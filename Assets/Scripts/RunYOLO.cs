@@ -31,6 +31,12 @@ public class RunYOLO : MonoBehaviour
     [Tooltip("Video file in Assets/StreamingAssets if not using webcam")]
     public string videoFilename = "giraffes.mp4";
     
+    [Header("Camera selection")]
+    public bool preferFrontCamera = true;
+
+    [Header("Image options")]
+    public bool mirrorHorizontally = true; // set true for selfie view
+    
     [Header("Fun Debug")]
     [Tooltip("When we see a person")]
     [SerializeField] private TMP_Text _hiText;
@@ -129,15 +135,30 @@ public class RunYOLO : MonoBehaviour
     {
         if (useWebcam)
         {
-            WebCamDevice? dev = null;
+            WebCamDevice? chosen = null;
+
+            // explicit name wins
             if (!string.IsNullOrEmpty(webcamDeviceName))
             {
                 foreach (var d in WebCamTexture.devices)
-                    if (d.name == webcamDeviceName) { dev = d; break; }
+                    if (d.name == webcamDeviceName) { chosen = d; break; }
             }
-            cam = dev.HasValue
-                ? new WebCamTexture(dev.Value.name, 1280, 720, 30)
+
+            // otherwise prefer front camera on mobile
+            if (!chosen.HasValue && preferFrontCamera)
+            {
+                foreach (var d in WebCamTexture.devices)
+                    if (d.isFrontFacing) { chosen = d; break; }
+            }
+
+            // fallback: first available
+            if (!chosen.HasValue && WebCamTexture.devices.Length > 0)
+                chosen = WebCamTexture.devices[0];
+
+            cam = chosen.HasValue
+                ? new WebCamTexture(chosen.Value.name, 1280, 720, 30)
                 : new WebCamTexture(1280, 720, 30);
+
             cam.Play();
         }
         else
@@ -183,9 +204,12 @@ public class RunYOLO : MonoBehaviour
         }
 
         // Letterbox to 640x640 while preserving aspect
-        float aspect = srcW * 1f / Mathf.Max(1, srcH);
         // Mirror horizontally by making the X scale negative
-        Graphics.Blit(sourceTex, targetRT, new Vector2(-1f / aspect, 1), new Vector2(1, 0));
+        float aspect = srcW * 1f / Mathf.Max(1, srcH);
+        var scale  = mirrorHorizontally ? new Vector2(-1f / aspect, 1f) : new Vector2(1f / aspect, 1f);
+        var offset = mirrorHorizontally ? new Vector2(1f, 0f) : Vector2.zero;
+
+        Graphics.Blit(sourceTex, targetRT, scale, offset);
         displayImage.texture = targetRT;
 
         using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, imageHeight, imageWidth));
