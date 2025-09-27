@@ -86,7 +86,7 @@ public class RunYOLO : MonoBehaviour
     void Start()
     {
         Application.targetFrameRate = 60;
-        Screen.orientation = ScreenOrientation.LandscapeLeft;
+        //Screen.orientation = ScreenOrientation.Portrait;
 
         labels = classesAsset.text.Split('\n');
         LoadModel();
@@ -203,6 +203,9 @@ public class RunYOLO : MonoBehaviour
             return;
         }
 
+        
+        //TODO: This is flipping
+        
         // Letterbox to 640x640 while preserving aspect
         // Mirror horizontally by making the X scale negative
         float aspect = srcW * 1f / Mathf.Max(1, srcH);
