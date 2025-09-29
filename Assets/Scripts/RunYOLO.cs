@@ -13,32 +13,32 @@ using TMPro;
 public class RunYOLO : MonoBehaviour
 {
     [Tooltip("Drag a YOLO model .onnx file here")]
-    public ModelAsset modelAsset;
+    [SerializeField] private ModelAsset modelAsset;
 
     [Tooltip("Drag the classes.txt here")]
-    public TextAsset classesAsset;
+    [SerializeField] private TextAsset classesAsset;
 
     [Tooltip("Create a Raw Image in the scene and link it here")]
-    public RawImage displayImage;
+    [SerializeField] private RawImage displayImage;
 
     [Tooltip("Drag a border box texture here")]
-    public Texture2D borderTexture;
+    [SerializeField] private Texture2D borderTexture;
 
     [Tooltip("Select an appropriate font for the labels")]
-    public Font font;
+    [SerializeField] private Font font;
 
     [Header("Input")]
-    public bool useWebcam = true;
+    [SerializeField] private bool useWebcam = true;
     [Tooltip("Use empty to pick default camera")]
-    public string webcamDeviceName = "";
+    [SerializeField] private string webcamDeviceName = "";
     [Tooltip("Video file in Assets/StreamingAssets if not using webcam")]
-    public string videoFilename = "giraffes.mp4";
+    [SerializeField] private string videoFilename = "giraffes.mp4";
     
     [Header("Camera selection")]
-    public bool preferFrontCamera = true;
+    [SerializeField] private bool preferFrontCamera = true;
 
     [Header("Image options")]
-    public bool mirrorHorizontally = true; // set true for selfie view
+    [SerializeField] private bool mirrorHorizontally = true; // set true for selfie view
     
     [Header("Fun Debug")]
     [Tooltip("When we see a person")]
@@ -46,71 +46,69 @@ public class RunYOLO : MonoBehaviour
     [Tooltip("When we dont see a person")]
     [SerializeField] private TMP_Text _whereText;
 
-    const BackendType backend = BackendType.GPUCompute;
+    private const BackendType Backend = BackendType.GPUCompute;
 
-    private Transform displayLocation;
-    private Worker worker;
-    private string[] labels;
-    private RenderTexture targetRT;
-    private Sprite borderSprite;
+    private Transform _displayLocation;
+    private Worker _worker;
+    private string[] _labels;
+    private RenderTexture _targetRT;
+    private Sprite _borderSprite;
 
     // Model input size
-    private const int imageWidth = 640;
-    private const int imageHeight = 640;
+    private const int ImageWidth = 640;
+    private const int ImageHeight = 640;
 
     // Inputs
-    private VideoPlayer video;
-    private WebCamTexture cam;
+    private VideoPlayer _video;
+    private WebCamTexture _cam;
 
-    List<GameObject> boxPool = new();
+    private List<GameObject> _boxPool = new();
 
     [Tooltip("Intersection over union threshold used for non-maximum suppression")]
-    [SerializeField, Range(0, 1)]
-    float iouThreshold = 0.5f;
+    [SerializeField, Range(0, 1)] private float iouThreshold = 0.5f;
 
     [Tooltip("Confidence score threshold used for non-maximum suppression")]
-    [SerializeField, Range(0, 1)]
-    float scoreThreshold = 0.5f;
+    [SerializeField, Range(0, 1)] private float scoreThreshold = 0.5f;
 
-    Tensor<float> centersToCorners;
+    private Tensor<float> _centersToCorners;
 
     // Simple state log
-    bool lastHasPerson;
+    private bool _lastHasPerson;
 
-    public struct BoundingBox
+    private struct BoundingBox
     {
-        public float centerX;
-        public float centerY;
-        public float width;
-        public float height;
-        public string label;
+        public float CenterX;
+        public float CenterY;
+        public float Width;
+        public float Height;
+        public string Label;
     }
 
-    void Start()
+    private void Start()
     {
         Application.targetFrameRate = 60;
         //Screen.orientation = ScreenOrientation.Portrait;
 
-        labels = classesAsset.text.Split('\n');
+        _labels = classesAsset.text.Split('\n');
         LoadModel();
 
-        targetRT = new RenderTexture(imageWidth, imageHeight, 0);
-        displayLocation = displayImage.transform;
+        _targetRT = new RenderTexture(ImageWidth, ImageHeight, 0);
+        _displayLocation = displayImage.transform;
 
         SetupInput();
 
-        borderSprite = Sprite.Create(
+        _borderSprite = Sprite.Create(
             borderTexture,
             new Rect(0, 0, borderTexture.width, borderTexture.height),
             new Vector2(borderTexture.width / 2f, borderTexture.height / 2f)
         );
     }
 
-    void LoadModel()
+    private void LoadModel()
     {
         var model1 = ModelLoader.Load(modelAsset);
 
-        centersToCorners = new Tensor<float>(new TensorShape(4, 4),
+        _centersToCorners = new Tensor<float>(new TensorShape(4, 4),
             new float[]
             {
                 1,      0,      1,      0,
@@ -126,15 +124,15 @@ public class RunYOLO : MonoBehaviour
         var allScores  = modelOutput[0, 4.., ..];                                        // (80,8400)
         var scores     = Functional.ReduceMax(allScores, 0);                              // (8400)
         var classIDs   = Functional.ArgMax(allScores, 0);                                 // (8400)
-        var boxCorners = Functional.MatMul(boxCoords, Functional.Constant(centersToCorners)); // (8400,4)
+        var boxCorners = Functional.MatMul(boxCoords, Functional.Constant(_centersToCorners)); // (8400,4)
         var indices    = Functional.NMS(boxCorners, scores, iouThreshold, scoreThreshold);// (N)
         var coords     = Functional.IndexSelect(boxCoords, 0, indices);                   // (N,4)
         var labelIDs   = Functional.IndexSelect(classIDs, 0, indices);                    // (N)
 
-        worker = new Worker(graph.Compile(coords, labelIDs), backend);
+        _worker = new Worker(graph.Compile(coords, labelIDs), Backend);
     }
 
-    void SetupInput()
+    private void SetupInput()
     {
         if (useWebcam)
         {
@@ -158,24 +156,24 @@ public class RunYOLO : MonoBehaviour
             if (!chosen.HasValue && WebCamTexture.devices.Length > 0)
                 chosen = WebCamTexture.devices[0];
 
-            cam = chosen.HasValue
+            _cam = chosen.HasValue
                 ? new WebCamTexture(chosen.Value.name, 1280, 720, 30)
                 : new WebCamTexture(1280, 720, 30);
 
-            cam.Play();
+            _cam.Play();
         }
         else
         {
-            video = gameObject.AddComponent<VideoPlayer>();
-            video.renderMode = VideoRenderMode.APIOnly;
-            video.source = VideoSource.Url;
-            video.url = Path.Join(Application.streamingAssetsPath, videoFilename);
-            video.isLooping = true;
-            video.Play();
+            _video = gameObject.AddComponent<VideoPlayer>();
+            _video.renderMode = VideoRenderMode.APIOnly;
+            _video.source = VideoSource.Url;
+            _video.url = Path.Join(Application.streamingAssetsPath, videoFilename);
+            _video.isLooping = true;
+            _video.Play();
         }
     }
 
-    void Update()
+    private void Update()
     {
         ExecuteML();
 
@@ -183,23 +181,23 @@ public class RunYOLO : MonoBehaviour
             Application.Quit();
     }
 
-    public void ExecuteML()
+    private void ExecuteML()
     {
         ClearAnnotations();
 
         Texture sourceTex = null;
         int srcW = 0, srcH = 0;
 
-        if (useWebcam && cam != null && cam.width > 16 && cam.height > 16)
+        if (useWebcam && _cam != null && _cam.width > 16 && _cam.height > 16)
         {
-            sourceTex = cam;
-            srcW = cam.width; srcH = cam.height;
+            sourceTex = _cam;
+            srcW = _cam.width; srcH = _cam.height;
         }
-        else if (!useWebcam && video && video.texture)
+        else if (!useWebcam && _video && _video.texture)
         {
-            sourceTex = video.texture;
-            srcW = (int)video.width;
-            srcH = (int)video.height;
+            sourceTex = _video.texture;
+            srcW = (int)_video.width;
+            srcH = (int)_video.height;
         }
         else
         {
@@ -210,10 +208,10 @@ public class RunYOLO : MonoBehaviour
         // Correct orientation and mirroring for webcam/video before inference
         int rot = 0;
         bool vflip = false;
-        if (useWebcam && cam != null)
+        if (useWebcam && _cam != null)
         {
-            rot = cam.videoRotationAngle;                 // 0, 90, 180, 270 from platform
-            vflip = cam.videoVerticallyMirrored;          // front cameras often true
+            rot = _cam.videoRotationAngle;                 // 0, 90, 180, 270 from platform
+            vflip = _cam.videoVerticallyMirrored;          // front cameras often true
         }
 
         // Rotate the UI container so the feed and overlays stay aligned
@@ -227,20 +225,20 @@ public class RunYOLO : MonoBehaviour
         Vector2 scale = new Vector2(sx, sy);
         Vector2 offset = new Vector2(mirrorHorizontally ? 1f : 0f, vflip ? 1f : 0f);
 
-        Graphics.Blit(sourceTex, targetRT, scale, offset);
-        displayImage.texture = targetRT;
+        Graphics.Blit(sourceTex, _targetRT, scale, offset);
+        displayImage.texture = _targetRT;
 
-        using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, imageHeight, imageWidth));
-        TextureConverter.ToTensor(targetRT, inputTensor, default);
-        worker.Schedule(inputTensor);
+        using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, ImageHeight, ImageWidth));
+        TextureConverter.ToTensor(_targetRT, inputTensor, default);
+        _worker.Schedule(inputTensor);
 
-        using var coords = (worker.PeekOutput("output_0") as Tensor<float>).ReadbackAndClone(); // (N,4) centers
-        using var labelIDs = (worker.PeekOutput("output_1") as Tensor<int>).ReadbackAndClone(); // (N)
+        using var coords = (_worker.PeekOutput("output_0") as Tensor<float>).ReadbackAndClone(); // (N,4) centers
+        using var labelIDs = (_worker.PeekOutput("output_1") as Tensor<int>).ReadbackAndClone(); // (N)
 
         float displayWidth = displayImage.rectTransform.rect.width;
         float displayHeight = displayImage.rectTransform.rect.height;
-        float scaleX = displayWidth / imageWidth;
-        float scaleY = displayHeight / imageHeight;
+        float scaleX = displayWidth / ImageWidth;
+        float scaleY = displayHeight / ImageHeight;
 
         bool hasPerson = false;
 
@@ -250,18 +248,18 @@ public class RunYOLO : MonoBehaviour
             int cls = labelIDs[n];
             var box = new BoundingBox
             {
-                centerX = coords[n, 0] * scaleX - displayWidth / 2f,
-                centerY = coords[n, 1] * scaleY - displayHeight / 2f,
-                width   = coords[n, 2] * scaleX,
-                height  = coords[n, 3] * scaleY,
-                label   = labels[cls],
+                CenterX = coords[n, 0] * scaleX - displayWidth / 2f,
+                CenterY = coords[n, 1] * scaleY - displayHeight / 2f,
+                Width   = coords[n, 2] * scaleX,
+                Height  = coords[n, 3] * scaleY,
+                Label   = _labels[cls],
             };
 
             if (cls == 0) hasPerson = true; // COCO class 0 = person
             DrawBox(box, n, displayHeight * 0.05f);
         }
 
-        if (hasPerson != lastHasPerson)
+        if (hasPerson != _lastHasPerson)
         {
             if (hasPerson)
             {
@@ -276,16 +274,16 @@ public class RunYOLO : MonoBehaviour
                 _hiText.enabled = false;
                 _whereText.enabled = true;
             }
-            lastHasPerson = hasPerson;
+            _lastHasPerson = hasPerson;
         }
     }
 
-    public void DrawBox(BoundingBox box, int id, float fontSize)
+    private void DrawBox(BoundingBox box, int id, float fontSize)
     {
         GameObject panel;
-        if (id < boxPool.Count)
+        if (id < _boxPool.Count)
         {
-            panel = boxPool[id];
+            panel = _boxPool[id];
             panel.SetActive(true);
         }
         else
@@ -293,25 +291,25 @@ public class RunYOLO : MonoBehaviour
             panel = CreateNewBox(Color.yellow);
         }
 
-        panel.transform.localPosition = new Vector3(box.centerX, -box.centerY);
+        panel.transform.localPosition = new Vector3(box.CenterX, -box.CenterY);
 
         RectTransform rt = panel.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(box.width, box.height);
+        rt.sizeDelta = new Vector2(box.Width, box.Height);
 
         var label = panel.GetComponentInChildren<Text>();
-        label.text = box.label;
+        label.text = box.Label;
         label.fontSize = (int)fontSize;
     }
 
-    public GameObject CreateNewBox(Color color)
+    private GameObject CreateNewBox(Color color)
     {
         var panel = new GameObject("ObjectBox");
         panel.AddComponent<CanvasRenderer>();
         Image img = panel.AddComponent<Image>();
         img.color = color;
-        img.sprite = borderSprite;
+        img.sprite = _borderSprite;
         img.type = Image.Type.Sliced;
-        panel.transform.SetParent(displayLocation, false);
+        panel.transform.SetParent(_displayLocation, false);
 
         var text = new GameObject("ObjectLabel");
         text.AddComponent<CanvasRenderer>();
@@ -330,24 +328,24 @@ public class RunYOLO : MonoBehaviour
         rt2.anchorMin = new Vector2(0, 0);
         rt2.anchorMax = new Vector2(1, 1);
 
-        boxPool.Add(panel);
+        _boxPool.Add(panel);
         return panel;
     }
 
-    public void ClearAnnotations()
+    private void ClearAnnotations()
     {
-        foreach (var box in boxPool) box.SetActive(false);
+        foreach (var box in _boxPool) box.SetActive(false);
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
-        centersToCorners?.Dispose();
-        worker?.Dispose();
+        _centersToCorners?.Dispose();
+        _worker?.Dispose();
 
-        if (cam != null)
+        if (_cam != null)
         {
-            if (cam.isPlaying) cam.Stop();
-            cam = null;
+            if (_cam.isPlaying) _cam.Stop();
+            _cam = null;
         }
     }
 }
