@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Unity.InferenceEngine;
 using UnityEngine;
@@ -204,13 +203,25 @@ public class RunYOLO : MonoBehaviour
         }
 
         
-        //TODO: This is flipping
-        
-        // Letterbox to 640x640 while preserving aspect
-        // Mirror horizontally by making the X scale negative
+        // Correct orientation and mirroring for webcam/video before inference
+        int rot = 0;
+        bool vflip = false;
+        if (useWebcam && cam != null)
+        {
+            rot = cam.videoRotationAngle;                 // 0, 90, 180, 270 from platform
+            vflip = cam.videoVerticallyMirrored;          // front cameras often true
+        }
+
+        // Rotate the UI container so the feed and overlays stay aligned
+        var eul = displayImage.rectTransform.localEulerAngles;
+        displayImage.rectTransform.localEulerAngles = new Vector3(0f, 0f, -rot);
+
+        // Letterbox to 640x640 while preserving aspect, then apply requested mirror and platform vertical flip
         float aspect = srcW * 1f / Mathf.Max(1, srcH);
-        var scale  = mirrorHorizontally ? new Vector2(-1f / aspect, 1f) : new Vector2(1f / aspect, 1f);
-        var offset = mirrorHorizontally ? new Vector2(1f, 0f) : Vector2.zero;
+        float sx = (mirrorHorizontally ? -1f : 1f) / aspect; // horizontal mirror for selfie view
+        float sy = vflip ? -1f : 1f;                         // platform vertical flip
+        Vector2 scale = new Vector2(sx, sy);
+        Vector2 offset = new Vector2(mirrorHorizontally ? 1f : 0f, vflip ? 1f : 0f);
 
         Graphics.Blit(sourceTex, targetRT, scale, offset);
         displayImage.texture = targetRT;
