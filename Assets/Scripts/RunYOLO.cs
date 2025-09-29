@@ -6,6 +6,10 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using TMPro;
 
+//TODO: Clean up the img rotation logic
+
+//TODO: In prod make it select the widest angle non-selfie cam and remove mirroring
+
 public class RunYOLO : MonoBehaviour
 {
     [Tooltip("Drag a YOLO model .onnx file here")]
