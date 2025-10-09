@@ -6,12 +6,18 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using TMPro;
 
+// nick, messy but readable
+
 //TODO: Clean up the img rotation logic
 
-//TODO: In prod make it select the widest angle non-selfie cam and remove mirroring
+//TODO: In prototype make it select the widest angle non-selfie cam and remove mirroring
 
 public class RunYOLO : MonoBehaviour
 {
+    // nick stuff
+    public Vector3 boxPosition;
+    
+    // yolo stuff
     [Tooltip("Drag a YOLO model .onnx file here")]
     [SerializeField] private ModelAsset modelAsset;
 
@@ -72,7 +78,7 @@ public class RunYOLO : MonoBehaviour
 
     private Tensor<float> _centersToCorners;
 
-    // Simple state log
+    // Simple test log
     private bool _lastHasPerson;
 
     private struct BoundingBox
@@ -87,7 +93,7 @@ public class RunYOLO : MonoBehaviour
     private void Start()
     {
         Application.targetFrameRate = 60;
-        //Screen.orientation = ScreenOrientation.Portrait;
+        //Screen.orientation = ScreenOrientation.Portrait; // this is evil
 
         _labels = classesAsset.text.Split('\n');
         LoadModel();
@@ -104,7 +110,7 @@ public class RunYOLO : MonoBehaviour
         );
     }
 
-    private void LoadModel()
+    private void LoadModel() // here be dragons and math
     {
         var model1 = ModelLoader.Load(modelAsset);
 
@@ -132,7 +138,7 @@ public class RunYOLO : MonoBehaviour
         _worker = new Worker(graph.Compile(coords, labelIDs), Backend);
     }
 
-    private void SetupInput()
+    private void SetupInput() //TODO: the non webcam part could/should be removed
     {
         if (useWebcam)
         {
@@ -179,9 +185,11 @@ public class RunYOLO : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
             Application.Quit();
+        
+        //Debug.Log(boxPosition);
     }
 
-    private void ExecuteML()
+    private void ExecuteML() // Mighty Messy Method (should be split up)
     {
         ClearAnnotations();
 
@@ -259,6 +267,7 @@ public class RunYOLO : MonoBehaviour
             DrawBox(box, n, displayHeight * 0.05f);
         }
 
+        // nick test
         if (hasPerson != _lastHasPerson)
         {
             if (hasPerson)
@@ -292,6 +301,7 @@ public class RunYOLO : MonoBehaviour
         }
 
         panel.transform.localPosition = new Vector3(box.CenterX, -box.CenterY);
+        boxPosition = panel.transform.localPosition; // nick taking this for later use
 
         RectTransform rt = panel.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(box.Width, box.Height);
@@ -299,7 +309,12 @@ public class RunYOLO : MonoBehaviour
         var label = panel.GetComponentInChildren<Text>();
         label.text = box.Label;
         label.fontSize = (int)fontSize;
+        
+        Debug.Log($"Box {box.Label} at {boxPosition}"); // nick logging box position and label
     }
+    
+    //TODO: nick should try drawing a red dot at boxPosition
+    
 
     private GameObject CreateNewBox(Color color)
     {
