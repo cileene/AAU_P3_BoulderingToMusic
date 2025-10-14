@@ -17,6 +17,8 @@ public class RunYOLO : MonoBehaviour
     // nick stuff
     public Vector3 boxPosition;
     
+    [SerializeField] private GameObject _fmodEmitter; // fmod test
+    
     // yolo stuff
     [Tooltip("Drag a YOLO model .onnx file here")]
     [SerializeField] private ModelAsset modelAsset;
@@ -277,6 +279,7 @@ public class RunYOLO : MonoBehaviour
                 Debug.Log("Person detected");
                 _hiText.enabled = true;
                 _whereText.enabled = false;
+                _fmodEmitter.SetActive(true); // fmod test
             }
 
             else
@@ -284,6 +287,7 @@ public class RunYOLO : MonoBehaviour
                 Debug.Log("No person");
                 _hiText.enabled = false;
                 _whereText.enabled = true;
+                _fmodEmitter.SetActive(false); // fmod test
             }
             _lastHasPerson = hasPerson;
         }
