@@ -2,7 +2,7 @@
 
 Medialogy 3rd Semester project at Aalborg University in Copenhagen fall 2025
 
-This repository contains the Unity project of our prototype focused on using computer vision models in cunjunction
+This repository contains the Unity project of our prototype focused on using computer vision models in conjunction
 with adaptive music to enhance the bouldering experience. 
 
 ## Team
