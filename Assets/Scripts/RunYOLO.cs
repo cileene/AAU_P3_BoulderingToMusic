@@ -108,6 +108,8 @@ public class RunYOLO : MonoBehaviour
             new Rect(0, 0, borderTexture.width, borderTexture.height),
             new Vector2(borderTexture.width / 2f, borderTexture.height / 2f)
         );
+        
+        Debug.Log($"{this} is ready");
     }
 
     private void LoadModel() // here be dragons and math
