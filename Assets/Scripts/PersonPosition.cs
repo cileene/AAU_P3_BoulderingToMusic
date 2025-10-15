@@ -27,7 +27,7 @@ public class PersonPosition : MonoBehaviour
     {
         if (lastBox != null)
         {
-            Debug.Log($"Last detected person at x:{lastBox?.CenterX} y {lastBox?.CenterY}");
+            Debug.Log($"Last detected person at x:{lastBox.CenterX} y {lastBox.CenterY}");
         }
     }
 
@@ -44,6 +44,4 @@ public class PersonPosition : MonoBehaviour
         hiText.enabled = false;
         whereText.enabled = true;
     }
-    
-
 }
