@@ -4,6 +4,7 @@ using UnityEngine;
 public class PersonPosition : MonoBehaviour
 {
     [SerializeField] private TMP_Text hiText;
+    [SerializeField] private GameObject fmodEmitter;
     
     private BoundingBox _lastBox;
     
@@ -30,12 +31,14 @@ public class PersonPosition : MonoBehaviour
     private void HandlePersonDetected(BoundingBox box)
     {
         _lastBox = box;
+        fmodEmitter.SetActive(true);
         hiText.text = "Hi human!";
     }    
     
     private void HandlePersonLost()
     {
         _lastBox = null;
+        fmodEmitter.SetActive(false);
         hiText.text = "Where are you human?";
     }
 }
