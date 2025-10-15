@@ -16,7 +16,7 @@ public static class AppEvents
 {
     public static event Action OnStart;
     public static event Action OnQuit;
-    public static event Action OnPersonDetected;
+    public static event Action<BoundingBox> OnPersonDetected;
     public static event Action OnPersonLost;
 
     public static void RaiseStart()
@@ -31,10 +31,11 @@ public static class AppEvents
         Debug.Log("Event: Quit");
     }
     
-    public static void RaisePersonDetected()
+    // Pass the bounding box of the detected person
+    public static void RaisePersonDetected(BoundingBox box)
     {
-        OnPersonDetected?.Invoke();
-        Debug.Log("Event: PersonDetected");
+        OnPersonDetected?.Invoke(box);
+        Debug.Log($"Event: PersonDetected at x:{box.CenterX} y {box.CenterY}");
     }
 
     public static void RaisePersonLost()

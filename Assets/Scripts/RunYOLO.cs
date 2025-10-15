@@ -81,15 +81,6 @@ public class RunYOLO : MonoBehaviour
     // Simple test log
     private bool _lastHasPerson;
 
-    private struct BoundingBox
-    {
-        public float CenterX;
-        public float CenterY;
-        public float Width;
-        public float Height;
-        public string Label;
-    }
-
     private void Start()
     {
         Application.targetFrameRate = 60;
@@ -253,6 +244,9 @@ public class RunYOLO : MonoBehaviour
         bool hasPerson = false;
 
         int boxesFound = coords.shape[0];
+        
+        BoundingBox firstPerson = null; // reference to first person box found for event
+        
         for (int n = 0; n < Mathf.Min(boxesFound, 200); n++)
         {
             int cls = labelIDs[n];
@@ -265,7 +259,13 @@ public class RunYOLO : MonoBehaviour
                 Label   = _labels[cls],
             };
 
-            if (cls == 0) hasPerson = true; // COCO class 0 = person
+            if (cls == 0) 
+            {
+                hasPerson = true; // COCO class 0 = person
+                if (firstPerson == null) firstPerson = box;
+            }
+            
+            
             DrawBox(box, n, displayHeight * 0.05f);
         }
 
@@ -274,14 +274,14 @@ public class RunYOLO : MonoBehaviour
         {
             if (hasPerson)
             {
-                Debug.Log("Person detected");
+                AppEvents.RaisePersonDetected(firstPerson);
                 _hiText.enabled = true;
                 _whereText.enabled = false;
             }
 
             else
             {
-                Debug.Log("No person");
+                AppEvents.RaisePersonLost();
                 _hiText.enabled = false;
                 _whereText.enabled = true;
             }
@@ -312,7 +312,7 @@ public class RunYOLO : MonoBehaviour
         label.text = box.Label;
         label.fontSize = (int)fontSize;
         
-        Debug.Log($"Box {box.Label} at {boxPosition}"); // nick logging box position and label
+        //Debug.Log($"Box {box.Label} at {boxPosition}"); // nick logging box position and label
     }
     
     //TODO: nick should try drawing a red dot at boxPosition
