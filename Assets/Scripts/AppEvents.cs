@@ -14,10 +14,12 @@ using UnityEngine;
 
 public static class AppEvents
 {
+    // EVENTS
     public static event Action<BoundingBox> OnPersonDetected;
     public static event Action OnPersonLost;
     
-    // Pass the bounding box of the detected person
+    
+    // EVENT METHODS
     public static void RaisePersonDetected(BoundingBox box)
     {
         OnPersonDetected?.Invoke(box);
