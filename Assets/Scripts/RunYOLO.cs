@@ -45,12 +45,6 @@ public class RunYOLO : MonoBehaviour
 
     [Header("Image options")]
     [SerializeField] private bool mirrorHorizontally = true; // set true for selfie view
-    
-    [Header("Fun Debug")]
-    [Tooltip("When we see a person")]
-    [SerializeField] private TMP_Text _hiText;
-    [Tooltip("When we dont see a person")]
-    [SerializeField] private TMP_Text _whereText;
 
     private const BackendType Backend = BackendType.GPUCompute;
 
@@ -69,6 +63,8 @@ public class RunYOLO : MonoBehaviour
     private WebCamTexture _cam;
 
     private List<GameObject> _boxPool = new();
+    
+    private readonly BoundingBox _personBox = new BoundingBox(); // persistent box for person
 
     [Tooltip("Intersection over union threshold used for non-maximum suppression")]
     [SerializeField, Range(0, 1)] private float iouThreshold = 0.5f;
@@ -259,13 +255,21 @@ public class RunYOLO : MonoBehaviour
                 Label   = _labels[cls],
             };
 
-            if (cls == 0) 
+            if (cls == 0) // COCO class 0 = person
             {
-                hasPerson = true; // COCO class 0 = person
-                if (firstPerson == null) firstPerson = box;
+                hasPerson = true; 
+                
+                // Update the persistent reference type so subscribers see live changes
+                _personBox.CenterX = box.CenterX;
+                _personBox.CenterY = box.CenterY;
+                _personBox.Width   = box.Width;
+                _personBox.Height  = box.Height;
+                _personBox.Label   = box.Label;
+
+                if (firstPerson == null)
+                    firstPerson = _personBox; // pass the persistent instance on first sighting
             }
-            
-            
+
             DrawBox(box, n, displayHeight * 0.05f);
         }
 
@@ -274,16 +278,12 @@ public class RunYOLO : MonoBehaviour
         {
             if (hasPerson)
             {
-                AppEvents.RaisePersonDetected(firstPerson);
-                _hiText.enabled = true;
-                _whereText.enabled = false;
+                AppEvents.RaisePersonDetected(_personBox);
             }
 
             else
             {
                 AppEvents.RaisePersonLost();
-                _hiText.enabled = false;
-                _whereText.enabled = true;
             }
             _lastHasPerson = hasPerson;
         }
@@ -311,12 +311,7 @@ public class RunYOLO : MonoBehaviour
         var label = panel.GetComponentInChildren<Text>();
         label.text = box.Label;
         label.fontSize = (int)fontSize;
-        
-        //Debug.Log($"Box {box.Label} at {boxPosition}"); // nick logging box position and label
     }
-    
-    //TODO: nick should try drawing a red dot at boxPosition
-    
 
     private GameObject CreateNewBox(Color color)
     {

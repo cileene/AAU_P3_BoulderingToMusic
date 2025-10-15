@@ -159,8 +159,6 @@ MonoBehaviour:
   videoFilename: 
   preferFrontCamera: 1
   mirrorHorizontally: 0
-  _hiText: {fileID: 1507943679}
-  _whereText: {fileID: 1100399341}
   iouThreshold: 0.5
   scoreThreshold: 0.5
 --- !u!4 &108153439
@@ -602,6 +600,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100399339}
   m_CullTransparentMesh: 1
+--- !u!1 &1399932940
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1399932942}
+  - component: {fileID: 1399932941}
+  m_Layer: 0
+  m_Name: PersonPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1399932941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1399932940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeee5c596de7455481ec1ce714c029b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PersonPosition
+  hiText: {fileID: 1507943679}
+  whereText: {fileID: 1100399341}
+--- !u!4 &1399932942
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1399932940}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4047.0823, y: 2463.472, z: -172.42102}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1507943677
 GameObject:
   m_ObjectHideFlags: 0
@@ -848,5 +892,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 330585546}
   - {fileID: 108153439}
+  - {fileID: 1399932942}
   - {fileID: 1857846217}
   - {fileID: 843367542}
