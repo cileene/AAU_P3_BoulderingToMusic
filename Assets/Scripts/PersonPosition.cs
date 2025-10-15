@@ -3,13 +3,9 @@ using UnityEngine;
 
 public class PersonPosition : MonoBehaviour
 {
-    [Header("Fun Debug")]
-    [Tooltip("When we see a person")]
     [SerializeField] private TMP_Text hiText;
-    [Tooltip("When we dont see a person")]
-    [SerializeField] private TMP_Text whereText;
     
-    private BoundingBox lastBox;
+    private BoundingBox _lastBox;
     
     private void OnEnable()
     {
@@ -25,23 +21,21 @@ public class PersonPosition : MonoBehaviour
 
     private void Update()
     {
-        if (lastBox != null)
+        if (_lastBox != null)
         {
-            Debug.Log($"Last detected person at x:{lastBox.CenterX} y {lastBox.CenterY}");
+            Debug.Log($"Last detected person at x:{_lastBox.CenterX} y {_lastBox.CenterY}");
         }
     }
 
     private void HandlePersonDetected(BoundingBox box)
     {
-        lastBox = box;
-        hiText.enabled = true;
-        whereText.enabled = false;
+        _lastBox = box;
+        hiText.text = "Hi human!";
     }    
     
     private void HandlePersonLost()
     {
-        lastBox = null;
-        hiText.enabled = false;
-        whereText.enabled = true;
+        _lastBox = null;
+        hiText.text = "Where are you human?";
     }
 }
