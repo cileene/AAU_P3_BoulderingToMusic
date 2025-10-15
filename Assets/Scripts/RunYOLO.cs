@@ -17,8 +17,6 @@ public class RunYOLO : MonoBehaviour
     // nick stuff
     public Vector3 boxPosition;
     
-    [SerializeField] private GameObject _fmodEmitter; // fmod test
-    
     // yolo stuff
     [Tooltip("Drag a YOLO model .onnx file here")]
     [SerializeField] private ModelAsset modelAsset;
@@ -47,12 +45,6 @@ public class RunYOLO : MonoBehaviour
 
     [Header("Image options")]
     [SerializeField] private bool mirrorHorizontally = true; // set true for selfie view
-    
-    [Header("Fun Debug")]
-    [Tooltip("When we see a person")]
-    [SerializeField] private TMP_Text _hiText;
-    [Tooltip("When we dont see a person")]
-    [SerializeField] private TMP_Text _whereText;
 
     private const BackendType Backend = BackendType.GPUCompute;
 
@@ -71,6 +63,8 @@ public class RunYOLO : MonoBehaviour
     private WebCamTexture _cam;
 
     private List<GameObject> _boxPool = new();
+    
+    private readonly BoundingBox _personBox = new BoundingBox(); // persistent box for person
 
     [Tooltip("Intersection over union threshold used for non-maximum suppression")]
     [SerializeField, Range(0, 1)] private float iouThreshold = 0.5f;
@@ -82,15 +76,6 @@ public class RunYOLO : MonoBehaviour
 
     // Simple test log
     private bool _lastHasPerson;
-
-    private struct BoundingBox
-    {
-        public float CenterX;
-        public float CenterY;
-        public float Width;
-        public float Height;
-        public string Label;
-    }
 
     private void Start()
     {
@@ -255,6 +240,9 @@ public class RunYOLO : MonoBehaviour
         bool hasPerson = false;
 
         int boxesFound = coords.shape[0];
+        
+        BoundingBox firstPerson = null; // reference to first person box found for event
+        
         for (int n = 0; n < Mathf.Min(boxesFound, 200); n++)
         {
             int cls = labelIDs[n];
@@ -267,7 +255,21 @@ public class RunYOLO : MonoBehaviour
                 Label   = _labels[cls],
             };
 
-            if (cls == 0) hasPerson = true; // COCO class 0 = person
+            if (cls == 0) // COCO class 0 = person
+            {
+                hasPerson = true; 
+                
+                // Update the persistent reference type so subscribers see live changes
+                _personBox.CenterX = box.CenterX;
+                _personBox.CenterY = box.CenterY;
+                _personBox.Width   = box.Width;
+                _personBox.Height  = box.Height;
+                _personBox.Label   = box.Label;
+
+                if (firstPerson == null)
+                    firstPerson = _personBox; // pass the persistent instance on first sighting
+            }
+
             DrawBox(box, n, displayHeight * 0.05f);
         }
 
@@ -276,18 +278,12 @@ public class RunYOLO : MonoBehaviour
         {
             if (hasPerson)
             {
-                Debug.Log("Person detected");
-                _hiText.enabled = true;
-                _whereText.enabled = false;
-                _fmodEmitter.SetActive(true); // fmod test
+                AppEvents.RaisePersonDetected(_personBox);
             }
 
             else
             {
-                Debug.Log("No person");
-                _hiText.enabled = false;
-                _whereText.enabled = true;
-                _fmodEmitter.SetActive(false); // fmod test
+                AppEvents.RaisePersonLost();
             }
             _lastHasPerson = hasPerson;
         }
@@ -315,12 +311,7 @@ public class RunYOLO : MonoBehaviour
         var label = panel.GetComponentInChildren<Text>();
         label.text = box.Label;
         label.fontSize = (int)fontSize;
-        
-        Debug.Log($"Box {box.Label} at {boxPosition}"); // nick logging box position and label
     }
-    
-    //TODO: nick should try drawing a red dot at boxPosition
-    
 
     private GameObject CreateNewBox(Color color)
     {
