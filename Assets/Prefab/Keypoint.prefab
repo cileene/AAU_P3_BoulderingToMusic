@@ -50,8 +50,8 @@ MonoBehaviour:
   innerCircle: {fileID: 5695897116106202409}
   outerColor: {r: 0, g: 0, b: 0, a: 1}
   innerColor: {r: 0.39607847, g: 0.8196079, b: 0.97647065, a: 1}
-  outerWidth: 0.4
-  innerWidth: 5
+  outerWidth: 4
+  innerWidth: 3
 --- !u!1 &1749681994122561607
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,12 +18,6 @@ public class KeypointLine : MonoBehaviour
         lineRenderer.endWidth = width;
     }
 
-    public void setLineWidth(float w)
-    {
-        lineRenderer.startWidth = w;
-        lineRenderer.endWidth = w;
-    }
-
     void Update()
     {
         lineRenderer.SetPosition(0, start.Position);
