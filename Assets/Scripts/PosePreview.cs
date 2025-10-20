@@ -7,15 +7,6 @@ public class PosePreview : MonoBehaviour
     public BoundingCircle boundingCircle;
     public Keypoint[] keypoints;
     public KeypointLine[] keyPointLines;
-    [SerializeField] float scaleFactor = 1.0f, skeletonScaleFactor = 1.0f;
-
-    private void Update()
-    {
-        foreach (KeypointLine kpl in keyPointLines)
-        {
-            kpl.setLineWidth(skeletonScaleFactor);
-        }
-    }
 
     public void SetActive(bool active)
     {
@@ -29,11 +20,11 @@ public class PosePreview : MonoBehaviour
 
     public void SetBoundingCircle(bool active, Vector3 position, float radius)
     {
-        boundingCircle.Set(active, position, radius * scaleFactor);
+        boundingCircle.Set(active, position, radius);
     }
 
     public void SetKeypoint(int index, bool active, Vector3 position)
     {
-        keypoints[index].Set(active, position * scaleFactor);
+        keypoints[index].Set(active, position);
     }
 }

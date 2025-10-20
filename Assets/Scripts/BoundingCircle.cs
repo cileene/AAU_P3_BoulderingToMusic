@@ -31,7 +31,7 @@ public class BoundingCircle : MonoBehaviour
         for (var i = 0; i < numSegments; i++)
         {
             var theta = 2 * Mathf.PI * i / (float)numSegments;
-            lineRenderer.SetPosition(i, position + (radius * radiusMod) * new Vector3(Mathf.Cos(theta), Mathf.Sin(theta), 0));
+            lineRenderer.SetPosition(i, position + (radius) * new Vector3(Mathf.Cos(theta), Mathf.Sin(theta), 0));
         }
         lineRenderer.loop = true;
     }
