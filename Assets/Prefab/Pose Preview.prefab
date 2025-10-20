@@ -8168,6 +8168,7 @@ MonoBehaviour:
   lineRenderer: {fileID: 2715363320186742940}
   color: {r: 1, g: 1, b: 1, a: 1}
   width: 0.4
+  radiusMod: 1
   numSegments: 128
 --- !u!120 &2715363320186742940
 LineRenderer:
