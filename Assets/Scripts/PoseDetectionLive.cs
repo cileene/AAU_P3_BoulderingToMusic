@@ -285,7 +285,7 @@ public class PoseDetectionLive : MonoBehaviour
         using var outputBox = await outputBoxAwaitable;
 
         bool scorePassesThreshold = outputScore[0] >= scoreThreshold;
-        posePreview.SetActive(scorePassesThreshold);
+        posePreview?.SetActive(scorePassesThreshold);
 
         if (!scorePassesThreshold)
             return;
@@ -301,7 +301,7 @@ public class PoseDetectionLive : MonoBehaviour
         var kp2_ImageSpace = BlazeUtils.mul(M, anchorPosition + new float2(outputBox[0, 0, 6], outputBox[0, 0, 7]));
 
         var delta_ImageSpace = kp2_ImageSpace - kp1_ImageSpace;
-        var dscale = 3f;
+        var dscale = 1.25f;
         var radius = dscale * math.length(delta_ImageSpace);
         var theta = math.atan2(delta_ImageSpace.y, delta_ImageSpace.x);
 

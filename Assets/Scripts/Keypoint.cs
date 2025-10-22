@@ -17,8 +17,6 @@ public class Keypoint : MonoBehaviour
 
     public void Update()
     {
-        outerCircle.material = new Material(Shader.Find("Sprites/Default"));
-        innerCircle.material = new Material(Shader.Find("Sprites/Default"));
         outerCircle.startColor = outerColor;
         outerCircle.endColor = outerColor;
         outerCircle.startWidth = outerWidth;
@@ -33,6 +31,10 @@ public class Keypoint : MonoBehaviour
     {
         m_IsActive = active;
         m_Position = position;
+        if (position == Vector3.zero)
+        {
+            Debug.Log(gameObject.name + ": position is zero");
+        }
         gameObject.SetActive(active);
         outerCircle.SetPosition(0, position);
         outerCircle.SetPosition(1, position);

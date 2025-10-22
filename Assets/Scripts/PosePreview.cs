@@ -7,7 +7,16 @@ public class PosePreview : MonoBehaviour
     public BoundingCircle boundingCircle;
     public Keypoint[] keypoints;
     public KeypointLine[] keyPointLines;
+    [SerializeField] float skeletonScaleFactor = 1.0f;
 
+
+    private void Update()
+    {
+        foreach (KeypointLine kpl in keyPointLines)
+        {
+            kpl.setLineWidth(skeletonScaleFactor);
+        }
+    }
     public void SetActive(bool active)
     {
         gameObject.SetActive(active);
@@ -25,6 +34,7 @@ public class PosePreview : MonoBehaviour
 
     public void SetKeypoint(int index, bool active, Vector3 position)
     {
+        //Debug.Log("Keypoint nr: " + index + " is being set at :" + position);
         keypoints[index].Set(active, position);
     }
 }
