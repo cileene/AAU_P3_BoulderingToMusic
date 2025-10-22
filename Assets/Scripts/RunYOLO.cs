@@ -4,13 +4,13 @@ using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using TMPro;
 
 // nick, messy but readable
 
 //TODO: Clean up the img rotation logic
 
 //TODO: In prototype make it select the widest angle non-selfie cam and remove mirroring
+
 
 public class RunYOLO : MonoBehaviour
 {
