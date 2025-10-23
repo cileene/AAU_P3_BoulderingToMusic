@@ -327,8 +327,8 @@ GameObject:
   - component: {fileID: 623429715}
   - component: {fileID: 623429719}
   - component: {fileID: 623429718}
-  - component: {fileID: 623429717}
   - component: {fileID: 623429716}
+  - component: {fileID: 623429720}
   m_Layer: 5
   m_Name: RawImage
   m_TagString: Untagged
@@ -367,25 +367,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec80ade2d8484275952ad7e94b2a61c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WebcamTexture
-  useWebcam: 1
-  webcamDeviceName: 
-  preferFrontCamera: 1
-  videoFilename: 
   displayImage: {fileID: 623429718}
---- !u!114 &623429717
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 623429714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86710e43de46f6f4bac7c8e50813a599, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.AspectRatioFitter
-  m_AspectMode: 3
-  m_AspectRatio: 1
+  resolution: 0
+  cam: {fileID: 0}
 --- !u!114 &623429718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -421,6 +405,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623429714}
   m_CullTransparentMesh: 1
+--- !u!114 &623429720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 623429714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86710e43de46f6f4bac7c8e50813a599, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.AspectRatioFitter
+  m_AspectMode: 3
+  m_AspectRatio: 1.333333
 --- !u!1 &1736955434
 GameObject:
   m_ObjectHideFlags: 0
@@ -464,7 +462,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1736955434}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
