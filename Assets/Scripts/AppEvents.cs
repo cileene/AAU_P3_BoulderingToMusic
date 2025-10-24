@@ -17,6 +17,8 @@ public static class AppEvents
     // EVENTS
     public static event Action<BoundingBox> OnPersonDetected;
     public static event Action OnPersonLost;
+    public static event Action<WebCamTexture> OnWebcamReady;
+    public static event Action OnSegRunning;
     
     
     // EVENT METHODS
@@ -30,5 +32,17 @@ public static class AppEvents
     {
         OnPersonLost?.Invoke();
         Debug.Log("Event: PersonLost");
+    }
+    
+    public static void RaiseWebcamReady(WebCamTexture cam)
+    {
+        OnWebcamReady?.Invoke(cam);
+        Debug.Log("Event: WebcamReady");
+    }
+    
+    public static void RaiseSegRunning()
+    {
+        OnSegRunning?.Invoke();
+        Debug.Log("Event: SegRunning");
     }
 }

@@ -1,0 +1,11 @@
+black
+blue
+Gray
+green
+orange
+purple
+red
+Turquise
+volume
+white
+yellow
