@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using YoloDetection;
 
 /// <summary>
 /// A system I've used in many projects to manage events.
