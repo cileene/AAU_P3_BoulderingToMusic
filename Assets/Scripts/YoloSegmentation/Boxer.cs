@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/rikturnbull/xr-image-segmentation
+
 using System.Collections.Generic;
 using Unity.InferenceEngine;
 using UnityEngine;
@@ -16,7 +18,7 @@ namespace YoloSegmentation
         public string ClassName;
     }
 
-    public class IEBoxer : MonoBehaviour
+    public class Boxer : MonoBehaviour
     {
         [SerializeField] private Transform _displayLocation;
         [SerializeField] private TextAsset _labelsAsset;

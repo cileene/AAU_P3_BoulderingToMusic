@@ -12,7 +12,7 @@ public class UseWebcam : MonoBehaviour
         HD1080p = 1, // 1920*1080
         HD720p = 2, // 1280*720
         VGA = 3, // 640*480
-        MacBook = 4 // 
+        MacBook = 4 // 1552*1552
     }
 
     private void Start()

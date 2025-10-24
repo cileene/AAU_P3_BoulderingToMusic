@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/rikturnbull/xr-image-segmentation
+
 using System.Collections;
 using System.Collections.Generic;
 using Unity.InferenceEngine;
@@ -5,7 +7,7 @@ using UnityEngine;
 
 namespace YoloSegmentation
 {
-    public class IEExecutor : MonoBehaviour
+    public class Executor : MonoBehaviour
     {
         enum InferenceDownloadState
         {
@@ -29,9 +31,9 @@ namespace YoloSegmentation
         [SerializeField] private Transform _displayLocation;
         public bool IsModelLoaded { get; private set; } = false;
 
-        [SerializeField] private IEBoxer _ieBoxer;
+        [SerializeField] private Boxer boxer;
 
-        private IEMasker _ieMasker;
+        private Masker _masker;
         private Worker _inferenceEngineWorker;
         private IEnumerator _schedule;
         private InferenceDownloadState _downloadState = InferenceDownloadState.Running;
@@ -52,7 +54,7 @@ namespace YoloSegmentation
             // Wait for the UI to be ready because when Sentis load the model it will block the main thread.
             yield return new WaitForSeconds(0.05f);
 
-            _ieMasker = new IEMasker(_displayLocation, _confidenceThreshold);
+            _masker = new Masker(_displayLocation, _confidenceThreshold);
             LoadModel();
         }
 
@@ -152,7 +154,7 @@ namespace YoloSegmentation
                             }
                             else
                             {
-                                Debug.LogError("Sentis: _output0BoxCoords empty");
+                                Debug.LogWarning("Sentis: _output0BoxCoords empty");
                                 _downloadState = InferenceDownloadState.Error;
                             }
                             _buffer?.Dispose();
@@ -241,8 +243,8 @@ namespace YoloSegmentation
                     }
                     break;
                 case InferenceDownloadState.Success:
-                    List<BoundingBox> boundingBoxes = _ieBoxer.DrawBoxes(_output0BoxCoords, _output1LabelIds, _inputSize.x, _inputSize.y);
-                    _ieMasker.DrawMask(boundingBoxes, _output3MaskWeights, _inputSize.x, _inputSize.y);
+                    List<BoundingBox> boundingBoxes = boxer.DrawBoxes(_output0BoxCoords, _output1LabelIds, _inputSize.x, _inputSize.y);
+                    _masker.DrawMask(boundingBoxes, _output3MaskWeights, _inputSize.x, _inputSize.y);
                     _downloadState = InferenceDownloadState.Cleanup;
                     break;
                 case InferenceDownloadState.Error:

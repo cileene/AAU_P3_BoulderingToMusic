@@ -1,21 +1,23 @@
+// Adapted from: https://github.com/rikturnbull/xr-image-segmentation
+
 using Unity.InferenceEngine;
 using UnityEditor;
 using UnityEngine;
 
-namespace YoloSegmentation
+namespace YoloSegmentation.Editor
 {
-    [CustomEditor(typeof(IEModelConverter))]
-    public class IEModelConverterEditor : Editor
+    [CustomEditor(typeof(ModelConverter))]
+    public class ModelConverterEditor : UnityEditor.Editor
     {
         private string _filepath = "Assets/Resources/Model/yolo11n-seg-sentis.sentis";
         private int _classCount;
-        private IEModelConverter _targetClass;
+        private ModelConverter _targetClass;
         private float _iouThreshold;
         private float _scoreThreshold;
 
         public void OnEnable()
         {
-            _targetClass = (IEModelConverter)target;
+            _targetClass = (ModelConverter)target;
             _iouThreshold = serializedObject.FindProperty("_iouThreshold").floatValue;
             _scoreThreshold = serializedObject.FindProperty("_scoreThreshold").floatValue;
             _filepath = serializedObject.FindProperty("filepath").stringValue;

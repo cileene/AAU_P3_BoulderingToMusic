@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/rikturnbull/xr-image-segmentation
+
 using System.Collections.Generic;
 using Unity.InferenceEngine;
 using UnityEngine;
@@ -5,7 +7,7 @@ using UnityEngine.UI;
 
 namespace YoloSegmentation
 {
-    public class IEMasker
+    public class Masker
     {
         [SerializeField] private Transform _displayLocation;
         private const int YOLO11_MASK_HEIGHT = 160;
@@ -29,7 +31,7 @@ namespace YoloSegmentation
 
         private float _confidenceThreshold = 0.5f;
 
-        public IEMasker(Transform displayLocation, float confidenceThreshold)
+        public Masker(Transform displayLocation, float confidenceThreshold)
         {
             _displayLocation = displayLocation;
             _confidenceThreshold = confidenceThreshold;

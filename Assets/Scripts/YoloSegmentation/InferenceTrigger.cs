@@ -1,11 +1,13 @@
+// Adapted from: https://github.com/rikturnbull/xr-image-segmentation
+
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace YoloSegmentation
 {
-    public class IEInferenceTrigger : MonoBehaviour
+    public class InferenceTrigger : MonoBehaviour
     {
-        [SerializeField] private IEExecutor _ieExecutor;
+        [SerializeField] private Executor executor;
         [SerializeField] private RawImage _outputImage;
         [SerializeField] private bool _useStillImage;
         [SerializeField] private Texture2D _testImage;
@@ -41,7 +43,7 @@ namespace YoloSegmentation
             {
                 RunStillImageInference();
             }
-            else if (_webcamReady && !_ieExecutor.IsRunning())
+            else if (_webcamReady && !executor.IsRunning())
             {
                 RunInference();
             }
@@ -49,13 +51,13 @@ namespace YoloSegmentation
 
         private void RunStillImageInference()
         {
-            if (!_testImage || _ieExecutor.IsRunning())
+            if (!_testImage || executor.IsRunning())
             {
                 return;
             }
 
             _outputImage.texture = _testImage;
-            _ieExecutor.RunInference(_testImage);
+            executor.RunInference(_testImage);
             //_hasRunStillImageInference = true;
         }
 
@@ -71,7 +73,7 @@ namespace YoloSegmentation
             texture.SetPixels(_webcamTexture.GetPixels());
             texture.Apply();
 
-            _ieExecutor.RunInference(texture);
+            executor.RunInference(texture);
 
             // Clean up the temporary texture
             Destroy(texture);
