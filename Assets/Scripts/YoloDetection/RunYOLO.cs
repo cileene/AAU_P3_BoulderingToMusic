@@ -25,6 +25,9 @@ namespace YoloDetection
 
         [Tooltip("Drag the classes.txt here")]
         [SerializeField] private TextAsset classesAsset;
+        
+        [Tooltip("Number of classes in the model")]
+        [SerializeField] private int classes = 80;
 
         [Tooltip("Create a Raw Image in the scene and link it here")]
         [SerializeField] private RawImage displayImage;
@@ -97,7 +100,6 @@ namespace YoloDetection
         private void Start()
         {
             Application.targetFrameRate = 60;
-            //Screen.orientation = ScreenOrientation.Portrait; // this is evil
 
             _labels = classesAsset.text.Split('\n');
             LoadModel();
@@ -133,7 +135,7 @@ namespace YoloDetection
             var inputs = graph.AddInputs(model1);
             var modelOutput = Functional.Forward(model1, inputs)[0];                         // (1,84,8400)
             var boxCoords  = modelOutput[0, 0..4, ..].Transpose(0, 1);                       // (8400,4)
-            var allScores  = modelOutput[0, 4.., ..];                                        // (80,8400)
+            var allScores  = modelOutput[0, 4..(classes + 4), ..];                                        // (80,8400)
             var scores     = Functional.ReduceMax(allScores, 0);                              // (8400)
             var classIDs   = Functional.ArgMax(allScores, 0);                                 // (8400)
             var boxCorners = Functional.MatMul(boxCoords, Functional.Constant(_centersToCorners)); // (8400,4)

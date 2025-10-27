@@ -149,8 +149,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunYOLO
   boxPosition: {x: 0, y: 0, z: 0}
-  modelAsset: {fileID: 5022602860645237092, guid: 6dd5bbefc9b494ac08820963a1ca5630, type: 3}
-  classesAsset: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
+  modelAsset: {fileID: 5022602860645237092, guid: 994d43cf9e889483396e05fabb9e64bd, type: 3}
+  classesAsset: {fileID: 4900000, guid: 35a8acf7937f2468286d5a7cf2a36e8c, type: 3}
+  classes: 11
   displayImage: {fileID: 550519888}
   borderTexture: {fileID: 2800000, guid: ad1def0831dd0466b8d30dae1746d2cc, type: 3}
   font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
