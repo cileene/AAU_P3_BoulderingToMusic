@@ -490,7 +490,7 @@ MonoBehaviour:
   anchorsCSV: {fileID: 4900000, guid: 0ae794f48f6a51b459512022a848ce99, type: 3}
   scoreThreshold: 0.75
   presetTexture: {fileID: 2800000, guid: 5ba5888b104e72c469588ae86012708e, type: 3}
-  isPresetTexture: 1
+  isPresetTexture: 0
 --- !u!114 &342585786 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2462378544354705245, guid: 54c065e78a74f134c9a0d5bbdfe5f081, type: 3}

@@ -9,7 +9,7 @@ namespace YoloSegmentation
 {
     public class Executor : MonoBehaviour
     {
-        enum InferenceDownloadState
+        private enum InferenceDownloadState
         {
             Running = 0,
             RequestingOutput0 = 1,
