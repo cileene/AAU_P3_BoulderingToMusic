@@ -373,8 +373,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraCapture
   deviceName: 
-  width: 640
-  height: 480
+  width: 1552
+  height: 1552
   fps: 30
 --- !u!4 &173996539
 Transform:

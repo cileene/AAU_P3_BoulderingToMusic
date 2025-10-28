@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Shared;
-using PersonDetection;
-using PoseDetection;
-using HandHoldDetection;
+using VisionModels.HandholdDetection;
+using VisionModels.PersonDetection;
+using VisionModels.PoseDetection;
 
 //TODO: Handle webcam / video / stills
 //TODO: Detect person?
@@ -21,37 +21,16 @@ public class LaunchManager : MonoBehaviour
         Still
     }
     
-    private enum RouteColor //TODO: Fix the naming of colors in training
-    {
-        All,
-        Gray,
-        orange,
-        black,
-        blue,
-        green,
-        purple,
-        red,
-        Turquise,
-        volume,
-        white,
-        yellow
-    }
 
     [Header("Input Settings")]
     [SerializeField] private InputSource inputSource;
+    [SerializeField] private UseWebcam.WebcamResolution webcamResolution;
+    [SerializeField] private string videoFilePath, stillFilePath;
     [SerializeField] private bool detectPerson, detectPose, detectHandHolds;
-    [SerializeField] private RouteColor routeColor;
+    [SerializeField] private HandholdsDetector.RouteColor routeColor;
     
     [Header("UI Settings")]
     [SerializeField] private RawImage imageDisplay;
-
-    private UseWebcam _useWebcam;
-    private UseVideo _useVideo;
-    private UseStill _useStill;
-    
-    private PersonDetector personDetector;
-    private PoseDetector _poseDetector;
-    private HandHoldDetector _handHoldDetector;
     
     private void Awake()
     {
@@ -64,16 +43,17 @@ public class LaunchManager : MonoBehaviour
         switch (inputSource)
         {
             case InputSource.Webcam:
-                _useWebcam = gameObject.AddComponent<UseWebcam>();
+                gameObject.AddComponent<UseWebcam>();
+                AppEvents.RaiseRequestUseWebcam(webcamResolution);
                 break;
             case InputSource.Video:
-                _useVideo = gameObject.AddComponent<UseVideo>();
+                gameObject.AddComponent<UseVideo>();
+                AppEvents.RaiseRequestUseVideo(videoFilePath);
                 break;
             case InputSource.Still:
-                _useStill = gameObject.AddComponent<UseStill>();
+                gameObject.AddComponent<UseStill>();
+                AppEvents.RaiseRequestUseStill(stillFilePath);
                 break;
-            default:
-                throw new System.ArgumentOutOfRangeException();
         }
     }
     
@@ -81,17 +61,23 @@ public class LaunchManager : MonoBehaviour
     {
         if (detectPerson)
         {
-            personDetector = gameObject.AddComponent<PersonDetector>();
+            var go = new GameObject("PersonDetector");
+            go.transform.SetParent(transform);
+            go.AddComponent<PersonDetector>();
         }
 
         if (detectPose)
         {
-            _poseDetector = gameObject.AddComponent<PoseDetector>();
+            var go = new GameObject("PoseDetector");
+            go.transform.SetParent(transform);
+            go.AddComponent<PoseDetector>();
         }
 
         if (detectHandHolds)
         {
-            _handHoldDetector = gameObject.AddComponent<HandHoldDetector>();
+            var go = new GameObject("HandHoldDetector");
+            go.transform.SetParent(transform);
+            go.AddComponent<HandholdsDetector>();
         }
     }
 }

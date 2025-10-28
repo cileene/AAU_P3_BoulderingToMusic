@@ -5,9 +5,6 @@ namespace Shared
 {
     public class UseWebcam : MonoBehaviour
     {
-        [SerializeField] public WebcamResolution resolution = WebcamResolution.HD1440p;
-        [HideInInspector] public WebCamTexture cam;
-
         public enum WebcamResolution //TODO: Handle iPhone specific resolutions
         {
             HD1440p = 0, // 1920*1440
@@ -16,14 +13,14 @@ namespace Shared
             VGA = 3, // 640*480
             MacBook = 4 // 1552*1552
         }
+        
+        private WebCamTexture _cam;
+        
+        private void OnEnable() => AppEvents.RequestUseWebcam += OnConfigureWebcam;
 
-        private void Start()
-        {
-            SetupInput();
-            AppEvents.RaiseWebcamReady(cam);
-        }
+        private void OnDisable() => AppEvents.RequestUseWebcam -= OnConfigureWebcam;
 
-        private void SetupInput()
+        private void OnConfigureWebcam(WebcamResolution resolution)
         {
             int width = resolution switch
             {
@@ -45,8 +42,10 @@ namespace Shared
                 _ => throw new ArgumentOutOfRangeException()
             };
         
-            cam = new WebCamTexture(requestedWidth: width, requestedHeight: height);
-            cam.Play();
+            _cam = new WebCamTexture(requestedWidth: width, requestedHeight: height);
+            _cam.Play();
+            
+            AppEvents.RaiseWebcamReady(_cam);
         }
     }
 }

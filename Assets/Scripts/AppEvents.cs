@@ -1,12 +1,15 @@
 using System;
 using UnityEngine;
-using PersonDetection;
+using Shared;
+using VisionModels.HandholdDetection;
+using VisionModels.PersonDetection;
 
 /// <summary>
 /// A system I've used in many projects to manage events.
 /// Sort of a mishmash of the Observer pattern and an Event bus.
-/// Any class can call an event method using eg. AppEvents.Start()
-/// Other classes can then subscribe to that event and take action. - nick
+/// Any class can call an event method using e.g. AppEvents.Start()
+/// Other classes can then subscribe to that event and take action.
+/// Can be split into multiple event classes if it gets unwieldy. - Nick
 /// <para>Example:</para>
 /// <para>AppEvents.OnStart += OnStartHandler;</para>
 /// <para>private void OnStartHandler() { ... }</para>
@@ -16,34 +19,62 @@ using PersonDetection;
 public static class AppEvents
 {
     // EVENTS
-    public static event Action<BoundingBox> OnPersonDetected;
-    public static event Action OnPersonLost;
-    public static event Action<WebCamTexture> OnWebcamReady;
-    public static event Action OnSegRunning;
+    public static event Action<BoundingBox> PersonDetected;
+    public static event Action PersonLost;
+    public static event Action<UseWebcam.WebcamResolution> RequestUseWebcam;
+    public static event Action<string> RequestUseVideo;
+    public static event Action<string> RequestUseStill;
+    public static event Action<WebCamTexture> WebcamReady;
+    public static event Action<HandholdsDetector.RouteColor> RequestRouteColor;
+    public static event Action SegRunning;
     
     
     // EVENT METHODS
     public static void RaisePersonDetected(BoundingBox box)
     {
-        OnPersonDetected?.Invoke(box);
+        PersonDetected?.Invoke(box);
         Debug.Log($"Event: PersonDetected at x:{box.CenterX} y {box.CenterY}");
     }
 
     public static void RaisePersonLost()
     {
-        OnPersonLost?.Invoke();
+        PersonLost?.Invoke();
         Debug.Log("Event: PersonLost");
+    }
+    
+    public static void RaiseRequestUseWebcam(UseWebcam.WebcamResolution resolution)
+    {
+        RequestUseWebcam?.Invoke(resolution);
+        Debug.Log($"Event: ConfigureWebcam to {resolution}");
+    }
+    
+    public static void RaiseRequestUseVideo(string path)
+    {
+        RequestUseVideo?.Invoke(path);
+        Debug.Log($"Event: RequestUseVideo from {path}");
+    }
+    
+    public static void RaiseRequestUseStill(string path)
+    {
+        RequestUseStill?.Invoke(path);
+        Debug.Log($"Event: RequestUseStill from {path}");
     }
     
     public static void RaiseWebcamReady(WebCamTexture cam)
     {
-        OnWebcamReady?.Invoke(cam);
+        WebcamReady?.Invoke(cam);
         Debug.Log("Event: WebcamReady");
+    }
+    
+    public static void RaiseRequestRouteColor(HandholdsDetector.RouteColor color)
+    {
+        RequestRouteColor?.Invoke(color);
+        Debug.Log($"Event: RequestRouteColor to {color}");
     }
     
     public static void RaiseSegRunning()
     {
-        OnSegRunning?.Invoke();
+        SegRunning?.Invoke();
         Debug.Log("Event: SegRunning");
     }
 }
