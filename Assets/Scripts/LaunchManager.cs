@@ -33,8 +33,8 @@ public class LaunchManager : MonoBehaviour
     
     private void Start()
     {
-        HandleInput();
         HandleDetectionSettings();
+        HandleInput();
     }
 
     private void HandleInput()
@@ -66,8 +66,7 @@ public class LaunchManager : MonoBehaviour
 
         if (detectPose)
         {
-            new GameObject("PoseDetector", 
-                typeof(PoseDetector)).transform.SetParent(transform);
+            Instantiate(Resources.Load<GameObject>("Prefabs/PoseDetector"));
         }
 
         if (detectHandholds)

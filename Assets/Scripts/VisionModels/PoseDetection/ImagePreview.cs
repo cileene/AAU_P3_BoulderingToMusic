@@ -2,7 +2,8 @@ using UnityEngine;
 
 namespace VisionModels.PoseDetection
 {
-    public class ImagePreview : MonoBehaviour
+    //TODO: We should be using a rawimage in ui NOT a quad in 3D space for image preview
+    public class ImagePreview : MonoBehaviour 
     {
         public GameObject imageQuad;
 
