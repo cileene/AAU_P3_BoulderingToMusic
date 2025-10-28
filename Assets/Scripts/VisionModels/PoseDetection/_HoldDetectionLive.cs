@@ -7,7 +7,7 @@ namespace VisionModels.PoseDetection
     public class HoldPreviewLive : MonoBehaviour
     {
         [Header("Scene References")]
-        public HoldPreview holdPreview;
+        public _HoldPreview holdPreview;
         public ImagePreview imagePreview;
 
         [Header("Model Asset")] public ModelAsset holdAsset;

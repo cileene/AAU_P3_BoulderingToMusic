@@ -5,11 +5,10 @@ using VisionModels.HandholdDetection;
 using VisionModels.PersonDetection;
 using VisionModels.PoseDetection;
 
-//TODO: Handle webcam / video / stills
+//TODO: Handle Video
+//TODO: Handle Still
 //TODO: Detect person?
-//TODO: Pose detect?
 //TODO: Detect hand-holds?
-//TODO: Choose hand-holds color
 
 
 public class LaunchManager : MonoBehaviour

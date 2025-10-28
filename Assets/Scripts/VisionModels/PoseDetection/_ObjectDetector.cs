@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace VisionModels.PoseDetection
 {
-    public class ObjectDetector : MonoBehaviour
+    public class _ObjectDetector : MonoBehaviour
     {
         public Transform[] ObjectsToDetect;
         public Keypoint[] Hands;

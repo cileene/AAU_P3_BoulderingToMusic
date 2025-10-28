@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace VisionModels.PoseDetection
 {
-    public class HoldPreview : MonoBehaviour
+    public class _HoldPreview : MonoBehaviour
     {
         public GameObject HoldPrefab;
-        private Hold[] _holds;
+        private _Hold[] _holds;
 
         public void SetActive(bool active)
         {
@@ -14,7 +14,7 @@ namespace VisionModels.PoseDetection
     
         public void SetMesh(Vector3[] holdPoints, int[][] holdVertex)
         {
-            _holds = new Hold[_holds.Length];
+            _holds = new _Hold[_holds.Length];
             for (int i = 0; i < _holds.Length; i++)
             {
                 GameObject holdGO = Instantiate(HoldPrefab, Vector3.zero, Quaternion.identity, transform);

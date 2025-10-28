@@ -2,13 +2,13 @@ using UnityEngine;
 
 namespace VisionModels.PoseDetection
 {
-    public class Hold : MonoBehaviour
+    public class _Hold : MonoBehaviour
     {
         private Vector3[] _vertices;
         private MeshRenderer _meshRenderer;
         private MeshFilter _meshFilter;
 
-        public Hold(int verticesCount, Vector3[] vertices)
+        public _Hold(int verticesCount, Vector3[] vertices)
         {
             _vertices = vertices;
             _meshRenderer = gameObject.AddComponent<MeshRenderer>();
