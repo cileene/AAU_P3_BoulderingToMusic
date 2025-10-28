@@ -21,7 +21,7 @@ public static class AppEvents
     // EVENTS
     public static event Action<BoundingBox> PersonDetected;
     public static event Action PersonLost;
-    public static event Action<UseWebcam.WebcamResolution> RequestUseWebcam;
+    public static event Action<UseWebcam.WebcamResolution, string> RequestUseWebcam;
     public static event Action<string> RequestUseVideo;
     public static event Action<string> RequestUseStill;
     public static event Action<WebCamTexture> WebcamReady;
@@ -42,10 +42,10 @@ public static class AppEvents
         Debug.Log("Event: PersonLost");
     }
     
-    public static void RaiseRequestUseWebcam(UseWebcam.WebcamResolution resolution)
+    public static void RaiseRequestUseWebcam(UseWebcam.WebcamResolution resolution, string deviceName)
     {
-        RequestUseWebcam?.Invoke(resolution);
-        Debug.Log($"Event: ConfigureWebcam to {resolution}");
+        RequestUseWebcam?.Invoke(resolution, deviceName);
+        Debug.Log($"Event: ConfigureWebcam to use {deviceName} at {resolution}");
     }
     
     public static void RaiseRequestUseVideo(string path)
@@ -63,7 +63,7 @@ public static class AppEvents
     public static void RaiseWebcamReady(WebCamTexture cam)
     {
         WebcamReady?.Invoke(cam);
-        Debug.Log("Event: WebcamReady");
+        Debug.Log($"Event: WebcamReady using {cam.deviceName} at {cam.width}x{cam.height}");
     }
     
     public static void RaiseRequestRouteColor(HandholdsDetector.RouteColor color)

@@ -17,10 +17,10 @@ namespace Shared
         private WebCamTexture _cam;
         
         private void OnEnable() => AppEvents.RequestUseWebcam += OnConfigureWebcam;
-
+        
         private void OnDisable() => AppEvents.RequestUseWebcam -= OnConfigureWebcam;
 
-        private void OnConfigureWebcam(WebcamResolution resolution)
+        private void OnConfigureWebcam(WebcamResolution resolution, string deviceName)
         {
             int width = resolution switch
             {
@@ -41,10 +41,17 @@ namespace Shared
                 WebcamResolution.MacBook => 1552,
                 _ => throw new ArgumentOutOfRangeException()
             };
-        
-            _cam = new WebCamTexture(requestedWidth: width, requestedHeight: height);
-            _cam.Play();
             
+            if (string.IsNullOrEmpty(deviceName))
+            {
+                _cam = new WebCamTexture(requestedWidth: width, requestedHeight: height);
+            }
+            else
+            {
+                _cam = new WebCamTexture(deviceName, width, height);
+            }
+            
+            _cam.Play();
             AppEvents.RaiseWebcamReady(_cam);
         }
     }
