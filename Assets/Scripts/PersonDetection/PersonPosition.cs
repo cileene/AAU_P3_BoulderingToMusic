@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace YoloDetection
+namespace PersonDetection
 {
     public class PersonPosition : MonoBehaviour
     {

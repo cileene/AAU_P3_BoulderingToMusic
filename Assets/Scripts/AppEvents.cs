@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using YoloDetection;
+using PersonDetection;
 
 /// <summary>
 /// A system I've used in many projects to manage events.

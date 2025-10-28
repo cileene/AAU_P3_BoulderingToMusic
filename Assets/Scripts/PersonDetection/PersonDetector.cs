@@ -12,9 +12,9 @@ using UnityEngine.Video;
 //TODO: In prototype make it select the widest angle non-selfie cam and remove mirroring
 
 
-namespace YoloDetection
+namespace PersonDetection
 {
-    public class RunYOLO : MonoBehaviour
+    public class PersonDetector : MonoBehaviour
     {
         // nick stuff
         public Vector3 boxPosition;
