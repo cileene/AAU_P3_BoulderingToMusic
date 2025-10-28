@@ -14,20 +14,19 @@ using VisionModels.PoseDetection;
 
 public class LaunchManager : MonoBehaviour
 {
-    private enum InputSource
-    {
-        Webcam,
-        Video,
-        Still
-    }
-    
+    private enum InputSource { Webcam, Video, Still }
 
     [Header("Input Settings")]
     [SerializeField] private InputSource inputSource;
     [SerializeField] private UseWebcam.WebcamResolution webcamResolution;
+    [SerializeField] private string webcamDeviceName;
     [SerializeField] private string videoFilePath, stillFilePath;
-    [SerializeField] private bool detectPerson, detectPose, detectHandHolds;
-    [SerializeField] private HandholdsDetector.RouteColor routeColor;
+    
+    [Header("Detection Settings")]
+    [SerializeField] private bool detectPerson;
+    [SerializeField] private bool detectPose;
+    [SerializeField] private bool detectHandholds;
+    [SerializeField] private HandholdsDetector.ProblemColor problemColor;
     
     [Header("UI Settings")]
     [SerializeField] private RawImage imageDisplay;
@@ -44,7 +43,7 @@ public class LaunchManager : MonoBehaviour
         {
             case InputSource.Webcam:
                 gameObject.AddComponent<UseWebcam>();
-                AppEvents.RaiseRequestUseWebcam(webcamResolution);
+                AppEvents.RaiseRequestUseWebcam(webcamResolution, webcamDeviceName);
                 break;
             case InputSource.Video:
                 gameObject.AddComponent<UseVideo>();
@@ -61,23 +60,22 @@ public class LaunchManager : MonoBehaviour
     {
         if (detectPerson)
         {
-            var go = new GameObject("PersonDetector");
-            go.transform.SetParent(transform);
-            go.AddComponent<PersonDetector>();
+            new GameObject("PersonDetector", 
+                typeof(PersonDetector)).transform.SetParent(transform);
         }
 
         if (detectPose)
         {
-            var go = new GameObject("PoseDetector");
-            go.transform.SetParent(transform);
-            go.AddComponent<PoseDetector>();
+            new GameObject("PoseDetector", 
+                typeof(PoseDetector)).transform.SetParent(transform);
         }
 
-        if (detectHandHolds)
+        if (detectHandholds)
         {
-            var go = new GameObject("HandHoldDetector");
-            go.transform.SetParent(transform);
-            go.AddComponent<HandholdsDetector>();
+            new GameObject("HandHoldDetector", 
+                typeof(HandholdsDetector)).transform.SetParent(transform);
+            
+            AppEvents.RaiseRequestProblemColor(problemColor);
         }
     }
 }

@@ -4,8 +4,9 @@ namespace VisionModels.HandholdDetection
 {
     public class HandholdsDetector : MonoBehaviour
     {
-        public enum RouteColor
+        public enum ProblemColor
         {
+            AllColors,
             Gray,
             orange,
             black,
@@ -16,8 +17,7 @@ namespace VisionModels.HandholdDetection
             Turquise,
             volume,
             white,
-            yellow,
-            AllColors
+            yellow
         }
     }
 }

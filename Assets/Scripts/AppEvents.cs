@@ -25,7 +25,7 @@ public static class AppEvents
     public static event Action<string> RequestUseVideo;
     public static event Action<string> RequestUseStill;
     public static event Action<WebCamTexture> WebcamReady;
-    public static event Action<HandholdsDetector.RouteColor> RequestRouteColor;
+    public static event Action<HandholdsDetector.ProblemColor> RequestProblemColor;
     public static event Action SegRunning;
     
     
@@ -66,9 +66,9 @@ public static class AppEvents
         Debug.Log($"Event: WebcamReady using {cam.deviceName} at {cam.width}x{cam.height}");
     }
     
-    public static void RaiseRequestRouteColor(HandholdsDetector.RouteColor color)
+    public static void RaiseRequestProblemColor(HandholdsDetector.ProblemColor color)
     {
-        RequestRouteColor?.Invoke(color);
+        RequestProblemColor?.Invoke(color);
         Debug.Log($"Event: RequestRouteColor to {color}");
     }
     

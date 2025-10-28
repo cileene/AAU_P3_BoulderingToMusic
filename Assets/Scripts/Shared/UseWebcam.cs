@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Shared
@@ -28,8 +27,7 @@ namespace Shared
                 WebcamResolution.HD1080p => 1920,
                 WebcamResolution.HD720p => 1280,
                 WebcamResolution.VGA => 640,
-                WebcamResolution.MacBook => 1552,
-                _ => throw new ArgumentOutOfRangeException()
+                WebcamResolution.MacBook => 1552
             };
     
             int height = resolution switch
@@ -38,8 +36,7 @@ namespace Shared
                 WebcamResolution.HD1080p => 1080,
                 WebcamResolution.HD720p => 720,
                 WebcamResolution.VGA => 480,
-                WebcamResolution.MacBook => 1552,
-                _ => throw new ArgumentOutOfRangeException()
+                WebcamResolution.MacBook => 1552
             };
             
             if (string.IsNullOrEmpty(deviceName))
