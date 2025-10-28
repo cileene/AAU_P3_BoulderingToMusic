@@ -436,6 +436,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99495ddd03a24414a6524598156ccc08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaunchManager
+  inputSource: 0
+  webcamResolution: 0
+  webcamDeviceName: 
+  videoFilePath: 
+  stillFilePath: 
+  detectPerson: 0
+  detectPose: 0
+  detectHandholds: 0
+  problemColor: 0
+  imageDisplay: {fileID: 0}
 --- !u!4 &1170015151
 Transform:
   m_ObjectHideFlags: 0

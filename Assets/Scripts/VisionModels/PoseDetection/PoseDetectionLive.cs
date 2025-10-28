@@ -15,7 +15,6 @@ namespace VisionModels.PoseDetection
         [Header("Scene References")]
         public PosePreview posePreview;
         public ImagePreview imagePreview;
-        public CameraCapture cameraCapture;
 
         [Header("Model Assets")]
         public ModelAsset poseDetector;
@@ -39,13 +38,37 @@ namespace VisionModels.PoseDetection
 
         private float m_TextureWidth;
         private float m_TextureHeight;
+        private WebCamTexture _webCamTexture;
 
-        [Header("Testing"),Tooltip("For testing purposes, add images here as textures")]
+        [Header("Testing"), Tooltip("For testing purposes, add images here as textures")]
         [SerializeField]
         private Texture presetTexture;
-        [SerializeField] private bool isPresetTexture = true;
-    
-        private async void Start()
+        [SerializeField] 
+        private bool isPresetTexture = true;
+
+        private void OnEnable()
+        {
+            AppEvents.WebcamReady += OnWebcamReady;
+        }
+
+        private void OnDisable()
+        {
+            AppEvents.WebcamReady -= OnWebcamReady;
+            
+            // Cleanup
+            m_PoseDetectorWorker?.Dispose();
+            m_PoseLandmarkerWorker?.Dispose();
+            m_DetectorInput?.Dispose();
+            m_LandmarkerInput?.Dispose();
+        }
+
+        private void OnWebcamReady(WebCamTexture cam)
+        {
+            _webCamTexture = cam;
+            StartDetection();
+        }
+
+        private async void StartDetection()
         {
             // Validate required TextAssets and other references
             if (anchorsCSV == null)
@@ -65,9 +88,9 @@ namespace VisionModels.PoseDetection
                     return;
                 }
 #else
-            Debug.LogError("PoseDetectionLive: anchorsCSV is not assigned. Please assign Assets/Data/anchors.csv in the Inspector.");
-            enabled = false;
-            return;
+                Debug.LogError("PoseDetectionLive: anchorsCSV is not assigned. Please assign Assets/Data/anchors.csv in the Inspector.");
+                enabled = false;
+                return;
 #endif
             }
 
@@ -84,12 +107,6 @@ namespace VisionModels.PoseDetection
             if (imagePreview == null)
             {
                 Debug.LogError("PoseDetectionLive: imagePreview is not assigned. Please assign it in the Inspector.");
-                enabled = false;
-                return;
-            }
-            if (cameraCapture == null)
-            {
-                Debug.LogError("PoseDetectionLive: cameraCapture is not assigned. Please assign it in the Inspector.");
                 enabled = false;
                 return;
             }
@@ -161,10 +178,10 @@ namespace VisionModels.PoseDetection
             m_DetectorInput = new Tensor<float>(new TensorShape(1, detectorInputSize, detectorInputSize, 3));
             m_LandmarkerInput = new Tensor<float>(new TensorShape(1, landmarkerInputSize, landmarkerInputSize, 3));
 
-            // Wait for camera initialization with timeout to avoid hanging the Editor/Play mode
+            // Wait for camera initialization with timeout
             const float kCameraTimeoutSeconds = 5.0f;
             float startTime = Time.realtimeSinceStartup;
-            while (cameraCapture.WebCamTex == null || !cameraCapture.WebCamTex.didUpdateThisFrame)
+            while (_webCamTexture == null || !_webCamTexture.didUpdateThisFrame)
             {
                 if (Time.realtimeSinceStartup - startTime > kCameraTimeoutSeconds)
                 {
@@ -178,14 +195,13 @@ namespace VisionModels.PoseDetection
             Debug.Log("Camera ready. Starting live pose detection...");
 
             // Main loop: continuously process frames from webcam
-            while (true)
+            while (enabled)
             {
                 try
                 {
-                    var tex = cameraCapture.WebCamTex;
-                    if (tex != null && tex.didUpdateThisFrame && !isPresetTexture)
-                        await Detect(tex);
-                    else if (tex != null && isPresetTexture)
+                    if (_webCamTexture != null && _webCamTexture.didUpdateThisFrame && !isPresetTexture)
+                        await Detect(_webCamTexture);
+                    else if (_webCamTexture != null && isPresetTexture)
                     {
                         await Detect(presetTexture);
                     }
@@ -199,41 +215,6 @@ namespace VisionModels.PoseDetection
                     break;
                 }
             }
-
-            // Cleanup
-            m_PoseDetectorWorker.Dispose();
-            m_PoseLandmarkerWorker.Dispose();
-            m_DetectorInput.Dispose();
-            m_LandmarkerInput.Dispose();
-        }
-
-        private void OnDisable()
-        {
-            try
-            {
-                m_PoseDetectorWorker?.Dispose();
-            }
-            catch { }
-            try
-            {
-                m_PoseLandmarkerWorker?.Dispose();
-            }
-            catch { }
-            try
-            {
-                m_DetectorInput?.Dispose();
-            }
-            catch { }
-            try
-            {
-                m_LandmarkerInput?.Dispose();
-            }
-            catch { }
-        }
-
-        private void OnDestroy()
-        {
-            OnDisable();
         }
 
         private Vector3 ImageToWorld(Vector2 position)

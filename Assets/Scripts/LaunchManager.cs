@@ -31,7 +31,7 @@ public class LaunchManager : MonoBehaviour
     [Header("UI Settings")]
     [SerializeField] private RawImage imageDisplay;
     
-    private void Awake()
+    private void Start()
     {
         HandleInput();
         HandleDetectionSettings();

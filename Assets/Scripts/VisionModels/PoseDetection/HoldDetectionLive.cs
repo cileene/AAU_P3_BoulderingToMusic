@@ -6,17 +6,14 @@ namespace VisionModels.PoseDetection
 {
     public class HoldPreviewLive : MonoBehaviour
     {
-    
         [Header("Scene References")]
         public HoldPreview holdPreview;
         public ImagePreview imagePreview;
-        public CameraCapture cameraCapture;
 
         [Header("Model Asset")] public ModelAsset holdAsset;
     
         [Header("Settings")]
-        [Range(0f, 1f)]
-        public float scoreThreshold = 0.75f;
+        [Range(0f, 1f)] public float scoreThreshold = 0.75f;
 
         private const int detectorInputSize = 1;
         private Worker m_HoldDetectorWorker;
@@ -24,15 +21,32 @@ namespace VisionModels.PoseDetection
 
         private float m_TextureWidth;
         private float m_TextureHeight;
+        private WebCamTexture _webCamTexture;
     
         [Header("Testing"),Tooltip("For testing purposes, add images here as textures")]
-        [SerializeField]
-        private Texture presetTexture;
+        [SerializeField] private Texture presetTexture;
         [SerializeField] private bool isPresetTexture = true;
     
     
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        private async void Start()
+        private void OnEnable()
+        {
+            AppEvents.WebcamReady += OnWebcamReady;
+        }
+        
+        private void OnDisable()
+        {
+            AppEvents.WebcamReady -= OnWebcamReady;
+            m_HoldDetectorWorker.Dispose();
+            m_DetectorInput.Dispose();
+        }
+        
+        private void OnWebcamReady(WebCamTexture cam)
+        {
+            _webCamTexture = cam;
+            StartDetection();
+        }
+
+        private async void StartDetection()
         {
             if (holdPreview == null)
             {
@@ -44,20 +58,12 @@ namespace VisionModels.PoseDetection
                 enabled = false;
                 return;
             }
-            if (cameraCapture == null)
-            {
-                Debug.LogError("PoseDetectionLive: cameraCapture is not assigned. Please assign it in the Inspector.");
-                enabled = false;
-                return;
-            }
-
             if (holdAsset == null)
             {
                 Debug.LogError("PoseDetectionLive: holdAsset is not assigned. Please assign it in the Inspector.");
                 enabled = false;
                 return;
             }
-        
         
             var holdDetectorModel = ModelLoader.Load(holdAsset);
             if (holdAsset == null)
@@ -93,7 +99,7 @@ namespace VisionModels.PoseDetection
             // Wait for camera initialization with timeout to avoid hanging the Editor/Play mode
             const float kCameraTimeoutSeconds = 5.0f;
             float startTime = Time.realtimeSinceStartup;
-            while (cameraCapture.WebCamTex == null || !cameraCapture.WebCamTex.didUpdateThisFrame)
+            while (_webCamTexture == null || !_webCamTexture.didUpdateThisFrame)
             {
                 if (Time.realtimeSinceStartup - startTime > kCameraTimeoutSeconds)
                 {
@@ -108,14 +114,13 @@ namespace VisionModels.PoseDetection
         
         
             // Main loop: continuously process frames from webcam
-            while (true)
+            while (enabled)
             {
                 try
                 {
-                    var tex = cameraCapture.WebCamTex;
-                    if (tex != null && tex.didUpdateThisFrame && !isPresetTexture)
-                        await Detect(tex);
-                    else if (tex != null && isPresetTexture)
+                    if (_webCamTexture != null && _webCamTexture.didUpdateThisFrame && !isPresetTexture)
+                        await Detect(_webCamTexture);
+                    else if (_webCamTexture != null && isPresetTexture)
                     {
                         await Detect(presetTexture);
                     }
@@ -129,10 +134,6 @@ namespace VisionModels.PoseDetection
                     break;
                 }
             }
-
-            // Cleanup
-            m_HoldDetectorWorker.Dispose();
-            m_DetectorInput.Dispose();
         }
 
         private async Awaitable Detect(Texture texture)

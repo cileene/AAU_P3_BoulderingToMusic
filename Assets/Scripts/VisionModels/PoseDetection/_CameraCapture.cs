@@ -1,3 +1,4 @@
+using Shared;
 using UnityEngine;
 
 namespace VisionModels.PoseDetection
@@ -6,7 +7,7 @@ namespace VisionModels.PoseDetection
     /// Simple webcam capture component that provides a live Texture feed
     /// for the pose detection pipeline.
     /// </summary>
-    public class CameraCapture : MonoBehaviour
+    public class _CameraCapture : MonoBehaviour
     {
         [Tooltip("Name of the webcam device (optional). Leave empty for default.")]
         public string deviceName = "";
@@ -29,11 +30,12 @@ namespace VisionModels.PoseDetection
         /// <summary>
         /// Returns the live webcam WebCamTexture. Can be used by other scripts (e.g., PoseDetection).
         /// </summary>
-        public WebCamTexture WebCamTex => _webCamTexture;
+        //public WebCamTexture WebCamTex => _webCamTexture;
 
         private void Start()
         {
-            StartCamera();
+            //AppEvents.RaiseRequestUseWebcam(UseWebcam.WebcamResolution.Macbook, deviceName);
+            //StartCamera();
         }
 
         /// <summary>

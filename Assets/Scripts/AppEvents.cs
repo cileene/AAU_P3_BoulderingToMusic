@@ -7,7 +7,7 @@ using VisionModels.PersonDetection;
 /// <summary>
 /// A system I've used in many projects to manage events.
 /// Sort of a mishmash of the Observer pattern and an Event bus.
-/// Any class can call an event method using e.g. AppEvents.Start()
+/// Any class can call an event method using e.g., AppEvents.Start()
 /// Other classes can then subscribe to that event and take action.
 /// Can be split into multiple event classes if it gets unwieldy. - Nick
 /// <para>Example:</para>
