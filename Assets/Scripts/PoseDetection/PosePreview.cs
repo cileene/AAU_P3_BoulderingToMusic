@@ -8,15 +8,10 @@ namespace PoseDetection
         public BoundingCircle boundingCircle;
         public Keypoint[] keypoints;
         public KeypointLine[] keyPointLines;
-        [SerializeField] private float skeletonScaleFactor = 1.0f;
-
 
         private void Update()
         {
-            foreach (KeypointLine kpl in keyPointLines)
-            {
-                kpl.setLineWidth(skeletonScaleFactor);
-            }
+            
         }
         public void SetActive(bool active)
         {
@@ -35,8 +30,10 @@ namespace PoseDetection
 
         public void SetKeypoint(int index, bool active, Vector3 position)
         {
-            //Debug.Log("Keypoint nr: " + index + " is being set at :" + position);
-            keypoints[index].Set(active, position);
+            if (keypoints[index] != null)
+            {
+                keypoints[index].Set(active, position);
+            }
         }
     }
 }

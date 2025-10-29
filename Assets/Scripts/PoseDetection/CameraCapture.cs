@@ -3,7 +3,7 @@ using UnityEngine;
 namespace PoseDetection
 {
     /// <summary>
-    /// Simple webcam capture component that provides a live Texture feed
+    /// Simple webcam detectionLive component that provides a live Texture feed
     /// for the pose detection pipeline.
     /// </summary>
     public class CameraCapture : MonoBehaviour

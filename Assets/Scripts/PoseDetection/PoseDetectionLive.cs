@@ -3,6 +3,7 @@ using Unity.InferenceEngine;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace PoseDetection
 {
@@ -44,6 +45,7 @@ namespace PoseDetection
         [SerializeField]
         private Texture presetTexture;
         [SerializeField] private bool isPresetTexture = true;
+        public float poseDetectionScale = 300f;
     
         private async void Start()
         {
@@ -336,7 +338,7 @@ namespace PoseDetection
                 var presence = landmarks[5 * i + 4];
 
                 Vector3 position_WorldSpace = ImageToWorld(position_ImageSpace) + new Vector3(0, 0, landmarks[5 * i + 2] / m_TextureHeight);
-                posePreview.SetKeypoint(i, visibility > 0.5f && presence > 0.5f, position_WorldSpace);
+                posePreview.SetKeypoint(i, visibility > 0.5f && presence > 0.5f, position_WorldSpace * poseDetectionScale);
             }
         }
     }

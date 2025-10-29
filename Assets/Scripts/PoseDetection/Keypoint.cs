@@ -33,10 +33,6 @@ namespace PoseDetection
         {
             m_IsActive = active;
             m_Position = position;
-            if (position == Vector3.zero)
-            {
-                Debug.Log(gameObject.name + ": position is zero");
-            }
             gameObject.SetActive(active);
             outerCircle.SetPosition(0, position);
             outerCircle.SetPosition(1, position);
