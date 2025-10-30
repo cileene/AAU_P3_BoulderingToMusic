@@ -3,6 +3,27 @@ using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+    01 Nose
+    02 Left Eye
+    03 Right Eye
+    04 Left Ear
+    05 Right Ear
+    06 Left Shoulder
+    07 Right Shoulder
+    08 Left Elbow
+    09 Right Elbow
+    10 Left Wrist
+    11 Right Wrist
+    12 Left Hip
+    13 Right Hip
+    14 Left Knee
+    15 Right Knee
+    16 Left Ankle
+    17 Right Ankle
+*/
+
+
 namespace VisionModelsV2
 {
     public class PoseDetector : MonoBehaviour
@@ -148,53 +169,13 @@ namespace VisionModelsV2
                     }
                 }
                 DrawPose(keypoints);
+                //Debug.Log(keypoints[1]); // Log a single keypoint
             }
         }
         
         private bool HandleInput()
         {
-            Texture sourceTex = null;
-            int srcW = 0, srcH = 0;
-
-            if (_useWebcam && _cam != null && _cam.width > 16 && _cam.height > 16)
-            {
-                sourceTex = _cam;
-                srcW = _cam.width; srcH = _cam.height;
-            }
-            else if (!_useWebcam && _video && _video)
-            {
-                sourceTex = _video;
-                srcW = (int)_video.width;
-                srcH = (int)_video.height;
-            }
-            else
-            {
-                return true;
-            }
-            
-            // Correct orientation and mirroring for webcam/video before inference
-            int rot = 0;
-            bool vflip = false;
-            if (_useWebcam && _cam != null)
-            {
-                rot = _cam.videoRotationAngle;                 // 0, 90, 180, 270 from platform
-                vflip = _cam.videoVerticallyMirrored;          // front cameras often true
-            }
-
-            // Rotate the UI container so the feed and overlays stay aligned
-            var eul = _displayImage.rectTransform.localEulerAngles;
-            _displayImage.rectTransform.localEulerAngles = new Vector3(0f, 0f, -rot);
-
-            // Letterbox to 640x640 while preserving aspect, then apply requested mirror and platform vertical flip
-            float aspect = srcW * 1f / Mathf.Max(1, srcH);
-            float sx = (_mirrorHorizontally ? -1f : 1f) / aspect; // horizontal mirror for selfie view
-            float sy = vflip ? -1f : 1f;                         // platform vertical flip
-            Vector2 scale = new Vector2(sx, sy);
-            Vector2 offset = new Vector2(_mirrorHorizontally ? 1f : 0f, vflip ? 1f : 0f);
-
-            Graphics.Blit(sourceTex, _targetRT, scale, offset);
-            _displayImage.texture = _targetRT;
-            return false;
+            return InputProcessor.ProcessInput(_useWebcam, _cam, _video, _targetRT, _displayImage, _mirrorHorizontally);
         }
 
 
@@ -242,7 +223,6 @@ namespace VisionModelsV2
             }
         }
 
-
         private GameObject CreateDot(Color color)
         {
             var dot = new GameObject("Keypoint");
@@ -272,13 +252,8 @@ namespace VisionModelsV2
             rt.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
             objectPool.Add(line);
         }
-
-        private void ClearAnnotations()
-        {
-            foreach (var obj in objectPool)
-                obj.SetActive(false);
-            objectPool.Clear();
-        }
+        
+        private void ClearAnnotations() => AnnotationManager.ClearAnnotations(objectPool);
 
         private void OnDestroy()
         {

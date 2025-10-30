@@ -3,13 +3,6 @@ using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
 
-// nick, messy but readable
-
-//TODO: Clean up the img rotation logic
-
-//TODO: In prototype make it select the widest angle non-selfie cam and remove mirroring
-
-
 namespace VisionModelsV2
 {
     public class PersonDetector : MonoBehaviour
@@ -18,19 +11,19 @@ namespace VisionModelsV2
         public Vector3 boxPosition;
     
         // yolo stuff
-        private ModelAsset modelAsset;
-        private TextAsset classesAsset;
-        private RawImage displayImage;
-        private Texture2D borderTexture;
-        private Font font;
+        private ModelAsset _modelAsset;
+        private TextAsset _classesAsset;
+        private RawImage _displayImage;
+        private Texture2D _borderTexture;
+        private Font _font;
         
-        private bool useWebcam;
-        private string webcamDeviceName;
-        private string videoFilename;
+        private bool _useWebcam;
+        private string _webcamDeviceName;
+        private string _videoFilename;
         
-        private bool preferFrontCamera;
+        private bool _preferFrontCamera;
         
-        private bool mirrorHorizontally; // set true for selfie view
+        private bool _mirrorHorizontally; // set true for selfie view
 
         private const BackendType Backend = BackendType.GPUCompute;
 
@@ -82,37 +75,37 @@ namespace VisionModelsV2
         private void OnVideoReady(Texture video)
         {
             _video = video;
-            useWebcam = false;
+            _useWebcam = false;
         }
         
         private void OnWebcamReady(WebCamTexture cam)
         {
             _cam = cam;
-            useWebcam = true;
+            _useWebcam = true;
         }
         
         private void OnConfigurePersonDetector(ModelAsset model, TextAsset classes, RawImage display, Font fnt, Texture2D borderTex)
         {
-            modelAsset = model;
-            classesAsset = classes;
-            displayImage = display;
-            font = fnt;
-            borderTexture = borderTex;
+            _modelAsset = model;
+            _classesAsset = classes;
+            _displayImage = display;
+            _font = fnt;
+            _borderTexture = borderTex;
             StartModel();
         }
 
         private void StartModel()
         {
-            _labels = classesAsset.text.Split('\n');
+            _labels = _classesAsset.text.Split('\n');
             LoadModel();
 
             _targetRT = new RenderTexture(ImageWidth, ImageHeight, 0);
-            _displayLocation = displayImage.transform;
+            _displayLocation = _displayImage.transform;
 
             _borderSprite = Sprite.Create(
-                borderTexture,
-                new Rect(0, 0, borderTexture.width, borderTexture.height),
-                new Vector2(borderTexture.width / 2f, borderTexture.height / 2f)
+                _borderTexture,
+                new Rect(0, 0, _borderTexture.width, _borderTexture.height),
+                new Vector2(_borderTexture.width / 2f, _borderTexture.height / 2f)
             );
         
             Debug.Log($"{this} is ready");
@@ -121,7 +114,7 @@ namespace VisionModelsV2
 
         private void LoadModel() // here be dragons and math
         {
-            var model1 = ModelLoader.Load(modelAsset);
+            var model1 = ModelLoader.Load(_modelAsset);
 
             _centersToCorners = new Tensor<float>(new TensorShape(4, 4),
                 new float[]
@@ -166,8 +159,8 @@ namespace VisionModelsV2
             using var coords = (_worker.PeekOutput("output_0") as Tensor<float>).ReadbackAndClone(); // (N,4) centers
             using var labelIDs = (_worker.PeekOutput("output_1") as Tensor<int>).ReadbackAndClone(); // (N)
 
-            float displayWidth = displayImage.rectTransform.rect.width;
-            float displayHeight = displayImage.rectTransform.rect.height;
+            float displayWidth = _displayImage.rectTransform.rect.width;
+            float displayHeight = _displayImage.rectTransform.rect.height;
             float scaleX = displayWidth / ImageWidth;
             float scaleY = displayHeight / ImageHeight;
 
@@ -206,86 +199,20 @@ namespace VisionModelsV2
 
                 DrawBox(box, n, displayHeight * 0.05f);
             }
-
-            // nick test
-            if (hasPerson != _lastHasPerson)
-            {
-                if (hasPerson)
-                {
-                    AppEvents.RaisePersonDetected(_personBox);
-                }
-
-                else
-                {
-                    AppEvents.RaisePersonLost();
-                }
-                _lastHasPerson = hasPerson;
-            }
         }
 
         private bool HandleInput()
         {
-            Texture sourceTex = null;
-            int srcW = 0, srcH = 0;
-
-            if (useWebcam && _cam != null && _cam.width > 16 && _cam.height > 16)
-            {
-                sourceTex = _cam;
-                srcW = _cam.width; srcH = _cam.height;
-            }
-            else if (!useWebcam && _video && _video)
-            {
-                sourceTex = _video;
-                srcW = (int)_video.width;
-                srcH = (int)_video.height;
-            }
-            else
-            {
-                return true;
-            }
-            
-            // Correct orientation and mirroring for webcam/video before inference
-            int rot = 0;
-            bool vflip = false;
-            if (useWebcam && _cam != null)
-            {
-                rot = _cam.videoRotationAngle;                 // 0, 90, 180, 270 from platform
-                vflip = _cam.videoVerticallyMirrored;          // front cameras often true
-            }
-
-            // Rotate the UI container so the feed and overlays stay aligned
-            var eul = displayImage.rectTransform.localEulerAngles;
-            displayImage.rectTransform.localEulerAngles = new Vector3(0f, 0f, -rot);
-
-            // Letterbox to 640x640 while preserving aspect, then apply requested mirror and platform vertical flip
-            float aspect = srcW * 1f / Mathf.Max(1, srcH);
-            float sx = (mirrorHorizontally ? -1f : 1f) / aspect; // horizontal mirror for selfie view
-            float sy = vflip ? -1f : 1f;                         // platform vertical flip
-            Vector2 scale = new Vector2(sx, sy);
-            Vector2 offset = new Vector2(mirrorHorizontally ? 1f : 0f, vflip ? 1f : 0f);
-
-            Graphics.Blit(sourceTex, _targetRT, scale, offset);
-            displayImage.texture = _targetRT;
-            return false;
+            return InputProcessor.ProcessInput(_useWebcam, _cam, _video, _targetRT, _displayImage, _mirrorHorizontally);
         }
 
         private void DrawBox(BoundingBox box, int id, float fontSize)
         {
-            GameObject panel;
-            if (id < _boxPool.Count)
-            {
-                panel = _boxPool[id];
-                panel.SetActive(true);
-            }
-            else
-            {
-                panel = CreateNewBox(Color.yellow);
-            }
-
+            var panel = AnnotationManager.GetOrCreateBox(_boxPool, id, _displayLocation, _borderSprite, _font, Color.yellow);
             panel.transform.localPosition = new Vector3(box.CenterX, -box.CenterY);
-            boxPosition = panel.transform.localPosition; // nick taking this for later use
+            boxPosition = panel.transform.localPosition;
 
-            RectTransform rt = panel.GetComponent<RectTransform>();
+            var rt = panel.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(box.Width, box.Height);
 
             var label = panel.GetComponentInChildren<Text>();
@@ -293,41 +220,7 @@ namespace VisionModelsV2
             label.fontSize = (int)fontSize;
         }
 
-        private GameObject CreateNewBox(Color color)
-        {
-            var panel = new GameObject("ObjectBox");
-            panel.AddComponent<CanvasRenderer>();
-            Image img = panel.AddComponent<Image>();
-            img.color = color;
-            img.sprite = _borderSprite;
-            img.type = Image.Type.Sliced;
-            panel.transform.SetParent(_displayLocation, false);
-
-            var text = new GameObject("ObjectLabel");
-            text.AddComponent<CanvasRenderer>();
-            text.transform.SetParent(panel.transform, false);
-            Text txt = text.AddComponent<Text>();
-            txt.font = font;
-            txt.color = color;
-            txt.fontSize = 40;
-            txt.horizontalOverflow = HorizontalWrapMode.Overflow;
-
-            RectTransform rt2 = text.GetComponent<RectTransform>();
-            rt2.offsetMin = new Vector2(20, rt2.offsetMin.y);
-            rt2.offsetMax = new Vector2(0, rt2.offsetMax.y);
-            rt2.offsetMin = new Vector2(rt2.offsetMin.x, 0);
-            rt2.offsetMax = new Vector2(rt2.offsetMax.x, 30);
-            rt2.anchorMin = new Vector2(0, 0);
-            rt2.anchorMax = new Vector2(1, 1);
-
-            _boxPool.Add(panel);
-            return panel;
-        }
-
-        private void ClearAnnotations()
-        {
-            foreach (var box in _boxPool) box.SetActive(false);
-        }
+        private void ClearAnnotations() => AnnotationManager.ClearAnnotations(_boxPool);
 
         private void OnDestroy()
         {

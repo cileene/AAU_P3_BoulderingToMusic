@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Video;
 
 namespace VisionModelsV2
 {
@@ -24,7 +22,7 @@ namespace VisionModelsV2
             yellow,
             All
         }
-        
+
         private ModelAsset _modelAsset;
         private TextAsset _classesAsset;
         private RawImage _displayImage;
@@ -46,7 +44,7 @@ namespace VisionModelsV2
 
         private Texture _video;
         private WebCamTexture _webcamTexture;
-        
+
         private bool _isModelReady;
 
         private List<GameObject> _boxPool = new();
@@ -55,7 +53,56 @@ namespace VisionModelsV2
 
         private Tensor<float> centersToCorners;
 
-        private void Start()
+        private bool _mirrorHorizontally;
+        private WebCamTexture _cam;
+        private bool _useWebcam = true;
+        private ProblemColor _selectedColor;
+
+        private void OnEnable()
+        {
+            AppEvents.WebcamReady += OnWebcamReady;
+            AppEvents.VideoReady += OnVideoReady;
+            AppEvents.ConfigureHandholdsDetector += OnConfigureHandholdsDetector;
+        }
+
+        private void OnDisable()
+        {
+            AppEvents.WebcamReady -= OnWebcamReady;
+            AppEvents.VideoReady -= OnVideoReady;
+            AppEvents.ConfigureHandholdsDetector -= OnConfigureHandholdsDetector;
+        }
+
+        private void OnWebcamReady(WebCamTexture cam)
+        {
+            _cam = cam;
+            _useWebcam = true;
+        }
+
+        private void OnVideoReady(Texture videoTexture)
+        {
+            _video = videoTexture;
+            _useWebcam = false;
+        }
+
+        private void OnConfigureHandholdsDetector(
+            ModelAsset model,
+            TextAsset classes,
+            ProblemColor problemColor,
+            RawImage rawImage,
+            Font font,
+            Texture2D borderTex)
+        {
+            _modelAsset = model;
+            _classesAsset = classes;
+            _selectedColor = problemColor;
+            _displayImage = rawImage;
+            _borderTexture = borderTex;
+            _font = font;
+
+            StartModel();
+        }
+
+        private void StartModel()
         {
             //Parse neural net labels
             _labels = _classesAsset.text.Split('\n');
@@ -67,9 +114,9 @@ namespace VisionModelsV2
             //Create image to display video
             _displayLocation = _displayImage.transform;
 
-            SetupInput();
-
-            _borderSprite = Sprite.Create(_borderTexture, new Rect(0, 0, _borderTexture.width, _borderTexture.height), new Vector2(_borderTexture.width / 2, _borderTexture.height / 2));
+            _borderSprite = Sprite.Create(_borderTexture, new Rect(0, 0, _borderTexture.width, _borderTexture.height),
+                new Vector2(_borderTexture.width / 2, _borderTexture.height / 2));
+            _isModelReady = true;
         }
 
         private void LoadModel()
@@ -80,10 +127,10 @@ namespace VisionModelsV2
             centersToCorners = new Tensor<float>(new TensorShape(4, 4),
                 new float[]
                 {
-                    1,      0,      1,      0,
-                    0,      1,      0,      1,
-                    -0.5f,  0,      0.5f,   0,
-                    0,      -0.5f,  0,      0.5f
+                    1, 0, 1, 0,
+                    0, 1, 0, 1,
+                    -0.5f, 0, 0.5f, 0,
+                    0, -0.5f, 0, 0.5f
                 });
 
             //Here we transform the output of the model1 by feeding it through a Non-Max-Suppression layer.
@@ -94,15 +141,24 @@ namespace VisionModelsV2
             var modelOutput = Functional.Forward(model1, inputs)[0];
             var boxCoords = modelOutput[0, 0..4, ..].Transpose(0, 1);
             var allScores = modelOutput[0, 4..(4 + numClasses), ..];
-            var scores = Functional.ReduceMax(allScores, 0);                                //shape=(8400)
-            var classIDs = Functional.ArgMax(allScores, 0);                                 //shape=(8400)
-            var boxCorners = Functional.MatMul(boxCoords, Functional.Constant(centersToCorners));   //shape=(8400,4)
+            var scores = Functional.ReduceMax(allScores, 0); //shape=(8400)
+            var classIDs = Functional.ArgMax(allScores, 0); //shape=(8400)
+            var boxCorners = Functional.MatMul(boxCoords, Functional.Constant(centersToCorners)); //shape=(8400,4)
             var indices = Functional.NMS(boxCorners, scores, _iouThreshold, _scoreThreshold); //shape=(N)
-            var coords = Functional.IndexSelect(boxCoords, 0, indices);                     //shape=(N,4)
-            var labelIDs = Functional.IndexSelect(classIDs, 0, indices);                    //shape=(N)
+            var coords = Functional.IndexSelect(boxCoords, 0, indices); //shape=(N,4)
+            var labelIDs = Functional.IndexSelect(classIDs, 0, indices); //shape=(N)
 
             //Create worker to run model
             _worker = new Worker(graph.Compile(coords, labelIDs), backend);
+        }
+
+        private bool ShouldDisplayLabel(string label, ProblemColor selectedColor)
+        {
+            if (selectedColor == ProblemColor.All)
+                return true;
+
+            string colorName = selectedColor.ToString().ToLower();
+            return label.ToLower().Contains(colorName);
         }
 
         private void Update()
@@ -115,13 +171,7 @@ namespace VisionModelsV2
         {
             ClearAnnotations();
 
-            if (_video && _video.texture)
-            {
-                float aspect = _video.width * 1f / _video.height;
-                Graphics.Blit(_video.texture, _targetRT, new Vector2(1f / aspect, 1), new Vector2(0, 0));
-                _displayImage.texture = _targetRT;
-            }
-            else return;
+            if (HandleInput()) return;
 
             using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, imageHeight, imageWidth));
             TextureConverter.ToTensor(_targetRT, inputTensor, default);
@@ -146,89 +196,58 @@ namespace VisionModelsV2
             }
 
             //Draw the bounding boxes
+            int drawnBoxes = 0;
             for (int n = 0; n < Mathf.Min(boxesFound, 200); n++)
             {
+                string label = _labels[labelIDs[n]];
+    
+                // Skip if color doesn't match filter
+                if (!ShouldDisplayLabel(label, _selectedColor))
+                    continue;
+
                 var box = new BoundingBox
                 {
-                    centerX = output[n, 0] * scaleX - displayWidth / 2,
-                    centerY = output[n, 1] * scaleY - displayHeight / 2,
-                    width = output[n, 2] * scaleX,
-                    height = output[n, 3] * scaleY,
-                    label = _labels[labelIDs[n]],
+                    CenterX = output[n, 0] * scaleX - displayWidth / 2,
+                    CenterY = output[n, 1] * scaleY - displayHeight / 2,
+                    Width = output[n, 2] * scaleX,
+                    Height = output[n, 3] * scaleY,
+                    Label = label,
                 };
-                DrawBox(box, n, displayHeight * 0.05f);
+                DrawBox(box, drawnBoxes++, displayHeight * 0.05f);
             }
+        }
+
+        private bool HandleInput()
+        {
+            return InputProcessor.ProcessInput(
+                _useWebcam,
+                _cam,
+                _video,
+                _targetRT,
+                _displayImage,
+                _mirrorHorizontally
+            );
         }
 
         private void DrawBox(BoundingBox box, int id, float fontSize)
         {
-            //Create the bounding box graphic or get from pool
-            GameObject panel;
-            if (id < _boxPool.Count)
-            {
-                panel = _boxPool[id];
-                panel.SetActive(true);
-            }
-            else
-            {
-                panel = CreateNewBox(Color.yellow);
-            }
-            //Set box position
-            panel.transform.localPosition = new Vector3(box.centerX, -box.centerY);
+            var panel = AnnotationManager.GetOrCreateBox(_boxPool, id, _displayLocation, _borderSprite, _font,
+                Color.yellow);
+            panel.transform.localPosition = new Vector3(box.CenterX, -box.CenterY);
 
-            //Set box size
-            RectTransform rt = panel.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(box.width, box.height);
+            var rt = panel.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(box.Width, box.Height);
 
-            //Set label text
             var label = panel.GetComponentInChildren<Text>();
-            label.text = box.label;
+            label.text = box.Label;
             label.fontSize = (int)fontSize;
-        }
-
-        private GameObject CreateNewBox(Color color)
-        {
-            //Create the box and set image
-
-            var panel = new GameObject("ObjectBox");
-            panel.AddComponent<CanvasRenderer>();
-            Image img = panel.AddComponent<Image>();
-            img.color = color;
-            img.sprite = _borderSprite;
-            img.type = Image.Type.Sliced;
-            panel.transform.SetParent(_displayLocation, false);
-
-            //Create the label
-
-            var text = new GameObject("ObjectLabel");
-            text.AddComponent<CanvasRenderer>();
-            text.transform.SetParent(panel.transform, false);
-            Text txt = text.AddComponent<Text>();
-            txt.font = _font;
-            txt.color = color;
-            txt.fontSize = 40;
-            txt.horizontalOverflow = HorizontalWrapMode.Overflow;
-
-            RectTransform rt2 = text.GetComponent<RectTransform>();
-            rt2.offsetMin = new Vector2(20, rt2.offsetMin.y);
-            rt2.offsetMax = new Vector2(0, rt2.offsetMax.y);
-            rt2.offsetMin = new Vector2(rt2.offsetMin.x, 0);
-            rt2.offsetMax = new Vector2(rt2.offsetMax.x, 30);
-            rt2.anchorMin = new Vector2(0, 0);
-            rt2.anchorMax = new Vector2(1, 1);
-
-            _boxPool.Add(panel);
-            return panel;
         }
 
         private void ClearAnnotations()
         {
-            foreach (var box in _boxPool)
-            {
-                box.SetActive(false);
-            }
+            AnnotationManager.ClearAnnotations(_boxPool);
         }
-
+        
         private void OnDestroy()
         {
             centersToCorners?.Dispose();
