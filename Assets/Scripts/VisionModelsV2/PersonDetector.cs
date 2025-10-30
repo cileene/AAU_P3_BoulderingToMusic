@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Video;
 
 // nick, messy but readable
 
@@ -20,33 +18,19 @@ namespace VisionModelsV2
         public Vector3 boxPosition;
     
         // yolo stuff
-        [Tooltip("Drag a YOLO model .onnx file here")]
-        [SerializeField] private ModelAsset modelAsset;
-
-        [Tooltip("Drag the classes.txt here")]
-        [SerializeField] private TextAsset classesAsset;
-
-        [Tooltip("Create a Raw Image in the scene and link it here")]
-        [SerializeField] private RawImage displayImage;
-
-        [Tooltip("Drag a border box texture here")]
-        [SerializeField] private Texture2D borderTexture;
-
-        [Tooltip("Select an appropriate font for the labels")]
-        [SerializeField] private Font font;
-
-        [Header("Input")]
-        [SerializeField] private bool useWebcam = true;
-        [Tooltip("Use empty to pick default camera")]
-        [SerializeField] private string webcamDeviceName = "";
-        [Tooltip("Video file in Assets/StreamingAssets if not using webcam")]
-        [SerializeField] private string videoFilename = "giraffes.mp4";
-    
-        [Header("Camera selection")]
-        [SerializeField] private bool preferFrontCamera = true;
-
-        [Header("Image options")]
-        [SerializeField] private bool mirrorHorizontally = true; // set true for selfie view
+        private ModelAsset modelAsset;
+        private TextAsset classesAsset;
+        private RawImage displayImage;
+        private Texture2D borderTexture;
+        private Font font;
+        
+        private bool useWebcam;
+        private string webcamDeviceName;
+        private string videoFilename;
+        
+        private bool preferFrontCamera;
+        
+        private bool mirrorHorizontally; // set true for selfie view
 
         private const BackendType Backend = BackendType.GPUCompute;
 
@@ -61,7 +45,7 @@ namespace VisionModelsV2
         private const int ImageHeight = 640;
 
         // Inputs
-        private VideoPlayer _video;
+        private Texture _video;
         private WebCamTexture _cam;
 
         private List<GameObject> _boxPool = new();
@@ -82,18 +66,27 @@ namespace VisionModelsV2
         private void OnEnable()
         {
             AppEvents.WebcamReady += OnWebcamReady;
+            AppEvents.VideoReady += OnVideoReady;
             AppEvents.ConfigurePersonDetector += OnConfigurePersonDetector;
         }
         
         private void OnDisable()
         {
             AppEvents.WebcamReady -= OnWebcamReady;
+            AppEvents.VideoReady -= OnVideoReady;
             AppEvents.ConfigurePersonDetector -= OnConfigurePersonDetector;
+        }
+        
+        private void OnVideoReady(Texture video)
+        {
+            _video = video;
+            useWebcam = false;
         }
         
         private void OnWebcamReady(WebCamTexture cam)
         {
             _cam = cam;
+            useWebcam = true;
         }
         
         private void OnConfigurePersonDetector(ModelAsset model, TextAsset classes, RawImage display, Font fnt, Texture2D borderTex)
@@ -103,20 +96,16 @@ namespace VisionModelsV2
             displayImage = display;
             font = fnt;
             borderTexture = borderTex;
+            StartModel();
         }
 
-        private void Start()
+        private void StartModel()
         {
-            Application.targetFrameRate = 60;
-            //Screen.orientation = ScreenOrientation.Portrait; // this is evil
-
             _labels = classesAsset.text.Split('\n');
             LoadModel();
 
             _targetRT = new RenderTexture(ImageWidth, ImageHeight, 0);
             _displayLocation = displayImage.transform;
-
-            SetupInput();
 
             _borderSprite = Sprite.Create(
                 borderTexture,
@@ -155,79 +144,16 @@ namespace VisionModelsV2
             _worker = new Worker(graph.Compile(coords, labelIDs), Backend);
         }
 
-        private void SetupInput() //TODO: the non webcam part could/should be removed
-        {
-            if (useWebcam)
-            {
-                _cam.Play();
-            }
-            else
-            {
-                _video = gameObject.AddComponent<VideoPlayer>();
-                _video.renderMode = VideoRenderMode.APIOnly;
-                _video.source = VideoSource.Url;
-                _video.url = Path.Join(Application.streamingAssetsPath, videoFilename);
-                _video.isLooping = true;
-                _video.Play();
-            }
-        }
-
         private void Update()
         {
             ExecuteML();
-
-            if (Input.GetKeyDown(KeyCode.Escape))
-                Application.Quit();
-        
-            //Debug.Log(boxPosition);
         }
 
         private void ExecuteML() // Mighty Messy Method (should be split up)
         {
             ClearAnnotations();
 
-            Texture sourceTex = null;
-            int srcW = 0, srcH = 0;
-
-            if (useWebcam && _cam != null && _cam.width > 16 && _cam.height > 16)
-            {
-                sourceTex = _cam;
-                srcW = _cam.width; srcH = _cam.height;
-            }
-            else if (!useWebcam && _video && _video.texture)
-            {
-                sourceTex = _video.texture;
-                srcW = (int)_video.width;
-                srcH = (int)_video.height;
-            }
-            else
-            {
-                return;
-            }
-
-        
-            // Correct orientation and mirroring for webcam/video before inference
-            int rot = 0;
-            bool vflip = false;
-            if (useWebcam && _cam != null)
-            {
-                rot = _cam.videoRotationAngle;                 // 0, 90, 180, 270 from platform
-                vflip = _cam.videoVerticallyMirrored;          // front cameras often true
-            }
-
-            // Rotate the UI container so the feed and overlays stay aligned
-            var eul = displayImage.rectTransform.localEulerAngles;
-            displayImage.rectTransform.localEulerAngles = new Vector3(0f, 0f, -rot);
-
-            // Letterbox to 640x640 while preserving aspect, then apply requested mirror and platform vertical flip
-            float aspect = srcW * 1f / Mathf.Max(1, srcH);
-            float sx = (mirrorHorizontally ? -1f : 1f) / aspect; // horizontal mirror for selfie view
-            float sy = vflip ? -1f : 1f;                         // platform vertical flip
-            Vector2 scale = new Vector2(sx, sy);
-            Vector2 offset = new Vector2(mirrorHorizontally ? 1f : 0f, vflip ? 1f : 0f);
-
-            Graphics.Blit(sourceTex, _targetRT, scale, offset);
-            displayImage.texture = _targetRT;
+            if (HandleInput()) return;
 
             using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, ImageHeight, ImageWidth));
             TextureConverter.ToTensor(_targetRT, inputTensor, default);
@@ -291,6 +217,52 @@ namespace VisionModelsV2
                 }
                 _lastHasPerson = hasPerson;
             }
+        }
+
+        private bool HandleInput()
+        {
+            Texture sourceTex = null;
+            int srcW = 0, srcH = 0;
+
+            if (useWebcam && _cam != null && _cam.width > 16 && _cam.height > 16)
+            {
+                sourceTex = _cam;
+                srcW = _cam.width; srcH = _cam.height;
+            }
+            else if (!useWebcam && _video && _video)
+            {
+                sourceTex = _video;
+                srcW = (int)_video.width;
+                srcH = (int)_video.height;
+            }
+            else
+            {
+                return true;
+            }
+            
+            // Correct orientation and mirroring for webcam/video before inference
+            int rot = 0;
+            bool vflip = false;
+            if (useWebcam && _cam != null)
+            {
+                rot = _cam.videoRotationAngle;                 // 0, 90, 180, 270 from platform
+                vflip = _cam.videoVerticallyMirrored;          // front cameras often true
+            }
+
+            // Rotate the UI container so the feed and overlays stay aligned
+            var eul = displayImage.rectTransform.localEulerAngles;
+            displayImage.rectTransform.localEulerAngles = new Vector3(0f, 0f, -rot);
+
+            // Letterbox to 640x640 while preserving aspect, then apply requested mirror and platform vertical flip
+            float aspect = srcW * 1f / Mathf.Max(1, srcH);
+            float sx = (mirrorHorizontally ? -1f : 1f) / aspect; // horizontal mirror for selfie view
+            float sy = vflip ? -1f : 1f;                         // platform vertical flip
+            Vector2 scale = new Vector2(sx, sy);
+            Vector2 offset = new Vector2(mirrorHorizontally ? 1f : 0f, vflip ? 1f : 0f);
+
+            Graphics.Blit(sourceTex, _targetRT, scale, offset);
+            displayImage.texture = _targetRT;
+            return false;
         }
 
         private void DrawBox(BoundingBox box, int id, float fontSize)
