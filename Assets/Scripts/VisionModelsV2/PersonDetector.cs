@@ -48,6 +48,8 @@ namespace VisionModelsV2
         private Texture _video;
         private WebCamTexture _cam;
 
+        private bool _isModelReady;
+
         private List<GameObject> _boxPool = new();
     
         private readonly BoundingBox _personBox = new BoundingBox(); // persistent box for person
@@ -114,6 +116,7 @@ namespace VisionModelsV2
             );
         
             Debug.Log($"{this} is ready");
+            _isModelReady = true;
         }
 
         private void LoadModel() // here be dragons and math
@@ -146,6 +149,7 @@ namespace VisionModelsV2
 
         private void Update()
         {
+            if (!_isModelReady) return;
             ExecuteML();
         }
 

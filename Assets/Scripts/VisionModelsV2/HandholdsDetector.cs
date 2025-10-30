@@ -25,80 +25,57 @@ namespace VisionModelsV2
             All
         }
         
-        [Tooltip("Drag a YOLO model .onnx file here")]
-        public ModelAsset modelAsset;
-
-        [Tooltip("Drag the classes.txt here")]
-        public TextAsset classesAsset;
-
-        [Tooltip("Create a Raw Image in the scene and link it here")]
-        public RawImage displayImage;
-
-        [Tooltip("Drag a border box texture here")]
-        public Texture2D borderTexture;
-
-        [Tooltip("Select an appropriate font for the labels")]
-        public Font font;
-
-        [Tooltip("Change this to the name of the video you put in the Assets/StreamingAssets folder")]
-        public string videoFilename = "giraffes.mp4";
+        private ModelAsset _modelAsset;
+        private TextAsset _classesAsset;
+        private RawImage _displayImage;
+        private Texture2D _borderTexture;
+        private Font _font;
+        private string _videoFilename;
 
         private const BackendType backend = BackendType.GPUCompute;
 
-        private Transform displayLocation;
-        private Worker worker;
-        private string[] labels;
-        private RenderTexture targetRT;
-        private Sprite borderSprite;
+        private Transform _displayLocation;
+        private Worker _worker;
+        private string[] _labels;
+        private RenderTexture _targetRT;
+        private Sprite _borderSprite;
 
         //Image size for the model
         private const int imageWidth = 640;
         private const int imageHeight = 640;
 
-        private VideoPlayer video;
+        private Texture _video;
+        private WebCamTexture _webcamTexture;
+        
+        private bool _isModelReady;
 
-        private List<GameObject> boxPool = new();
-
-        [Tooltip("Intersection over union threshold used for non-maximum suppression")]
-        [SerializeField, Range(0, 1)]
-        private float iouThreshold = 0.5f;
-
-        [Tooltip("Confidence score threshold used for non-maximum suppression")]
-        [SerializeField, Range(0, 1)]
-        private float scoreThreshold = 0.5f;
+        private List<GameObject> _boxPool = new();
+        private float _iouThreshold = 0.5f;
+        private float _scoreThreshold = 0.5f;
 
         private Tensor<float> centersToCorners;
-        //bounding box data
-        public struct BoundingBox
-        {
-            public float centerX;
-            public float centerY;
-            public float width;
-            public float height;
-            public string label;
-        }
 
         private void Start()
         {
             //Parse neural net labels
-            labels = classesAsset.text.Split('\n');
+            _labels = _classesAsset.text.Split('\n');
 
             LoadModel();
 
-            targetRT = new RenderTexture(imageWidth, imageHeight, 0);
+            _targetRT = new RenderTexture(imageWidth, imageHeight, 0);
 
             //Create image to display video
-            displayLocation = displayImage.transform;
+            _displayLocation = _displayImage.transform;
 
             SetupInput();
 
-            borderSprite = Sprite.Create(borderTexture, new Rect(0, 0, borderTexture.width, borderTexture.height), new Vector2(borderTexture.width / 2, borderTexture.height / 2));
+            _borderSprite = Sprite.Create(_borderTexture, new Rect(0, 0, _borderTexture.width, _borderTexture.height), new Vector2(_borderTexture.width / 2, _borderTexture.height / 2));
         }
 
         private void LoadModel()
         {
             //Load model
-            var model1 = ModelLoader.Load(modelAsset);
+            var model1 = ModelLoader.Load(_modelAsset);
 
             centersToCorners = new Tensor<float>(new TensorShape(4, 4),
                 new float[]
@@ -120,26 +97,17 @@ namespace VisionModelsV2
             var scores = Functional.ReduceMax(allScores, 0);                                //shape=(8400)
             var classIDs = Functional.ArgMax(allScores, 0);                                 //shape=(8400)
             var boxCorners = Functional.MatMul(boxCoords, Functional.Constant(centersToCorners));   //shape=(8400,4)
-            var indices = Functional.NMS(boxCorners, scores, iouThreshold, scoreThreshold); //shape=(N)
+            var indices = Functional.NMS(boxCorners, scores, _iouThreshold, _scoreThreshold); //shape=(N)
             var coords = Functional.IndexSelect(boxCoords, 0, indices);                     //shape=(N,4)
             var labelIDs = Functional.IndexSelect(classIDs, 0, indices);                    //shape=(N)
 
             //Create worker to run model
-            worker = new Worker(graph.Compile(coords, labelIDs), backend);
-        }
-
-        private void SetupInput()
-        {
-            video = gameObject.AddComponent<VideoPlayer>();
-            video.renderMode = VideoRenderMode.APIOnly;
-            video.source = VideoSource.Url;
-            video.url = Path.Join(Application.streamingAssetsPath, videoFilename);
-            video.isLooping = true;
-            video.Play();
+            _worker = new Worker(graph.Compile(coords, labelIDs), backend);
         }
 
         private void Update()
         {
+            if (!_isModelReady) return;
             ExecuteML();
         }
 
@@ -147,29 +115,29 @@ namespace VisionModelsV2
         {
             ClearAnnotations();
 
-            if (video && video.texture)
+            if (_video && _video.texture)
             {
-                float aspect = video.width * 1f / video.height;
-                Graphics.Blit(video.texture, targetRT, new Vector2(1f / aspect, 1), new Vector2(0, 0));
-                displayImage.texture = targetRT;
+                float aspect = _video.width * 1f / _video.height;
+                Graphics.Blit(_video.texture, _targetRT, new Vector2(1f / aspect, 1), new Vector2(0, 0));
+                _displayImage.texture = _targetRT;
             }
             else return;
 
             using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, imageHeight, imageWidth));
-            TextureConverter.ToTensor(targetRT, inputTensor, default);
-            worker.Schedule(inputTensor);
+            TextureConverter.ToTensor(_targetRT, inputTensor, default);
+            _worker.Schedule(inputTensor);
 
-            using var output = (worker.PeekOutput("output_0") as Tensor<float>).ReadbackAndClone();
-            using var labelIDs = (worker.PeekOutput("output_1") as Tensor<int>).ReadbackAndClone();
+            using var output = (_worker.PeekOutput("output_0") as Tensor<float>).ReadbackAndClone();
+            using var labelIDs = (_worker.PeekOutput("output_1") as Tensor<int>).ReadbackAndClone();
 
-            float displayWidth = displayImage.rectTransform.rect.width;
-            float displayHeight = displayImage.rectTransform.rect.height;
+            float displayWidth = _displayImage.rectTransform.rect.width;
+            float displayHeight = _displayImage.rectTransform.rect.height;
 
             float scaleX = displayWidth / imageWidth;
             float scaleY = displayHeight / imageHeight;
 
             int boxesFound = output.shape[0];
-            Debug.Log($"Boxes found: {boxesFound}, Labels length: {labels.Length}");
+            Debug.Log($"Boxes found: {boxesFound}, Labels length: {_labels.Length}");
 
             for (int i = 0; i < Mathf.Min(boxesFound, 5); i++)
             {
@@ -186,7 +154,7 @@ namespace VisionModelsV2
                     centerY = output[n, 1] * scaleY - displayHeight / 2,
                     width = output[n, 2] * scaleX,
                     height = output[n, 3] * scaleY,
-                    label = labels[labelIDs[n]],
+                    label = _labels[labelIDs[n]],
                 };
                 DrawBox(box, n, displayHeight * 0.05f);
             }
@@ -196,9 +164,9 @@ namespace VisionModelsV2
         {
             //Create the bounding box graphic or get from pool
             GameObject panel;
-            if (id < boxPool.Count)
+            if (id < _boxPool.Count)
             {
-                panel = boxPool[id];
+                panel = _boxPool[id];
                 panel.SetActive(true);
             }
             else
@@ -226,9 +194,9 @@ namespace VisionModelsV2
             panel.AddComponent<CanvasRenderer>();
             Image img = panel.AddComponent<Image>();
             img.color = color;
-            img.sprite = borderSprite;
+            img.sprite = _borderSprite;
             img.type = Image.Type.Sliced;
-            panel.transform.SetParent(displayLocation, false);
+            panel.transform.SetParent(_displayLocation, false);
 
             //Create the label
 
@@ -236,7 +204,7 @@ namespace VisionModelsV2
             text.AddComponent<CanvasRenderer>();
             text.transform.SetParent(panel.transform, false);
             Text txt = text.AddComponent<Text>();
-            txt.font = font;
+            txt.font = _font;
             txt.color = color;
             txt.fontSize = 40;
             txt.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -249,13 +217,13 @@ namespace VisionModelsV2
             rt2.anchorMin = new Vector2(0, 0);
             rt2.anchorMax = new Vector2(1, 1);
 
-            boxPool.Add(panel);
+            _boxPool.Add(panel);
             return panel;
         }
 
         private void ClearAnnotations()
         {
-            foreach (var box in boxPool)
+            foreach (var box in _boxPool)
             {
                 box.SetActive(false);
             }
@@ -264,7 +232,7 @@ namespace VisionModelsV2
         private void OnDestroy()
         {
             centersToCorners?.Dispose();
-            worker?.Dispose();
+            _worker?.Dispose();
         }
     }
 }
