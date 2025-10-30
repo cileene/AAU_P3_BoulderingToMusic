@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Shared;
+using UnityEngine.Video;
 using VisionModels.HandholdDetection;
 using VisionModels.PersonDetection;
 
@@ -25,6 +26,7 @@ public static class AppEvents
     public static event Action<string> RequestUseVideo;
     public static event Action<string> RequestUseStill;
     public static event Action<WebCamTexture> WebcamReady;
+    public static event Action<Texture> VideoReady;
     public static event Action<HandholdsDetector.ProblemColor> RequestProblemColor;
     public static event Action SegRunning;
     
@@ -48,10 +50,10 @@ public static class AppEvents
         Debug.Log($"Event: ConfigureWebcam to use {deviceName} at {resolution}");
     }
     
-    public static void RaiseRequestUseVideo(string path)
+    public static void RaiseRequestUseVideo(string fileName)
     {
-        RequestUseVideo?.Invoke(path);
-        Debug.Log($"Event: RequestUseVideo from {path}");
+        RequestUseVideo?.Invoke(fileName);
+        Debug.Log($"Event: RequestUseVideo from {fileName}");
     }
     
     public static void RaiseRequestUseStill(string path)
@@ -64,6 +66,12 @@ public static class AppEvents
     {
         WebcamReady?.Invoke(cam);
         Debug.Log($"Event: WebcamReady using {cam.deviceName} at {cam.width}x{cam.height}");
+    }
+    
+    public static void RaiseVideoReady(VideoPlayer video)
+    {
+        VideoReady?.Invoke(video.texture);
+        Debug.Log($"Event: VideoReady using {video.url} at {video.width}x{video.height}");
     }
     
     public static void RaiseRequestProblemColor(HandholdsDetector.ProblemColor color)

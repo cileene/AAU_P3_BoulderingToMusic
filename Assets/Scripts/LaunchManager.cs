@@ -19,9 +19,10 @@ public class LaunchManager : MonoBehaviour
     [SerializeField] private InputSource inputSource;
     [SerializeField] private UseWebcam.WebcamResolution webcamResolution;
     [SerializeField] private string webcamDeviceName;
-    [SerializeField] private string videoFilePath, stillFilePath;
-    
+    [SerializeField] private string videoName, stillFilePath;
+
     [Header("Detection Settings")]
+    [SerializeField] private int targetFrameRate = 40;
     [SerializeField] private bool detectPerson;
     [SerializeField] private bool detectPose;
     [SerializeField] private bool detectHandholds;
@@ -29,6 +30,11 @@ public class LaunchManager : MonoBehaviour
     
     [Header("UI Settings")]
     [SerializeField] private RawImage imageDisplay;
+    
+    private void Awake()
+    {
+        Application.targetFrameRate = targetFrameRate;
+    }
     
     private void Start()
     {
@@ -46,7 +52,7 @@ public class LaunchManager : MonoBehaviour
                 break;
             case InputSource.Video:
                 gameObject.AddComponent<UseVideo>();
-                AppEvents.RaiseRequestUseVideo(videoFilePath);
+                AppEvents.RaiseRequestUseVideo(videoName);
                 break;
             case InputSource.Still:
                 gameObject.AddComponent<UseStill>();

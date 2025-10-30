@@ -17,10 +17,25 @@ namespace Shared
         
         private void OnEnable() => AppEvents.RequestUseWebcam += OnConfigureWebcam;
         
-        private void OnDisable() => AppEvents.RequestUseWebcam -= OnConfigureWebcam;
+        private void OnDisable()
+        {
+            AppEvents.RequestUseWebcam -= OnConfigureWebcam;
+            
+            if (_cam != null)
+            {
+                _cam.Stop();
+                Destroy(_cam);
+            }
+        }
 
         private void OnConfigureWebcam(WebcamResolution resolution, string deviceName)
         {
+            if (_cam != null)
+            {
+                _cam.Stop();
+                Destroy(_cam);
+            }
+
             (int width, int height) = resolution switch
             {
                 WebcamResolution.HD1440p => (1920, 1440),
@@ -29,7 +44,7 @@ namespace Shared
                 WebcamResolution.VGA => (640, 480),
                 WebcamResolution.Macbook => (1552, 1552)
             };
-            
+
             if (string.IsNullOrEmpty(deviceName))
             {
                 _cam = new WebCamTexture(requestedWidth: width, requestedHeight: height);
@@ -38,7 +53,7 @@ namespace Shared
             {
                 _cam = new WebCamTexture(deviceName, width, height);
             }
-            
+
             _cam.Play();
             AppEvents.RaiseWebcamReady(_cam);
         }
