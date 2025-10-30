@@ -1,9 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Shared;
-using VisionModels.HandholdDetection;
-using VisionModels.PersonDetection;
-using VisionModels.PoseDetection;
+using Unity.InferenceEngine;
+using VisionModelsV2;
 
 //TODO: Handle Video
 //TODO: Handle Still
@@ -15,21 +14,39 @@ public class LaunchManager : MonoBehaviour
 {
     private enum InputSource { Webcam, Video, Still }
 
-    [Header("Input Settings")]
+    [Header("Input")]
     [SerializeField] private InputSource inputSource;
-    [SerializeField] private UseWebcam.WebcamResolution webcamResolution;
+    [SerializeField] private UseWebcam.WebcamResolution webcamResolution = UseWebcam.WebcamResolution.Macbook;
     [SerializeField] private string webcamDeviceName;
     [SerializeField] private string videoName, stillFilePath;
 
-    [Header("Detection Settings")]
+    [Header("Settings")]
     [SerializeField] private int targetFrameRate = 40;
-    [SerializeField] private bool detectPerson;
-    [SerializeField] private bool detectPose;
-    [SerializeField] private bool detectHandholds;
-    [SerializeField] private HandholdsDetector.ProblemColor problemColor;
-    
-    [Header("UI Settings")]
+    [Tooltip("Drag a border box texture here")]
+    [SerializeField] private Texture2D borderTexture;
+    [Tooltip("Select an appropriate font for the labels")]
+    [SerializeField] private Font font;
     [SerializeField] private RawImage imageDisplay;
+    
+    [Header("Detect Person")]
+    [SerializeField] private bool detectPerson;
+    [Tooltip("Drag a YOLO model .onnx file here")]
+    [SerializeField] private ModelAsset detectPersonModel;
+    [Tooltip("Drag the classes.txt here")]
+    [SerializeField] private TextAsset detectPersonClasses;
+    
+    [Header("Detect Handholds")]
+    [SerializeField] private bool detectHandholds;
+    [SerializeField] private HandholdsDetector.ProblemColor problemColor = HandholdsDetector.ProblemColor.All;
+    [Tooltip("Drag a YOLO model .onnx file here")]
+    public ModelAsset detectHandholdsModel;
+    [Tooltip("Drag the classes.txt here")]
+    public TextAsset classesAsset;
+    
+    [Header("Detect Pose")]
+    [SerializeField] private bool detectPose;
+    [Tooltip("Drag your YOLO11n-pose .onnx model here")]
+    public ModelAsset modelAsset;
     
     private void Awake()
     {
@@ -67,19 +84,38 @@ public class LaunchManager : MonoBehaviour
         {
             new GameObject("PersonDetector", 
                 typeof(PersonDetector)).transform.SetParent(transform);
+            
+            AppEvents.RaiseConfigurePersonDetector(
+                detectPersonModel,
+                detectPersonClasses,
+                imageDisplay,
+                font,
+                borderTexture);
         }
 
         if (detectPose)
         {
-            Instantiate(Resources.Load<GameObject>("Prefabs/PoseDetector"));
+            new GameObject("PoseDetector", 
+                typeof(PoseDetector)).transform.SetParent(transform);
+            
+            AppEvents.RaiseConfigurePoseDetector(
+                modelAsset,
+                imageDisplay,
+                borderTexture);
         }
 
         if (detectHandholds)
         {
-            new GameObject("HandHoldDetector", 
+            new GameObject("HandholdsDetector", 
                 typeof(HandholdsDetector)).transform.SetParent(transform);
             
-            AppEvents.RaiseRequestProblemColor(problemColor);
+            AppEvents.RaiseConfigureHandholdsDetector(
+                detectHandholdsModel,
+                classesAsset,
+                problemColor,
+                imageDisplay,
+                font,
+                borderTexture);
         }
     }
 }

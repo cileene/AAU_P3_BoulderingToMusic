@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
 using Shared;
+using Unity.InferenceEngine;
+using UnityEngine.UI;
 using UnityEngine.Video;
-using VisionModels.HandholdDetection;
-using VisionModels.PersonDetection;
+using VisionModelsV2;
 
 /// <summary>
 /// A system I've used in many projects to manage events.
@@ -27,8 +28,9 @@ public static class AppEvents
     public static event Action<string> RequestUseStill;
     public static event Action<WebCamTexture> WebcamReady;
     public static event Action<Texture> VideoReady;
-    public static event Action<HandholdsDetector.ProblemColor> RequestProblemColor;
-    public static event Action SegRunning;
+    public static event Action<ModelAsset, TextAsset, RawImage, Font, Texture2D> ConfigurePersonDetector;
+    public static event Action<ModelAsset, RawImage, Texture2D> ConfigurePoseDetector;
+    public static event Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D> ConfigureHandholdsDetector;
     
     
     // EVENT METHODS
@@ -74,15 +76,35 @@ public static class AppEvents
         Debug.Log($"Event: VideoReady using {video.url} at {video.width}x{video.height}");
     }
     
-    public static void RaiseRequestProblemColor(HandholdsDetector.ProblemColor color)
+    public static void RaiseConfigurePersonDetector(
+        ModelAsset model, 
+        TextAsset classes,
+        RawImage rawImage,
+        Font font,
+        Texture2D borderTexture)
     {
-        RequestProblemColor?.Invoke(color);
-        Debug.Log($"Event: RequestRouteColor to {color}");
+        ConfigurePersonDetector?.Invoke(model, classes, rawImage, font, borderTexture);
+        Debug.Log($"Event: ConfigurePersonDetector with model {model.name}");
     }
-    
-    public static void RaiseSegRunning()
+
+    public static void RaiseConfigurePoseDetector(
+        ModelAsset model,
+        RawImage rawImage,
+        Texture2D borderTexture)
     {
-        SegRunning?.Invoke();
-        Debug.Log("Event: SegRunning");
+        ConfigurePoseDetector?.Invoke(model, rawImage, borderTexture);
+        Debug.Log($"Event: ConfigurePoseDetector with model {model.name}");
+    }
+
+    public static void RaiseConfigureHandholdsDetector(
+        ModelAsset model, 
+        TextAsset classes, 
+        HandholdsDetector.ProblemColor problemColor,
+        RawImage rawImage,
+        Font font,
+        Texture2D borderTexture)
+    {
+        ConfigureHandholdsDetector?.Invoke(model, classes, problemColor, rawImage, font, borderTexture);
+        Debug.Log($"Event: ConfigureHandholdsDetector with model {model.name}");
     }
 }
