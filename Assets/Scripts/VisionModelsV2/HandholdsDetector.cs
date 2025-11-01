@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +23,11 @@ namespace VisionModelsV2
             yellow,
             All
         }
+
+        private List<DetectedHandhold> _persistentHandholds = new();
+        private int _nextHandholdId = 0;
+        private int _maxFramesBeforeRemoval = 30; // Remove if not seen for ~0.5 seconds at 60fps
+        private bool _debugMode;
 
         private ModelAsset _modelAsset;
         private TextAsset _classesAsset;
@@ -90,7 +96,10 @@ namespace VisionModelsV2
             ProblemColor problemColor,
             RawImage rawImage,
             Font font,
-            Texture2D borderTex)
+            Texture2D borderTex,
+            Int32 keepHandholdsFrames,
+            Boolean debugMode
+            )
         {
             _modelAsset = model;
             _classesAsset = classes;
@@ -98,6 +107,8 @@ namespace VisionModelsV2
             _displayImage = rawImage;
             _borderTexture = borderTex;
             _font = font;
+            _maxFramesBeforeRemoval = keepHandholdsFrames;
+            _debugMode = debugMode;
 
             StartModel();
         }
@@ -169,8 +180,6 @@ namespace VisionModelsV2
 
         private void ExecuteML()
         {
-            ClearAnnotations();
-
             if (HandleInput()) return;
 
             using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, imageHeight, imageWidth));
@@ -182,26 +191,21 @@ namespace VisionModelsV2
 
             float displayWidth = _displayImage.rectTransform.rect.width;
             float displayHeight = _displayImage.rectTransform.rect.height;
-
             float scaleX = displayWidth / imageWidth;
             float scaleY = displayHeight / imageHeight;
 
             int boxesFound = output.shape[0];
-            Debug.Log($"Boxes found: {boxesFound}, Labels length: {_labels.Length}");
 
-            for (int i = 0; i < Mathf.Min(boxesFound, 5); i++)
+            // Mark all existing handholds as not seen this frame
+            foreach (var handhold in _persistentHandholds)
             {
-                int id = labelIDs[i];
-                Debug.Log($"Label ID[{i}] = {id}");
+                handhold.FramesSinceLastSeen++;
             }
 
-            //Draw the bounding boxes
-            int drawnBoxes = 0;
+            // Update or add new detections
             for (int n = 0; n < Mathf.Min(boxesFound, 200); n++)
             {
                 string label = _labels[labelIDs[n]];
-    
-                // Skip if color doesn't match filter
                 if (!ShouldDisplayLabel(label, _selectedColor))
                     continue;
 
@@ -213,7 +217,61 @@ namespace VisionModelsV2
                     Height = output[n, 3] * scaleY,
                     Label = label,
                 };
-                DrawBox(box, drawnBoxes++, displayHeight * 0.05f);
+
+                UpdateOrAddHandhold(box, label);
+            }
+
+            // Remove handholds not seen for too long
+            _persistentHandholds.RemoveAll(h => h.FramesSinceLastSeen > _maxFramesBeforeRemoval);
+
+            // Draw persistent handholds
+            ClearAnnotations();
+            for (int i = 0; i < _persistentHandholds.Count; i++)
+            {
+                DrawBox(_persistentHandholds[i].Box, i, displayHeight * 0.05f);
+            }
+        }
+
+        private void UpdateOrAddHandhold(BoundingBox box, string label)
+        {
+            // Find matching handhold based on proximity
+            DetectedHandhold match = null;
+            float minDistance = float.MaxValue;
+            float distanceThreshold = 50f; // pixels - adjust based on your needs
+
+            foreach (var handhold in _persistentHandholds)
+            {
+                float dx = handhold.Box.CenterX - box.CenterX;
+                float dy = handhold.Box.CenterY - box.CenterY;
+                float distance = Mathf.Sqrt(dx * dx + dy * dy);
+
+                if (distance < distanceThreshold && distance < minDistance)
+                {
+                    match = handhold;
+                    minDistance = distance;
+                }
+            }
+
+            if (match != null)
+            {
+                // Update existing handhold
+                match.Box = box;
+                match.Label = label;
+                match.FramesSinceLastSeen = 0;
+            }
+            else
+            {
+                // Add new handhold
+                var newHandhold = new DetectedHandhold
+                {
+                    Box = box,
+                    Label = label,
+                    FramesSinceLastSeen = 0,
+                    Id = _nextHandholdId++
+                };
+    
+                _persistentHandholds.Add(newHandhold);
+                AppEvents.RaiseNewHandholdDetected(newHandhold);
             }
         }
 
@@ -247,11 +305,26 @@ namespace VisionModelsV2
         {
             AnnotationManager.ClearAnnotations(_boxPool);
         }
-        
+
         private void OnDestroy()
         {
             centersToCorners?.Dispose();
             _worker?.Dispose();
+        }
+
+        private void OnGUI()
+        {
+            if (!_debugMode) return;
+            GUILayout.BeginArea(new Rect(10, 10, 300, 400));
+            GUILayout.Label($"Handholds: {_persistentHandholds.Count}");
+
+            foreach (var handhold in _persistentHandholds)
+            {
+                GUILayout.Label($"ID: {handhold.Id} | {handhold.Label} | " +
+                                $"Pos: ({handhold.Box.CenterX:F0}, {handhold.Box.CenterY:F0})");
+            }
+
+            GUILayout.EndArea();
         }
     }
 }

@@ -30,7 +30,8 @@ public static class AppEvents
     public static event Action<Texture> VideoReady;
     public static event Action<ModelAsset, TextAsset, RawImage, Font, Texture2D> ConfigurePersonDetector;
     public static event Action<ModelAsset, RawImage, Texture2D> ConfigurePoseDetector;
-    public static event Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D> ConfigureHandholdsDetector;
+    public static event Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32, Boolean> ConfigureHandholdsDetector;
+    public static event Action<DetectedHandhold> NewHandholdDetected;
     
     
     // EVENT METHODS
@@ -102,9 +103,17 @@ public static class AppEvents
         HandholdsDetector.ProblemColor problemColor,
         RawImage rawImage,
         Font font,
-        Texture2D borderTexture)
+        Texture2D borderTexture,
+        Int32 keepHandholdsFrames,
+        Boolean debugMode)
     {
-        ConfigureHandholdsDetector?.Invoke(model, classes, problemColor, rawImage, font, borderTexture);
+        ConfigureHandholdsDetector?.Invoke(model, classes, problemColor, rawImage, font, borderTexture, keepHandholdsFrames, debugMode);
         Debug.Log($"Event: ConfigureHandholdsDetector with model {model.name}");
+    }
+    
+    public static void RaiseNewHandholdDetected(DetectedHandhold handhold)
+    {
+        NewHandholdDetected?.Invoke(handhold);
+        Debug.Log($"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
     }
 }

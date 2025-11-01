@@ -32,6 +32,8 @@ public class LaunchManager : MonoBehaviour
     [Header("Detect Handholds")]
     [SerializeField] private bool detectHandholds;
     [SerializeField] private HandholdsDetector.ProblemColor problemColor = HandholdsDetector.ProblemColor.All;
+    [SerializeField] private bool showDebugOverlay;
+    [SerializeField] private int handholdPersistenceFrames = 30;
     [Tooltip("Drag a YOLO model .onnx file here")]
     public ModelAsset detectHandholdsModel;
     [Tooltip("Drag the classes.txt here")]
@@ -102,14 +104,16 @@ public class LaunchManager : MonoBehaviour
         {
             new GameObject("HandholdsDetector", 
                 typeof(HandholdsDetector)).transform.SetParent(transform);
-            
+
             AppEvents.RaiseConfigureHandholdsDetector(
                 detectHandholdsModel,
                 classesAsset,
                 problemColor,
                 imageDisplay,
                 font,
-                borderTexture);
+                borderTexture,
+                handholdPersistenceFrames,
+                showDebugOverlay);
         }
     }
 }
