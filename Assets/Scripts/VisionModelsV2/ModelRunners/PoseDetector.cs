@@ -182,7 +182,7 @@ namespace VisionModelsV2.ModelRunners
                 }
 
                 DrawPose(keypoints);
-                //Debug.Log(keypoints[1]); // Log a single keypoint
+                Debug.Log($"Keypoint at {keypoints[10]}"); // Log a single keypoint
             }
         }
 
