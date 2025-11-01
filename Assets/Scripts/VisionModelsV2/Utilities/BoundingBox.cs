@@ -1,4 +1,4 @@
-namespace VisionModelsV2
+namespace VisionModelsV2.Utilities
 {
     public class BoundingBox // changed to class from struct to allow passing by reference
     {

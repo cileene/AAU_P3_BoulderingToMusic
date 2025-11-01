@@ -327,7 +327,7 @@ MonoBehaviour:
   detectPersonModel: {fileID: 5022602860645237092, guid: 6dd5bbefc9b494ac08820963a1ca5630, type: 3}
   detectPersonClasses: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
   detectHandholds: 1
-  problemColor: 11
+  problemColor: 2
   showDebugOverlay: 1
   handholdPersistenceFrames: 30
   detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}

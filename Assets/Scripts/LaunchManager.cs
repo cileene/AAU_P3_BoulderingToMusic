@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Shared;
 using Unity.InferenceEngine;
 using VisionModelsV2;
+using VisionModelsV2.Input;
+using VisionModelsV2.ModelRunners;
 
 public class LaunchManager : MonoBehaviour
 {

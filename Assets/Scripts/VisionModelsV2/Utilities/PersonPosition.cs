@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace VisionModelsV2
+namespace VisionModelsV2.Utilities
 {
     public class PersonPosition : MonoBehaviour
     {

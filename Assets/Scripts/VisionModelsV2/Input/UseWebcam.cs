@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Shared
+namespace VisionModelsV2.Input
 {
     public class UseWebcam : MonoBehaviour
     {

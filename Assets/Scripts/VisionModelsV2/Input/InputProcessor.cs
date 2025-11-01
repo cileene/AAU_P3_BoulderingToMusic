@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace VisionModelsV2
+namespace VisionModelsV2.Input
 {
     public static class InputProcessor
     {

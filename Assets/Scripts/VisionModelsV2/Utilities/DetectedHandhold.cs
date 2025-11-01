@@ -1,4 +1,4 @@
-namespace VisionModelsV2
+namespace VisionModelsV2.Utilities
 {
     public class DetectedHandhold
     {

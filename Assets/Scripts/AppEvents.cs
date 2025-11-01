@@ -1,10 +1,11 @@
 using System;
 using UnityEngine;
-using Shared;
 using Unity.InferenceEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using VisionModelsV2;
+using VisionModelsV2.Input;
+using VisionModelsV2.ModelRunners;
+using VisionModelsV2.Utilities;
 
 /// <summary>
 /// A system I've used in many projects to manage events.

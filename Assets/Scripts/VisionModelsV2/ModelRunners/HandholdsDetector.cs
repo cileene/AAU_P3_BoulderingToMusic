@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
+using VisionModelsV2.Input;
+using VisionModelsV2.Utilities;
 
-namespace VisionModelsV2
+namespace VisionModelsV2.ModelRunners
 {
     public class HandholdsDetector : MonoBehaviour
     {
