@@ -44,6 +44,7 @@ namespace VisionModelsV2.ModelRunners
         private Transform _displayLocation;
         private Sprite _borderSprite;
         private Texture _video;
+        private Texture2D _still;
         private WebCamTexture _cam;
         private bool _useWebcam = true;
 
@@ -59,6 +60,7 @@ namespace VisionModelsV2.ModelRunners
         {
             AppEvents.WebcamReady += OnWebcamReady;
             AppEvents.VideoReady += OnVideoReady;
+            AppEvents.StillReady += OnStillReady;
             AppEvents.ConfigurePoseDetector += OnConfigurePoseDetector;
         }
         
@@ -66,6 +68,7 @@ namespace VisionModelsV2.ModelRunners
         {
             AppEvents.WebcamReady -= OnWebcamReady;
             AppEvents.VideoReady -= OnVideoReady;
+            AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigurePoseDetector -= OnConfigurePoseDetector;
         }
         
@@ -78,6 +81,12 @@ namespace VisionModelsV2.ModelRunners
         private void OnVideoReady(Texture videoTexture)
         {
             _video = videoTexture;
+            _useWebcam = false;
+        }
+        
+        private void OnStillReady(Texture2D still)
+        {
+            _still = still;
             _useWebcam = false;
         }
         
@@ -177,8 +186,12 @@ namespace VisionModelsV2.ModelRunners
         
         private bool HandleInput()
         {
-            return InputProcessor.ProcessInput(_useWebcam, _cam, _video, _targetRT, _displayImage, _mirrorHorizontally);
+            InputMode mode = _useWebcam ? InputMode.Webcam : 
+                (_video ? InputMode.Video : InputMode.Still);
+    
+            return InputProcessor.ProcessInput(mode, _cam, _video, _still, _targetRT, _displayImage, _mirrorHorizontally);
         }
+
 
 
         private void DrawPose(List<Vector2> keypoints)

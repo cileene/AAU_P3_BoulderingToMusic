@@ -41,6 +41,7 @@ namespace VisionModelsV2.ModelRunners
 
         // Inputs
         private Texture _video;
+        private Texture2D _still;
         private WebCamTexture _cam;
 
         private bool _isModelReady;
@@ -64,6 +65,7 @@ namespace VisionModelsV2.ModelRunners
         {
             AppEvents.WebcamReady += OnWebcamReady;
             AppEvents.VideoReady += OnVideoReady;
+            AppEvents.StillReady += OnStillReady;
             AppEvents.ConfigurePersonDetector += OnConfigurePersonDetector;
         }
         
@@ -71,6 +73,7 @@ namespace VisionModelsV2.ModelRunners
         {
             AppEvents.WebcamReady -= OnWebcamReady;
             AppEvents.VideoReady -= OnVideoReady;
+            AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigurePersonDetector -= OnConfigurePersonDetector;
         }
         
@@ -84,6 +87,12 @@ namespace VisionModelsV2.ModelRunners
         {
             _cam = cam;
             _useWebcam = true;
+        }
+        
+        private void OnStillReady(Texture2D still)
+        {
+            _still = still;
+            _useWebcam = false;
         }
         
         private void OnConfigurePersonDetector(ModelAsset model, TextAsset classes, RawImage display, Font fnt, Texture2D borderTex)
@@ -205,7 +214,10 @@ namespace VisionModelsV2.ModelRunners
 
         private bool HandleInput()
         {
-            return InputProcessor.ProcessInput(_useWebcam, _cam, _video, _targetRT, _displayImage, _mirrorHorizontally);
+            InputMode mode = _useWebcam ? InputMode.Webcam :
+                (_video ? InputMode.Video : InputMode.Still);
+
+            return InputProcessor.ProcessInput(mode, _cam, _video, _still, _targetRT, _displayImage, _mirrorHorizontally);
         }
 
         private void DrawBox(BoundingBox box, int id, float fontSize)

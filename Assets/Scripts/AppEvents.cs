@@ -29,6 +29,7 @@ public static class AppEvents
     public static event Action<string> RequestUseStill;
     public static event Action<WebCamTexture> WebcamReady;
     public static event Action<Texture> VideoReady;
+    public static event Action<Texture2D> StillReady;
     public static event Action<ModelAsset, TextAsset, RawImage, Font, Texture2D> ConfigurePersonDetector;
     public static event Action<ModelAsset, RawImage, Texture2D> ConfigurePoseDetector;
     public static event Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32, Boolean> ConfigureHandholdsDetector;
@@ -76,6 +77,12 @@ public static class AppEvents
     {
         VideoReady?.Invoke(video.texture);
         Debug.Log($"Event: VideoReady using {video.url} at {video.width}x{video.height}");
+    }
+    
+    public static void RaiseStillReady(Texture2D texture)
+    {
+        StillReady?.Invoke(texture);
+        Debug.Log($"Event: StillReady with texture size {texture.width}x{texture.height}");
     }
     
     public static void RaiseConfigurePersonDetector(
