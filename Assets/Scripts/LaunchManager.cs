@@ -4,6 +4,7 @@ using Unity.InferenceEngine;
 using VisionModelsV2;
 using VisionModelsV2.Input;
 using VisionModelsV2.ModelRunners;
+using VisionModelsV2.Utilities;
 
 public class LaunchManager : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class LaunchManager : MonoBehaviour
     [SerializeField] private string webcamDeviceName;
     [SerializeField] private string videoName, stillFilePath;
 
-    [Header("Settings")]
+    [Header("Settings")] [SerializeField] private bool showDebug;
     [SerializeField] private int targetFrameRate = 40;
     [Tooltip("Drag a border box texture here")]
     [SerializeField] private Texture2D borderTexture;
@@ -33,7 +34,6 @@ public class LaunchManager : MonoBehaviour
     [Header("Detect Handholds")]
     [SerializeField] private bool detectHandholds;
     [SerializeField] private HandholdsDetector.ProblemColor problemColor = HandholdsDetector.ProblemColor.All;
-    [SerializeField] private bool showDebugOverlay;
     [SerializeField] private int handholdPersistenceFrames = 30;
     [Tooltip("Drag a YOLO model .onnx file here")]
     public ModelAsset detectHandholdsModel;
@@ -52,6 +52,11 @@ public class LaunchManager : MonoBehaviour
     
     private void Start()
     {
+        if (showDebug)
+        {
+            gameObject.AddComponent<ModelDebugger>();
+        }
+        
         HandleDetectionSettings();
         HandleInput();
     }
@@ -113,8 +118,7 @@ public class LaunchManager : MonoBehaviour
                 imageDisplay,
                 font,
                 borderTexture,
-                handholdPersistenceFrames,
-                showDebugOverlay);
+                handholdPersistenceFrames);
         }
     }
 }

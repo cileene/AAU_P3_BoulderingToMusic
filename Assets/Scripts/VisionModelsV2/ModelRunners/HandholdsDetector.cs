@@ -108,8 +108,7 @@ namespace VisionModelsV2.ModelRunners
             RawImage rawImage,
             Font font,
             Texture2D borderTex,
-            Int32 keepHandholdsFrames,
-            Boolean debugMode
+            Int32 keepHandholdsFrames
             )
         {
             _modelAsset = model;
@@ -119,7 +118,6 @@ namespace VisionModelsV2.ModelRunners
             _borderTexture = borderTex;
             _font = font;
             _maxFramesBeforeRemoval = keepHandholdsFrames;
-            _debugMode = debugMode;
 
             StartModel();
         }
@@ -317,21 +315,6 @@ namespace VisionModelsV2.ModelRunners
         {
             centersToCorners?.Dispose();
             _worker?.Dispose();
-        }
-
-        private void OnGUI() // Only for debugging
-        {
-            if (!_debugMode) return;
-            GUILayout.BeginArea(new Rect(10, 10, 300, 400));
-            GUILayout.Label($"Handholds: {_persistentHandholds.Count}");
-
-            foreach (var handhold in _persistentHandholds)
-            {
-                GUILayout.Label($"ID: {handhold.Id} | {handhold.Label} | " +
-                                $"Pos: ({handhold.Box.CenterX:F0}, {handhold.Box.CenterY:F0})");
-            }
-
-            GUILayout.EndArea();
         }
     }
 }

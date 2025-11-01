@@ -56,6 +56,8 @@ namespace VisionModelsV2.ModelRunners
         private float _scoreThreshold = 0.5f;
 
         private bool _isModelReady;
+        
+        private PoseData _currentPose;
 
         private void OnEnable()
         {
@@ -114,6 +116,10 @@ namespace VisionModelsV2.ModelRunners
                 new Rect(0, 0, _borderTexture.width, _borderTexture.height),
                 new Vector2(0.5f, 0.5f));
 
+            _currentPose = new PoseData(); // Initialize once
+            
+            AppEvents.RaiseNewPoseDetected(_currentPose);
+
             _isModelReady = true;
         }
 
@@ -146,12 +152,13 @@ namespace VisionModelsV2.ModelRunners
 
             using var output = (_worker.PeekOutput() as Tensor<float>).ReadbackAndClone();
 
-            // YOLO11n-pose output shape: [1, 56, N]
             int numDetections = output.shape[2];
-            int numKeypoints = (output.shape[1] - 5) / 3; // (56 - 5) / 3 = 17 keypoints
+            int numKeypoints = (output.shape[1] - 5) / 3;
 
             float displayWidth = _displayImage.rectTransform.rect.width;
             float displayHeight = _displayImage.rectTransform.rect.height;
+
+            List<PoseData> allDetections = new();
 
             for (int n = 0; n < numDetections; n++)
             {
@@ -161,14 +168,12 @@ namespace VisionModelsV2.ModelRunners
                 List<Vector2> keypoints = new();
                 for (int k = 0; k < numKeypoints; k++)
                 {
-                    // YOLO11n-pose gives absolute coordinates in model space (0–640)
                     float x = output[0, 5 + k * 3, n] - imageWidth / 2f;
                     float y = output[0, 5 + k * 3 + 1, n] - imageHeight / 2f;
                     float c = output[0, 5 + k * 3 + 2, n];
 
                     if (c > 0.3f)
                     {
-                        // Scale once to match display size
                         Vector2 scaled = new Vector2(
                             x * (displayWidth / imageWidth),
                             -y * (displayHeight / imageHeight)
@@ -181,10 +186,12 @@ namespace VisionModelsV2.ModelRunners
                     }
                 }
 
-                DrawPose(keypoints);
-                Debug.Log($"Keypoint at {keypoints[10]}"); // Log a single keypoint
+                _currentPose.UpdateKeypoints(keypoints, conf);
+                DrawPose(_currentPose.Keypoints);
+                break; // Only process first detection
             }
         }
+
 
         private bool HandleInput()
         {

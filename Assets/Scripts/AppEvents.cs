@@ -18,7 +18,6 @@ using VisionModelsV2.Utilities;
 /// <para>private void OnStartHandler() { ... }</para>
 /// <para>It's best practice to subscribe in the OnEnable method and unsubscribe in the OnDisable method.</para>
 /// </summary>
-
 public static class AppEvents
 {
     // EVENTS
@@ -32,10 +31,15 @@ public static class AppEvents
     public static event Action<Texture2D> StillReady;
     public static event Action<ModelAsset, TextAsset, RawImage, Font, Texture2D> ConfigurePersonDetector;
     public static event Action<ModelAsset, RawImage, Texture2D> ConfigurePoseDetector;
-    public static event Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32, Boolean> ConfigureHandholdsDetector;
+
+    public static event
+        Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32>
+        ConfigureHandholdsDetector;
+
     public static event Action<DetectedHandhold> NewHandholdDetected;
-    
-    
+    public static event Action<PoseData> NewPoseDetected;
+
+
     // EVENT METHODS
     public static void RaisePersonDetected(BoundingBox box)
     {
@@ -48,45 +52,45 @@ public static class AppEvents
         PersonLost?.Invoke();
         Debug.Log("Event: PersonLost");
     }
-    
+
     public static void RaiseRequestUseWebcam(UseWebcam.WebcamResolution resolution, string deviceName)
     {
         RequestUseWebcam?.Invoke(resolution, deviceName);
         Debug.Log($"Event: ConfigureWebcam to use {deviceName} at {resolution}");
     }
-    
+
     public static void RaiseRequestUseVideo(string fileName)
     {
         RequestUseVideo?.Invoke(fileName);
         Debug.Log($"Event: RequestUseVideo from {fileName}");
     }
-    
+
     public static void RaiseRequestUseStill(string path)
     {
         RequestUseStill?.Invoke(path);
         Debug.Log($"Event: RequestUseStill from {path}");
     }
-    
+
     public static void RaiseWebcamReady(WebCamTexture cam)
     {
         WebcamReady?.Invoke(cam);
         Debug.Log($"Event: WebcamReady using {cam.deviceName} at {cam.width}x{cam.height}");
     }
-    
+
     public static void RaiseVideoReady(VideoPlayer video)
     {
         VideoReady?.Invoke(video.texture);
         Debug.Log($"Event: VideoReady using {video.url} at {video.width}x{video.height}");
     }
-    
+
     public static void RaiseStillReady(Texture2D texture)
     {
         StillReady?.Invoke(texture);
         Debug.Log($"Event: StillReady with texture size {texture.width}x{texture.height}");
     }
-    
+
     public static void RaiseConfigurePersonDetector(
-        ModelAsset model, 
+        ModelAsset model,
         TextAsset classes,
         RawImage rawImage,
         Font font,
@@ -106,22 +110,29 @@ public static class AppEvents
     }
 
     public static void RaiseConfigureHandholdsDetector(
-        ModelAsset model, 
-        TextAsset classes, 
+        ModelAsset model,
+        TextAsset classes,
         HandholdsDetector.ProblemColor problemColor,
         RawImage rawImage,
         Font font,
         Texture2D borderTexture,
-        Int32 keepHandholdsFrames,
-        Boolean debugMode)
+        Int32 keepHandholdsFrames)
     {
-        ConfigureHandholdsDetector?.Invoke(model, classes, problemColor, rawImage, font, borderTexture, keepHandholdsFrames, debugMode);
+        ConfigureHandholdsDetector?.Invoke(model, classes, problemColor, rawImage, font, borderTexture,
+            keepHandholdsFrames);
         Debug.Log($"Event: ConfigureHandholdsDetector with model {model.name}");
     }
-    
+
     public static void RaiseNewHandholdDetected(DetectedHandhold handhold)
     {
         NewHandholdDetected?.Invoke(handhold);
-        Debug.Log($"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
+        Debug.Log(
+            $"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
+    }
+    
+    public static void RaiseNewPoseDetected(PoseData pose)
+    {
+        NewPoseDetected?.Invoke(pose);
+        Debug.Log("Event: NewPoseDetected with " + pose.Keypoints.Count + " keypoints");
     }
 }

@@ -319,6 +319,7 @@ MonoBehaviour:
   webcamDeviceName: 
   videoName: Boulder.mp4
   stillFilePath: Still2.jpg
+  showDebug: 1
   targetFrameRate: 30
   borderTexture: {fileID: 2800000, guid: ad1def0831dd0466b8d30dae1746d2cc, type: 3}
   font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
@@ -328,7 +329,6 @@ MonoBehaviour:
   detectPersonClasses: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
   detectHandholds: 1
   problemColor: 11
-  showDebugOverlay: 1
   handholdPersistenceFrames: 30
   detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}
   classesAsset: {fileID: 4900000, guid: 35a8acf7937f2468286d5a7cf2a36e8c, type: 3}
