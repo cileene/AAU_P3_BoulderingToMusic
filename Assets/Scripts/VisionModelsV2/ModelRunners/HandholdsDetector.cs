@@ -314,7 +314,7 @@ namespace VisionModelsV2.ModelRunners
             _worker?.Dispose();
         }
 
-        private void OnGUI()
+        private void OnGUI() // Only for debugging
         {
             if (!_debugMode) return;
             GUILayout.BeginArea(new Rect(10, 10, 300, 400));
