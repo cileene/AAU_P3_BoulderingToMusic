@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -55,7 +56,7 @@ namespace VisionModelsV2.ModelRunners
         private float _scoreThreshold = 0.5f;
 
         private bool _isModelReady;
-        
+
         private void OnEnable()
         {
             AppEvents.WebcamReady += OnWebcamReady;
@@ -63,7 +64,7 @@ namespace VisionModelsV2.ModelRunners
             AppEvents.StillReady += OnStillReady;
             AppEvents.ConfigurePoseDetector += OnConfigurePoseDetector;
         }
-        
+
         private void OnDisable()
         {
             AppEvents.WebcamReady -= OnWebcamReady;
@@ -71,25 +72,25 @@ namespace VisionModelsV2.ModelRunners
             AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigurePoseDetector -= OnConfigurePoseDetector;
         }
-        
+
         private void OnWebcamReady(WebCamTexture cam)
         {
             _cam = cam;
             _useWebcam = true;
         }
-        
+
         private void OnVideoReady(Texture videoTexture)
         {
             _video = videoTexture;
             _useWebcam = false;
         }
-        
+
         private void OnStillReady(Texture2D still)
         {
             _still = still;
             _useWebcam = false;
         }
-        
+
         private void OnConfigurePoseDetector(
             ModelAsset model,
             RawImage rawImage,
@@ -112,7 +113,7 @@ namespace VisionModelsV2.ModelRunners
             _borderSprite = Sprite.Create(_borderTexture,
                 new Rect(0, 0, _borderTexture.width, _borderTexture.height),
                 new Vector2(0.5f, 0.5f));
-            
+
             _isModelReady = true;
         }
 
@@ -179,24 +180,22 @@ namespace VisionModelsV2.ModelRunners
                         keypoints.Add(Vector2.zero);
                     }
                 }
+
                 DrawPose(keypoints);
                 //Debug.Log(keypoints[1]); // Log a single keypoint
             }
         }
-        
+
         private bool HandleInput()
         {
-            InputMode mode = _useWebcam ? InputMode.Webcam : 
-                (_video ? InputMode.Video : InputMode.Still);
-    
-            return InputProcessor.ProcessInput(mode, _cam, _video, _still, _targetRT, _displayImage, _mirrorHorizontally);
+            InputMode mode = _useWebcam ? InputMode.Webcam : (_video ? InputMode.Video : InputMode.Still);
+
+            return InputProcessor.ProcessInput(mode, _cam, _video, _still, _targetRT, _displayImage,
+                _mirrorHorizontally);
         }
-
-
 
         private void DrawPose(List<Vector2> keypoints)
         {
-            // Draw points (reuse existing objects)
             for (int i = 0; i < keypoints.Count; i++)
             {
                 if (keypoints[i] == Vector2.zero) continue;
@@ -210,31 +209,8 @@ namespace VisionModelsV2.ModelRunners
                 else
                 {
                     dot = CreateDot(Color.cyan);
-                    objectPool.Add(dot);
                 }
-
                 dot.transform.localPosition = new Vector3(keypoints[i].x, keypoints[i].y, 0);
-            }
-
-            // COCO skeleton connections
-            int[,] skeletonPairs =
-            {
-                {5,7}, {7,9}, {6,8}, {8,10}, // arms
-                {11,13}, {13,15}, {12,14}, {14,16}, // legs
-                {5,6}, {11,12}, {5,11}, {6,12}, // torso
-                {0,5}, {0,6}, {0,11}, {0,12} // head connections
-            };
-
-            for (int i = 0; i < skeletonPairs.GetLength(0); i++)
-            {
-                int a = skeletonPairs[i, 0];
-                int b = skeletonPairs[i, 1];
-
-                if (a < keypoints.Count && b < keypoints.Count &&
-                    keypoints[a] != Vector2.zero && keypoints[b] != Vector2.zero)
-                {
-                    ConnectKeypoints(keypoints[a], keypoints[b]);
-                }
             }
         }
 
@@ -251,23 +227,6 @@ namespace VisionModelsV2.ModelRunners
             return dot;
         }
 
-        private void ConnectKeypoints(Vector2 a, Vector2 b)
-        {
-            var line = new GameObject("Limb");
-            var img = line.AddComponent<Image>();
-            img.color = Color.yellow;
-            img.sprite = _borderSprite;
-            img.type = Image.Type.Sliced;
-            line.transform.SetParent(_displayLocation, false);
-
-            var rt = line.GetComponent<RectTransform>();
-            Vector2 dir = b - a;
-            rt.sizeDelta = new Vector2(dir.magnitude, 2);
-            rt.localPosition = a + dir / 2;
-            rt.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
-            objectPool.Add(line);
-        }
-        
         private void ClearAnnotations() => AnnotationManager.ClearAnnotations(objectPool);
 
         private void OnDestroy()
