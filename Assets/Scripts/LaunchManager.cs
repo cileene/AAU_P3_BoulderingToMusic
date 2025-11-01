@@ -4,12 +4,6 @@ using Shared;
 using Unity.InferenceEngine;
 using VisionModelsV2;
 
-//TODO: Handle Video
-//TODO: Handle Still
-//TODO: Detect person?
-//TODO: Detect hand-holds?
-
-
 public class LaunchManager : MonoBehaviour
 {
     private enum InputSource { Webcam, Video, Still }
