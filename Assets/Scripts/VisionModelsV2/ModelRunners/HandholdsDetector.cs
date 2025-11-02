@@ -38,7 +38,7 @@ namespace VisionModelsV2.ModelRunners
         private Font _font;
         private string _videoFilename;
 
-        private const BackendType backend = BackendType.GPUCompute;
+        private const BackendType Backend = BackendType.GPUCompute;
 
         private Transform _displayLocation;
         private Worker _worker;
@@ -47,8 +47,8 @@ namespace VisionModelsV2.ModelRunners
         private Sprite _borderSprite;
 
         //Image size for the model
-        private const int imageWidth = 640;
-        private const int imageHeight = 640;
+        private const int ImageWidth = 640;
+        private const int ImageHeight = 640;
 
         private Texture _video;
         private Texture2D _still;
@@ -129,7 +129,7 @@ namespace VisionModelsV2.ModelRunners
 
             LoadModel();
 
-            _targetRT = new RenderTexture(imageWidth, imageHeight, 0);
+            _targetRT = new RenderTexture(ImageWidth, ImageHeight, 0);
 
             //Create image to display video
             _displayLocation = _displayImage.transform;
@@ -169,7 +169,7 @@ namespace VisionModelsV2.ModelRunners
             var labelIDs = Functional.IndexSelect(classIDs, 0, indices); //shape=(N)
 
             //Create worker to run model
-            _worker = new Worker(graph.Compile(coords, labelIDs), backend);
+            _worker = new Worker(graph.Compile(coords, labelIDs), Backend);
         }
 
         private bool ShouldDisplayLabel(string label, ProblemColor selectedColor)
@@ -191,7 +191,7 @@ namespace VisionModelsV2.ModelRunners
         {
             if (HandleInput()) return;
 
-            using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, imageHeight, imageWidth));
+            using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, ImageHeight, ImageWidth));
             TextureConverter.ToTensor(_targetRT, inputTensor, default);
             _worker.Schedule(inputTensor);
 
@@ -200,8 +200,8 @@ namespace VisionModelsV2.ModelRunners
 
             float displayWidth = _displayImage.rectTransform.rect.width;
             float displayHeight = _displayImage.rectTransform.rect.height;
-            float scaleX = displayWidth / imageWidth;
-            float scaleY = displayHeight / imageHeight;
+            float scaleX = displayWidth / ImageWidth;
+            float scaleY = displayHeight / ImageHeight;
 
             int boxesFound = output.shape[0];
 
@@ -306,10 +306,7 @@ namespace VisionModelsV2.ModelRunners
             label.fontSize = (int)fontSize;
         }
 
-        private void ClearAnnotations()
-        {
-            AnnotationManager.ClearAnnotations(_boxPool);
-        }
+        private void ClearAnnotations() => AnnotationManager.ClearAnnotations(_boxPool);
 
         private void OnDestroy()
         {

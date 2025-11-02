@@ -65,10 +65,10 @@ public static class AppEvents
         Debug.Log($"Event: RequestUseVideo from {fileName}");
     }
 
-    public static void RaiseRequestUseStill(string path)
+    public static void RaiseRequestUseStill(string fileName)
     {
-        RequestUseStill?.Invoke(path);
-        Debug.Log($"Event: RequestUseStill from {path}");
+        RequestUseStill?.Invoke(fileName);
+        Debug.Log($"Event: RequestUseStill from {fileName}");
     }
 
     public static void RaiseWebcamReady(WebCamTexture cam)
@@ -129,7 +129,7 @@ public static class AppEvents
         Debug.Log(
             $"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
     }
-    
+
     public static void RaiseNewPoseDetected(PoseData pose)
     {
         NewPoseDetected?.Invoke(pose);
