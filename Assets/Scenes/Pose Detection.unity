@@ -317,8 +317,9 @@ MonoBehaviour:
   inputSource: 0
   webcamResolution: 4
   webcamDeviceName: 
-  videoName: Boulder.mp4
+  videoName: Valde.mov
   stillFilePath: Still2.jpg
+  runLogic: 1
   showDebug: 1
   targetFrameRate: 30
   borderTexture: {fileID: 2800000, guid: ad1def0831dd0466b8d30dae1746d2cc, type: 3}
@@ -330,7 +331,7 @@ MonoBehaviour:
   detectHandholds: 1
   problemColor: 11
   handholdPersistenceFrames: 30
-  detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}
+  detectHandholdsModel: {fileID: 5022602860645237092, guid: 57cf9887ba13f40a290b99600ab9e630, type: 3}
   classesAsset: {fileID: 4900000, guid: 35a8acf7937f2468286d5a7cf2a36e8c, type: 3}
   detectPose: 1
   modelAsset: {fileID: 5022602860645237092, guid: 14b6851a51f384b16b1a3495edf1b1a0, type: 3}

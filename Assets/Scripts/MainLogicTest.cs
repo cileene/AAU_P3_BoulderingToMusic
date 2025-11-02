@@ -4,7 +4,7 @@ using VisionModelsV2.Utilities;
 
 public class MainLogicTest : MonoBehaviour
 {
-    private List<Vector2> _handholdCenters;
+    private List<Vector2> _handholdCenters = new();
     private PoseData _poseData;
     private Vector2 _rightWristPos;
     
@@ -38,7 +38,7 @@ public class MainLogicTest : MonoBehaviour
         if (_poseData != null)
         {
             _rightWristPos  = _poseData.GetKeypoint(KeypointIndex.RightWrist);
-            Debug.Log($"Nose Position: {_rightWristPos}");
+            //Debug.Log($"Right Wrist Position: {_rightWristPos}");
         }
         
         if (_handholdCenters == null || _handholdCenters.Count == 0) return;
@@ -47,7 +47,7 @@ public class MainLogicTest : MonoBehaviour
     
     private void CheckHandholdProximity()
     {
-        float proximityThreshold = 10.0f; // Define a threshold distance
+        float proximityThreshold = 25.0f; // Define a threshold distance
         foreach (var center in _handholdCenters)
         {
             float distance = Vector2.Distance(_rightWristPos, center);
