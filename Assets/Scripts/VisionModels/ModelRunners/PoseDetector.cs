@@ -3,8 +3,8 @@ using System.Linq;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
-using VisionModelsV2.Input;
-using VisionModelsV2.Utilities;
+using VisionModels.Input;
+using VisionModels.Utilities;
 
 /*
     01 Nose
@@ -27,7 +27,7 @@ using VisionModelsV2.Utilities;
 */
 
 
-namespace VisionModelsV2.ModelRunners
+namespace VisionModels.ModelRunners
 {
     public class PoseDetector : MonoBehaviour
     {

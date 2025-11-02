@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace VisionModelsV2.Input
+namespace VisionModels.Input
 {
     public enum InputMode
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace VisionModelsV2.Utilities
+namespace VisionModels.Utilities
 {
     public class PoseData
     {

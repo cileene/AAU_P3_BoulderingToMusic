@@ -2,7 +2,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Video;
 
-namespace VisionModelsV2.Input
+namespace VisionModels.Input
 {
     public class UseVideo : MonoBehaviour
     {

@@ -3,9 +3,9 @@ using UnityEngine;
 using Unity.InferenceEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using VisionModelsV2.Input;
-using VisionModelsV2.ModelRunners;
-using VisionModelsV2.Utilities;
+using VisionModels.Input;
+using VisionModels.ModelRunners;
+using VisionModels.Utilities;
 
 /// <summary>
 /// A system I've used in many projects to manage events.

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using VisionModelsV2.Utilities;
+using VisionModels.Utilities;
 
 public class MainLogicTest : MonoBehaviour
 {

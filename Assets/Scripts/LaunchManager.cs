@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.InferenceEngine;
-using VisionModelsV2;
-using VisionModelsV2.Input;
-using VisionModelsV2.ModelRunners;
-using VisionModelsV2.Utilities;
+using VisionModels;
+using VisionModels.Input;
+using VisionModels.ModelRunners;
+using VisionModels.Utilities;
 
 public class LaunchManager : MonoBehaviour
 {

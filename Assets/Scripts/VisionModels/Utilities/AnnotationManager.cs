@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace VisionModelsV2.Utilities
+namespace VisionModels.Utilities
 {
     public static class AnnotationManager
     {

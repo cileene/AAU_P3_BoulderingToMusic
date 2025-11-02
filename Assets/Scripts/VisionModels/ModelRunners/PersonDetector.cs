@@ -2,10 +2,10 @@
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
-using VisionModelsV2.Input;
-using VisionModelsV2.Utilities;
+using VisionModels.Input;
+using VisionModels.Utilities;
 
-namespace VisionModelsV2.ModelRunners
+namespace VisionModels.ModelRunners
 {
     public class PersonDetector : MonoBehaviour
     {

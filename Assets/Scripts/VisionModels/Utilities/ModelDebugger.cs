@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace VisionModelsV2.Utilities
+namespace VisionModels.Utilities
 {
     public class ModelDebugger : MonoBehaviour
     {
