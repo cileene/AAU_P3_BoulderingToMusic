@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using VisionModels.Utilities;
 
 public class PersonPosition : MonoBehaviour
 {
@@ -10,14 +11,14 @@ public class PersonPosition : MonoBehaviour
     
     private void OnEnable()
     {
-        AppEvents.OnPersonDetected += HandlePersonDetected; 
-        AppEvents.OnPersonLost += HandlePersonLost;
+        AppEvents.PersonDetected += HandlePersonDetected; 
+        AppEvents.PersonLost += HandlePersonLost;
     }
 
     private void OnDisable()
     {
-        AppEvents.OnPersonDetected -= HandlePersonDetected;
-        AppEvents.OnPersonLost -= HandlePersonLost;
+        AppEvents.PersonDetected -= HandlePersonDetected;
+        AppEvents.PersonLost -= HandlePersonLost;
     }
 
     private void Update()
