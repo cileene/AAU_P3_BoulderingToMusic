@@ -246,7 +246,7 @@ namespace VisionModelsV2.ModelRunners
             // Find matching handhold based on proximity
             DetectedHandhold match = null;
             float minDistance = float.MaxValue;
-            float distanceThreshold = 50f; // pixels - adjust based on your needs
+            float distanceThreshold = 15f; // pixels - adjust based on your needs
 
             foreach (var handhold in _persistentHandholds)
             {
@@ -295,7 +295,7 @@ namespace VisionModelsV2.ModelRunners
         private void DrawBox(BoundingBox box, int id, float fontSize)
         {
             var panel = AnnotationManager.GetOrCreateBox(_boxPool, id, _displayLocation, _borderSprite, _font,
-                Color.yellow);
+                Color.red);
             panel.transform.localPosition = new Vector3(box.CenterX, -box.CenterY);
 
             var rt = panel.GetComponent<RectTransform>();

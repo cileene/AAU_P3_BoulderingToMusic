@@ -16,7 +16,9 @@ public class LaunchManager : MonoBehaviour
     [SerializeField] private string webcamDeviceName;
     [SerializeField] private string videoName, stillFilePath;
 
-    [Header("Settings")] [SerializeField] private bool showDebug;
+    [Header("Settings")]
+    [SerializeField] private bool runLogic;
+    [SerializeField] private bool showDebug;
     [SerializeField] private int targetFrameRate = 40;
     [Tooltip("Drag a border box texture here")]
     [SerializeField] private Texture2D borderTexture;
@@ -52,10 +54,8 @@ public class LaunchManager : MonoBehaviour
     
     private void Start()
     {
-        if (showDebug)
-        {
-            gameObject.AddComponent<ModelDebugger>();
-        }
+        if (showDebug) gameObject.AddComponent<ModelDebugger>();
+        if (runLogic) gameObject.AddComponent<MainLogicTest>();
         
         HandleDetectionSettings();
         HandleInput();
