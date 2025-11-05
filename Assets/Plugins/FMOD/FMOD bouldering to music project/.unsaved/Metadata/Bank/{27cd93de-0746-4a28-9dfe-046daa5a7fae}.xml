@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="Bank" id="{27cd93de-0746-4a28-9dfe-046daa5a7fae}">
+		<property name="name">
+			<value>Event detected</value>
+		</property>
+		<relationship name="folder">
+			<destination>{de849817-d2b6-4556-bbab-85533c268f1b}</destination>
+		</relationship>
+	</object>
+</objects>
