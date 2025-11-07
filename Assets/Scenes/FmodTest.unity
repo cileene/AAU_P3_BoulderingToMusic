@@ -149,6 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunYOLO
   boxPosition: {x: 0, y: 0, z: 0}
+  _fmodEmitter: {fileID: 2064052549}
   modelAsset: {fileID: 5022602860645237092, guid: 6dd5bbefc9b494ac08820963a1ca5630, type: 3}
   classesAsset: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
   displayImage: {fileID: 171031747}
@@ -159,6 +160,8 @@ MonoBehaviour:
   videoFilename: 
   preferFrontCamera: 1
   mirrorHorizontally: 0
+  _hiText: {fileID: 1507943679}
+  _whereText: {fileID: 1100399341}
   iouThreshold: 0.5
   scoreThreshold: 0.5
 --- !u!4 &108153439
@@ -391,9 +394,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
   nonRigidbodyVelocity: 0
   attenuationObject: {fileID: 0}
-  lastFramePosition: {x: 0, y: 0, z: 0}
-  rigidBody: {fileID: 0}
-  rigidBody2D: {fileID: 0}
 --- !u!1 &843367539
 GameObject:
   m_ObjectHideFlags: 0
@@ -897,11 +897,6 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 20
-  hasTriggered: 0
-  isQuitting: 0
-  isOneshot: 0
-  cachedParams: []
-  <IsActive>k__BackingField: 0
 --- !u!4 &2064052551
 Transform:
   m_ObjectHideFlags: 0
