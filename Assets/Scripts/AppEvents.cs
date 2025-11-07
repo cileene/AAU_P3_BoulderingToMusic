@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using YoloDetection;
+//using BoundingBox = PoseDetection.BoundingBox;
 
 /// <summary>
 /// A system I've used in many projects to manage events.
