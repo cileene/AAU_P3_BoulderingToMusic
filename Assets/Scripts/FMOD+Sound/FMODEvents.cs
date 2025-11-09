@@ -4,10 +4,8 @@ using VisionModels.Utilities;
 
 public class FMODEvents : MonoBehaviour
 {
-    [field: Header("Handhold contact")]
     [field: SerializeField] public EventReference HandholdContact {  get; private set; }
     
-    [field: Header("Ambience")]
     [field: SerializeField] public EventReference Ambience {  get; private set; }
 
     public static FMODEvents Instance { get; private set; }
@@ -28,12 +26,12 @@ public class FMODEvents : MonoBehaviour
     private void OnEnable()
     {
         AppEvents.NewPoseDetected += OnNewPoseDetected;
-        AppEvents.NewHandholdDetected += OnNewHandholdDetected;
+        AppEvents.NewHandholdDetected += OnPotentialHandholdContact;
     }
     private void OnDisable()
     {
         AppEvents.NewPoseDetected -= OnNewPoseDetected;
-        AppEvents.NewHandholdDetected -= OnNewHandholdDetected;
+        AppEvents.NewHandholdDetected -= OnPotentialHandholdContact;
     }
 
     private void OnNewPoseDetected(PoseData pose)
@@ -41,10 +39,10 @@ public class FMODEvents : MonoBehaviour
         poseData = pose;
     }
 
-    private void OnNewHandholdDetected(DetectedHandhold handhold)
+    private void OnPotentialHandholdContact(DetectedHandhold handhold)
     {
-        //if (condition)
         AudioManager.Instance.PlayOneShot(HandholdContact, transform.position);
+        Debug.Log("Handhold contact sound played");
     }
 }
 
