@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using VisionModels.Input;
 using VisionModels.Utilities;
+using UnityEngine.EventSystems;
+
 
 namespace VisionModels.ModelRunners
 {
@@ -67,9 +69,9 @@ namespace VisionModels.ModelRunners
         private bool _useWebcam = true;
         private ProblemColor _selectedColor;
         
-        private bool _continuousDetection = false;
+        private bool _continuousDetection;
         private Button _detectionToggleButton;
-        private bool _isButtonPressed = false;
+        private bool _isButtonPressed;
 
         private void OnEnable()
         {
@@ -146,10 +148,10 @@ namespace VisionModels.ModelRunners
         {
             if (_continuousDetection) return;
             
-            var eventTrigger = _detectionToggleButton.GetComponent<UnityEngine.EventSystems.EventTrigger>()
-                               ?? _detectionToggleButton.gameObject.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            var eventTrigger = _detectionToggleButton.GetComponent<EventTrigger>()
+                               ?? _detectionToggleButton.gameObject.AddComponent<EventTrigger>();
 
-            var pointerDown = new UnityEngine.EventSystems.EventTrigger.Entry { eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown };
+            var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
             pointerDown.callback.AddListener((data) =>
             {
                 _isButtonPressed = true;
@@ -157,7 +159,7 @@ namespace VisionModels.ModelRunners
             });
             eventTrigger.triggers.Add(pointerDown);
 
-            var pointerUp = new UnityEngine.EventSystems.EventTrigger.Entry { eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp };
+            var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
             pointerUp.callback.AddListener((data) =>
             {
                 _isButtonPressed = false;
