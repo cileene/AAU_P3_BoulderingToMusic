@@ -1,3 +1,4 @@
+using Mannequin;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.InferenceEngine;
@@ -46,6 +47,9 @@ public class LaunchManager : MonoBehaviour
     [SerializeField] private bool detectPose;
     [Tooltip("Drag your YOLO11n-pose .onnx model here")]
     public ModelAsset modelAsset;
+
+    [Header("Record Player")]
+    [SerializeField] private bool createRecording;
     
     private void Awake()
     {
@@ -59,6 +63,7 @@ public class LaunchManager : MonoBehaviour
         
         HandleDetectionSettings();
         HandleInput();
+        TrackPlayer();
     }
 
     private void HandleInput()
@@ -78,6 +83,17 @@ public class LaunchManager : MonoBehaviour
                 AppEvents.RaiseRequestUseStill(stillFilePath);
                 break;
         }
+    }
+
+    private void TrackPlayer()
+    {
+        if (!createRecording) return;
+        if (inputSource != InputSource.Webcam)
+        {
+            Debug.Log("Webcam input required to track player");
+            return;
+        }
+        
     }
     
     private void HandleDetectionSettings()

@@ -14,6 +14,7 @@ namespace VisionModels.Input
         }
         
         private WebCamTexture _cam;
+        public WebCamTexture Cam { get { return _cam; } }
         
         private void OnEnable() => AppEvents.RequestUseWebcam += OnConfigureWebcam;
         
