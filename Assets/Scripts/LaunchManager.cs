@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.InferenceEngine;
-using VisionModels;
 using VisionModels.Input;
 using VisionModels.ModelRunners;
 using VisionModels.Utilities;
