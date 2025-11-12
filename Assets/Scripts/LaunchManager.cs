@@ -55,7 +55,7 @@ public class LaunchManager : MonoBehaviour
     private void Start()
     {
         if (showDebug) gameObject.AddComponent<ModelDebugger>();
-        //if (runLogic) gameObject.AddComponent<MainLogicTest>();
+        if (runLogic) gameObject.AddComponent<AppEventTrigger>();
         
         HandleDetectionSettings();
         HandleInput();
