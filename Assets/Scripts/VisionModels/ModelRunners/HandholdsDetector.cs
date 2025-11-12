@@ -66,6 +66,10 @@ namespace VisionModels.ModelRunners
         private WebCamTexture _cam;
         private bool _useWebcam = true;
         private ProblemColor _selectedColor;
+        
+        private bool _continuousDetection = false;
+        private Button _detectionToggleButton;
+        private bool _isButtonPressed = false;
 
         private void OnEnable()
         {
@@ -81,6 +85,16 @@ namespace VisionModels.ModelRunners
             AppEvents.VideoReady -= OnVideoReady;
             AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigureHandholdsDetector -= OnConfigureHandholdsDetector;
+        }
+        
+        private void Update()
+        {
+            if (!_isModelReady) return;
+
+            if (!_continuousDetection && !_isButtonPressed)
+                return;
+    
+            ExecuteML();
         }
 
         private void OnWebcamReady(WebCamTexture cam)
@@ -108,7 +122,9 @@ namespace VisionModels.ModelRunners
             RawImage rawImage,
             Font font,
             Texture2D borderTex,
-            Int32 keepHandholdsFrames
+            Int32 keepHandholdsFrames,
+            Button handholdDetectButton,
+            bool continuousHandholdDetection
             )
         {
             _modelAsset = model;
@@ -118,10 +134,39 @@ namespace VisionModels.ModelRunners
             _borderTexture = borderTex;
             _font = font;
             _maxFramesBeforeRemoval = keepHandholdsFrames;
+            _detectionToggleButton = handholdDetectButton;
+            _continuousDetection = continuousHandholdDetection;
 
             StartModel();
+            
+            SetupButtonEventTriggers();
         }
 
+        private void SetupButtonEventTriggers()
+        {
+            if (_continuousDetection) return;
+            
+            var eventTrigger = _detectionToggleButton.GetComponent<UnityEngine.EventSystems.EventTrigger>()
+                               ?? _detectionToggleButton.gameObject.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+
+            var pointerDown = new UnityEngine.EventSystems.EventTrigger.Entry { eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown };
+            pointerDown.callback.AddListener((data) =>
+            {
+                _isButtonPressed = true;
+                if (_worker == null) LoadModel(); // Recreate worker if disposed
+            });
+            eventTrigger.triggers.Add(pointerDown);
+
+            var pointerUp = new UnityEngine.EventSystems.EventTrigger.Entry { eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp };
+            pointerUp.callback.AddListener((data) =>
+            {
+                _isButtonPressed = false;
+                _worker?.Dispose(); // Free GPU memory
+                _worker = null;
+            });
+            eventTrigger.triggers.Add(pointerUp);
+        }
+        
         private void StartModel()
         {
             //Parse neural net labels
@@ -179,12 +224,6 @@ namespace VisionModels.ModelRunners
 
             string colorName = selectedColor.ToString().ToLower();
             return label.ToLower().Contains(colorName);
-        }
-
-        private void Update()
-        {
-            if (!_isModelReady) return;
-            ExecuteML();
         }
 
         private void ExecuteML()
