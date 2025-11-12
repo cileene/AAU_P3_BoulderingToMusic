@@ -38,6 +38,8 @@ public static class AppEvents
 
     public static event Action<DetectedHandhold> NewHandholdDetected;
     public static event Action<PoseData> NewPoseDetected;
+    public static event Action PotentialHandholdContact;
+    public static event Action PotentialHighestHandholdContact;
 
 
     // EVENT METHODS
@@ -128,13 +130,20 @@ public static class AppEvents
     public static void RaiseNewHandholdDetected(DetectedHandhold handhold)
     {
         NewHandholdDetected?.Invoke(handhold);
-        Debug.Log(
-            $"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
+        //Debug.Log($"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
     }
 
     public static void RaiseNewPoseDetected(PoseData pose)
     {
         NewPoseDetected?.Invoke(pose);
-        Debug.Log("Event: NewPoseDetected with " + pose.Keypoints.Count + " keypoints");
+        //Debug.Log("Event: NewPoseDetected with " + pose.Keypoints.Count + " keypoints");
+    }
+    public static void RaisePotentialHandholdContact()
+    {
+        PotentialHandholdContact?.Invoke();
+    }
+    public static void RaisePotentialHighestHandholdContact()
+    {
+        PotentialHighestHandholdContact?.Invoke();
     }
 }

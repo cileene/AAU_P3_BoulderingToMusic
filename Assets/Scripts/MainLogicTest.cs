@@ -54,6 +54,7 @@ public class MainLogicTest : MonoBehaviour
             if (distance < proximityThreshold)
             {
                 Debug.Log($"Right wrist is close to handhold at {center} with distance {distance}");
+                //AudioManager.Instance.PlayOneShot(FMODEvents.Instance.HandholdContact, this.transform.position);
             }
         }
     }

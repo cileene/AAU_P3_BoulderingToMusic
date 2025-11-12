@@ -1,0 +1,48 @@
+using UnityEngine;
+using FMODUnity;
+using VisionModels.Utilities;
+
+public class FMODEvents : MonoBehaviour
+{
+    [field: SerializeField] public EventReference HandholdContact {  get; private set; }
+    
+    [field: SerializeField] public EventReference Ambience {  get; private set; }
+
+    public static FMODEvents Instance { get; private set; }
+    private void Awake() //Singleton logic
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
+
+
+    private PoseData poseData;
+    private void OnEnable()
+    {
+        AppEvents.NewPoseDetected += OnNewPoseDetected;
+        AppEvents.NewHandholdDetected += OnPotentialHandholdContact;
+    }
+    private void OnDisable()
+    {
+        AppEvents.NewPoseDetected -= OnNewPoseDetected;
+        AppEvents.NewHandholdDetected -= OnPotentialHandholdContact;
+    }
+
+    private void OnNewPoseDetected(PoseData pose)
+    {
+        poseData = pose;
+    }
+
+    private void OnPotentialHandholdContact(DetectedHandhold handhold)
+    {
+        AudioManager.Instance.PlayOneShot(HandholdContact, transform.position);
+        Debug.Log("Handhold contact sound played");
+    }
+}
+

@@ -380,8 +380,9 @@ MonoBehaviour:
   switchSettingsMigration: 1
   HasSourceProject: 1
   HasPlatforms: 1
-  sourceProjectPath: FmodTest/FmodTest.fspro
-  sourceBankPath: FmodTest/Build
+  sourceProjectPath: Assets/Plugins/FMOD/FMOD bouldering to music project/FMOD bouldering
+    to music project.fspro
+  sourceBankPath: Assets/Plugins/FMOD/FMOD bouldering to music project/Build
   sourceBankPathUnformatted: 
   BankRefreshCooldown: 5
   ShowBankRefreshWindow: 1
@@ -406,13 +407,8 @@ MonoBehaviour:
   MasterBanks:
   - Master
   Banks:
-  - Dialogue_CN
-  - Dialogue_EN
-  - Dialogue_JP
-  - Music
-  - SFX
-  - Vehicles
-  - VO
+  - Ambience
+  - Event detected
   BanksToLoad: []
   LiveUpdatePort: 9264
   EnableMemoryTracking: 0
