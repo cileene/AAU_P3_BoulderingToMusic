@@ -63,7 +63,6 @@ public class LaunchManager : MonoBehaviour
         
         HandleDetectionSettings();
         HandleInput();
-        TrackPlayer();
     }
 
     private void HandleInput()
@@ -85,15 +84,10 @@ public class LaunchManager : MonoBehaviour
         }
     }
 
-    private void TrackPlayer()
+    private CreateVideo TrackPlayer()
     {
-        if (!createRecording) return;
-        if (inputSource != InputSource.Webcam)
-        {
-            Debug.Log("Webcam input required to track player");
-            return;
-        }
-        
+        if (!createRecording) return null;
+        return new CreateVideo();
     }
     
     private void HandleDetectionSettings()

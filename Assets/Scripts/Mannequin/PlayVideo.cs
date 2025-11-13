@@ -17,7 +17,7 @@ public class PlayVideo : MonoBehaviour
         videoPlayer.url = videoName;
     }
 
-    public void Disable()
+    public void OnDisable()
     {
         videoPlayer.Pause();
         enabled = false;

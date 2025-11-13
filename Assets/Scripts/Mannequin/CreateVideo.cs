@@ -1,47 +1,50 @@
 using System.Collections.Generic;
-using System.IO;
 using UnityEditor.Media;
 using UnityEngine;
-using VisionModels.Input;
 
 namespace Mannequin
 {
-    public class CreateVideo
+    public class CreateVideo : MonoBehaviour
     {
         private WebCamTexture _cam;
-        private List<byte[]> images = new List<byte[]>();
+        private List<Color32[]> images = new List<Color32[]>();
         private MediaEncoder encoder;
         private string videoPath;
+        private int videoWidth;
+        private int videoHeight;
         public string VideoPath => videoPath;
         public bool recording = false;
-        public GameObject Player;
-
-        public CreateVideo(UseWebcam useWebcam)
-        {
-            _cam = useWebcam.Cam;
-        }
-        public void RecordTexture(byte[] textureBytes)
+        
+        private void RecordTexture(WebCamTexture webcamTexture)
         {
             if (recording)
             {
+                videoHeight = webcamTexture.height;
+                videoWidth = webcamTexture.width;
+                var textureBytes = webcamTexture.GetPixels32();
                 images.Add(textureBytes);
             }
         }
 
-        private void FormVideo()
+        public void FormVideo()
         {
-            foreach (byte[] image in images)
+            foreach (var image in images)
             {
-                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                tex.LoadRawTextureData(image);
+                Texture2D tex = new Texture2D(videoWidth, videoHeight, TextureFormat.RGBA32, false);
+                tex.SetPixels32(image);
                 tex.Apply();
-                byte[] bytes = tex.EncodeToPNG();
                 encoder.AddFrame(tex);
             }
         }
 
+        public void EraseVideo()
+        {
+            DestroyVideo();
+        }
+
         private void OnEnable()
         {
+            AppEvents.WebcamReady += RecordTexture;
             videoPath = Application.streamingAssetsPath + "/Videos/" + "Video.mp4";
             var videoAttr = new VideoTrackAttributes
             {
