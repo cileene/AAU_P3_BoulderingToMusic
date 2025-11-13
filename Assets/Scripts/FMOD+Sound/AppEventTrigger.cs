@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics;
+using System.Security.Cryptography;
 using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using VisionModels.Utilities;
 using Vector2 = UnityEngine.Vector2;
@@ -16,6 +16,22 @@ public class AppEventTrigger : MonoBehaviour
     private Vector2 _rightWristPos;
     private Vector2 _leftWristPos;
     private KeypointDelta RightWristDelta = new();
+    private KeypointDelta LeftWristDelta = new();
+
+    private static int _poseDataKeypointLength = Enum.GetValues(typeof(KeypointIndex)).Length; //Will get the length of KeypointIndex
+    private Queue<Vector2>[] _poseDataKeypoints = new Queue<Vector2>[_poseDataKeypointLength];
+    private int maxPoseDataKeypointsLength = 5;
+    private void InitializePoseDataKeypoints()
+    {
+        for (int i = 0;  i < _poseDataKeypointLength; i++) //Fills all the Queues with up vectors
+        {
+            _poseDataKeypoints[i] = new Queue<Vector2>(Enumerable.Repeat(Vector2.one, maxPoseDataKeypointsLength));
+        }
+    }
+    private void Start()
+    {
+        InitializePoseDataKeypoints();
+    }
 
     public static AppEventTrigger Instance { get; private set; }
     private void Awake() //Singleton logic
@@ -47,24 +63,34 @@ public class AppEventTrigger : MonoBehaviour
 
     private void Update()
     {
-        RightWristDelta.CheckIfKeypointIsStill(_rightWristPos);
-        if (RightWristDelta.KeypointStill)
-        {
-            print("Right wrist still?: " + RightWristDelta.KeypointStill);
-        }
         if (_poseData != null)
         {
             _rightWristPos = _poseData.GetKeypoint(KeypointIndex.RightWrist);
             _leftWristPos = _poseData.GetKeypoint(KeypointIndex.LeftWrist);
         }
-
+        //print($"Right wrist still?: {RightWristDelta.KeypointStill}");
         if (_handholdCenters != null && _handholdCenters.Count != 0)
         {
             RightWristDelta.CheckHandholdProximity(_handholdCenters, _rightWristPos);
+            LeftWristDelta.CheckHandholdProximity(_handholdCenters, _leftWristPos);
+            //print($"Right wrist delta: {RightWristDelta.currentDelta}");
+            //print($"Left wrist delta: {LeftWristDelta.currentDelta}");
             if (RightWristDelta.LikelyKeypointOnHold)
             {
                 print("Climber touched hold with right hand!");
             }
+            if (LeftWristDelta.LikelyKeypointOnHold)
+            {
+                print("Climber touched hold with left hand!");
+            }
+            if(LeftWristDelta.LikelyKeypointOnHighestHold && RightWristDelta.LikelyKeypointOnHighestHold)
+            {
+                print("Climber finished the climb!");
+            }
+        }
+        for (int i = 0;  i < _poseDataKeypointLength; i++)
+        {
+
         }
     }
     /*
@@ -94,49 +120,46 @@ public class AppEventTrigger : MonoBehaviour
     private void SortHandholdCentersByY()
     {
         _handholdCenters.Sort((a, b) => b.y.CompareTo(a.y));
-        print($"Highest handhold is at y={_handholdCenters[0].y}");
     }
-    private void OnNewHandholdDetected(DetectedHandhold handhold) //Remember to add logic that removes handholds again if they should disappear
+    private void OnNewHandholdDetected(DetectedHandhold handhold)
     {
         BoundingBox bob = handhold.Box;
         Vector2 center = new Vector2(bob.CenterX, bob.CenterY);
         _handholdCenters.Add(center);
-        //Debug.Log($"Handhold Detected: {handhold.Label} at {center}");
         SortHandholdCentersByY();
     }
-    /*
-    private void CheckHandholdProximity() //Checks whether a wrist keypoint is close to a handhold center
+
+    private bool ClimberJumpedDown()
     {
-        float proximityThreshold = 25.0f; //Define a threshold distance
-        for (int i = 0; i < _handholdCenters.Count; i++)
+        for (int i = 0; i < _poseDataKeypointLength; i++)
         {
-            var center = _handholdCenters[i];
-            float rightWristDistance = Vector2.Distance(_rightWristPos, center);
-            float leftWristDistance = Vector2.Distance(_leftWristPos, center);
+            KeypointIndex currentIndex = (KeypointIndex)i;
 
-            if (rightWristDistance < proximityThreshold || leftWristDistance < proximityThreshold)
+            if (_poseData.GetKeypoint(currentIndex) == Vector2.zero) //If the keypoint isn't detected by the model it returns a zero vector
             {
-                Debug.Log($"A wrist is close to handhold {i} at {center}");
-                AppEvents.RaisePotentialHandholdContact();
+                continue;
+            }
 
-                if (i != 0) break; //Checks if the contacted handhold is the first index, meaning that it has the highest y value
-                
-                AppEvents.RaisePotentialHighestHandholdContact();
-                print($"Highest handhold was touched!");
+            _poseDataKeypoints[i].Enqueue(_poseData.GetKeypoint(currentIndex));
+
+            if (_poseDataKeypoints[i].Count > maxPoseDataKeypointsLength)
+            {
+                _poseDataKeypoints[i].Dequeue();
             }
         }
+
+        return true;
     }
-    */
     private class KeypointDelta
-    /*This helper class is used to detect whether a keypoint is still next to a handhold
-     * (likely indicating that the climber touched a hold)
+    /*This helper class is used to detect whether a keypoint is still and next to a handhold
+     * (likely indicating that the climber touched a hold).
      * Call CheckIfKeypointIsStill() inside Update() inside AppEventTrigger
-     * and use the bool LikelyKeypointOnHold to trigger logic in FMOD
+     * and use the bool LikelyKeypointOnHold to trigger logic in FMOD.
     */
     {
         //Variables related to AverageDelta()
         private Queue<float> deltas = new();
-        private float currentDelta;
+        public float currentDelta;
         private int deltasMaxLength = 10;
         private Vector2 previousPoint = Vector2.zero;
 
@@ -147,13 +170,13 @@ public class AppEventTrigger : MonoBehaviour
         }
         private bool _keypointStill = false;
 
-        private float movementThreshold = 10f;
-        private float stillnessTimeThreshold = 0.5f;
+        private float movementThreshold = 200f;
+        private float stillnessTimeThreshold = 0.3f;
         private float timer = 0; //Increments when keypoint is still. Used to check against stillnessTimeThreshold
-        private float timerDecay = 0.7f;
+        private float timerDecay = 0.3f;
 
         //Variables related to CheckHandholdProximity()
-        private float proximityThreshold = 25.0f;
+        private float proximityThreshold = 50.0f;
         public bool LikelyKeypointOnHold
         {
             get { return _likelyKeypointOnHold; }
@@ -166,6 +189,14 @@ public class AppEventTrigger : MonoBehaviour
         }
         private bool _likelyKeypointOnHighestHold = false;
 
+        public KeypointDelta()
+        {
+
+        }
+        public KeypointDelta(float thresholdProximity)
+        {
+            proximityThreshold = thresholdProximity;
+        }
 
         /// <summary>
         /// Will calculate the average movement over a number of points. The number of points is set by deltasMaxLength
