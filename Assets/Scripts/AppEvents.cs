@@ -126,8 +126,7 @@ public static class AppEvents
     public static void RaiseNewHandholdDetected(DetectedHandhold handhold)
     {
         NewHandholdDetected?.Invoke(handhold);
-        Debug.Log(
-            $"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
+        //Debug.Log($"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
     }
 
     public static void RaiseNewPoseDetected(PoseData pose)

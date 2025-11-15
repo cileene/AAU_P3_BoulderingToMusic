@@ -1,68 +1,77 @@
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEditor.Media;
 using UnityEngine;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using VisionModels.Input;
 
 namespace Mannequin
 {
     public class CreateVideo : MonoBehaviour
     {
-        private WebCamTexture _cam;
-        private List<Color32[]> images = new List<Color32[]>();
-        private MediaEncoder encoder;
-        private string videoPath;
-        private int videoWidth;
-        private int videoHeight;
-        public string VideoPath => videoPath;
-        public bool recording = false;
+        public WebCamTexture _cam;
+        public string _camName;
+        [SerializeField] private List<Texture2D> images = new List<Texture2D>();
+        //private MediaEncoder encoder;
+        private string savePath;
+        [SerializeField] public bool isRecording = false;
+        private VideoTrackAttributes videoAttr;
+        private AudioTrackAttributes audioAttr;
+        private int sampleFramesPerVideoFrame;
         
-        private void RecordTexture(WebCamTexture webcamTexture)
+        private void SetupRecorder(WebCamTexture webcamTexture)
         {
-            if (recording)
-            {
-                videoHeight = webcamTexture.height;
-                videoWidth = webcamTexture.width;
-                var textureBytes = webcamTexture.GetPixels32();
-                images.Add(textureBytes);
-            }
+            Debug.Log("Setting up the recorder");
+            _cam = webcamTexture;
+            _camName = _cam.deviceName;
         }
 
-        public void FormVideo()
+        private IEnumerator Record(WebCamTexture image)
         {
-            foreach (var image in images)
+            while (isRecording)
             {
-                Texture2D tex = new Texture2D(videoWidth, videoHeight, TextureFormat.RGBA32, false);
-                tex.SetPixels32(image);
-                tex.Apply();
-                encoder.AddFrame(tex);
+                Debug.Log("Recording video");
+                Color32[] pixels = image.GetPixels32();
+                Texture2D texture = new Texture2D(image.width, image.height, TextureFormat.RGBA32, false);
+                texture.SetPixels32(pixels);
+                images.Add(texture);
+                yield return null;
             }
+            Debug.Log("Finished recording");
+            isRecording = false;
         }
 
-        public void EraseVideo()
+        public void startRecording(UseWebcam useWebcam)
         {
-            DestroyVideo();
+            isRecording = true;
+            SetPaths();
+            SetupRecorder(useWebcam.Cam);
+            Debug.Log("Setup recorder to record to " + savePath);
+            StartCoroutine(Record(_cam));
         }
 
         private void OnEnable()
         {
-            AppEvents.WebcamReady += RecordTexture;
-            videoPath = Application.streamingAssetsPath + "/Videos/" + "Video.mp4";
-            var videoAttr = new VideoTrackAttributes
-            {
-                frameRate = new MediaRational(50),
-                width = (uint) _cam.width,
-                height = (uint) _cam.height,
-                includeAlpha = false
-            };
-            encoder = new MediaEncoder(videoPath, videoAttr);
+            isRecording = FindAnyObjectByType<LaunchManager>().createRecording;
         }
+
+        private void SetPaths()
+        {
+            Debug.Log("Streaming Path: " + Application.streamingAssetsPath);
+            savePath = Application.streamingAssetsPath + "/saves/";
+            Debug.Log("SavePath: " + savePath);
+            
+            int savePathLength = Directory.GetFiles(savePath).Length / 2;
+            savePath = Path.Combine(savePath, "video" + savePathLength + ".mp4");
+            Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+        }
+
         private void OnDisable()
         {
-            DestroyVideo();
-        }
-        private void DestroyVideo()
-        {
-            images.Clear();
-            encoder.Dispose();
+            isRecording = false;
         }
     }
 }

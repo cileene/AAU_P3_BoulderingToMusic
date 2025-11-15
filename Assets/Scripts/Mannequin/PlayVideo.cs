@@ -6,7 +6,7 @@ using UnityEngine.Video;
 public class PlayVideo : MonoBehaviour
 {
     private RawImage image;
-    private VideoClip RecordedVideo;
+    private VideoClip RecordedVideo { get; set; }
     private VideoPlayer videoPlayer;
     private GameObject videoObj;
     private string videoName {set; get;}
@@ -19,7 +19,7 @@ public class PlayVideo : MonoBehaviour
 
     public void OnDisable()
     {
-        videoPlayer.Pause();
+        videoPlayer.Stop();
         enabled = false;
     }
 

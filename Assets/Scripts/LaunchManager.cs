@@ -49,7 +49,8 @@ public class LaunchManager : MonoBehaviour
     public ModelAsset modelAsset;
 
     [Header("Record Player")]
-    [SerializeField] private bool createRecording;
+    public CreateVideo CreateVideo;
+    public bool createRecording;
     
     private void Awake()
     {
@@ -70,8 +71,13 @@ public class LaunchManager : MonoBehaviour
         switch (inputSource)
         {
             case InputSource.Webcam:
+                CreateVideo = RecordPlayer();
                 gameObject.AddComponent<UseWebcam>();
                 AppEvents.RaiseRequestUseWebcam(webcamResolution, webcamDeviceName);
+                if (CreateVideo != null)
+                {
+                    CreateVideo.startRecording(gameObject.GetComponent<UseWebcam>());
+                }
                 break;
             case InputSource.Video:
                 gameObject.AddComponent<UseVideo>();
@@ -84,10 +90,10 @@ public class LaunchManager : MonoBehaviour
         }
     }
 
-    private CreateVideo TrackPlayer()
+    private CreateVideo RecordPlayer()
     {
         if (!createRecording) return null;
-        return new CreateVideo();
+        return gameObject.AddComponent<CreateVideo>();
     }
     
     private void HandleDetectionSettings()
