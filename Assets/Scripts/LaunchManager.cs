@@ -2,7 +2,6 @@ using Mannequin;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.InferenceEngine;
-using VisionModels;
 using VisionModels.Input;
 using VisionModels.ModelRunners;
 using VisionModels.Utilities;
@@ -36,6 +35,8 @@ public class LaunchManager : MonoBehaviour
     
     [Header("Detect Handholds")]
     [SerializeField] private bool detectHandholds;
+    [SerializeField] private bool continuousHandholdDetection;
+    [SerializeField] private Button handholdDetectButton;
     [SerializeField] private HandholdsDetector.ProblemColor problemColor = HandholdsDetector.ProblemColor.All;
     [SerializeField] private int handholdPersistenceFrames = 30;
     [Tooltip("Drag a YOLO model .onnx file here")]
@@ -134,7 +135,9 @@ public class LaunchManager : MonoBehaviour
                 imageDisplay,
                 font,
                 borderTexture,
-                handholdPersistenceFrames);
+                handholdPersistenceFrames,
+                handholdDetectButton,
+                continuousHandholdDetection);
         }
     }
 }

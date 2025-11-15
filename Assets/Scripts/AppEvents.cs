@@ -33,7 +33,7 @@ public static class AppEvents
     public static event Action<ModelAsset, RawImage, Texture2D> ConfigurePoseDetector;
 
     public static event
-        Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32>
+        Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32, Button, bool>
         ConfigureHandholdsDetector;
 
     public static event Action<DetectedHandhold> NewHandholdDetected;
@@ -116,10 +116,12 @@ public static class AppEvents
         RawImage rawImage,
         Font font,
         Texture2D borderTexture,
-        Int32 keepHandholdsFrames)
+        Int32 keepHandholdsFrames,
+        Button handholdDetectButton,
+        bool continuousHandholdDetection)
     {
         ConfigureHandholdsDetector?.Invoke(model, classes, problemColor, rawImage, font, borderTexture,
-            keepHandholdsFrames);
+            keepHandholdsFrames, handholdDetectButton, continuousHandholdDetection);
         Debug.Log($"Event: ConfigureHandholdsDetector with model {model.name}");
     }
 
