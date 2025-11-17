@@ -148,6 +148,13 @@ public class AppEventTrigger : MonoBehaviour
             }
         }
 
+        for (int i = 0; i < _poseDataKeypointLength; i++)
+        {
+            for (int j = 0; j < _poseDataKeypoints[i].Count; j++)
+            {
+            }
+        }
+
         return true;
     }
     private class KeypointDelta
