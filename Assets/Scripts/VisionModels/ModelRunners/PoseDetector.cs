@@ -49,8 +49,10 @@ namespace VisionModels.ModelRunners
         private WebCamTexture _cam;
         private bool _useWebcam = true;
 
+        
         private const int imageWidth = 640;
         private const int imageHeight = 640;
+        public int ImageHeight { get { return imageHeight; } }
 
         private readonly List<GameObject> objectPool = new();
         private float _scoreThreshold = 0.5f;

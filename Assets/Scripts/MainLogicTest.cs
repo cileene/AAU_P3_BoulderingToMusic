@@ -38,7 +38,7 @@ public class MainLogicTest : MonoBehaviour
         if (_poseData != null)
         {
             _rightWristPos  = _poseData.GetKeypoint(KeypointIndex.RightWrist);
-            //Debug.Log($"Right Wrist Position: {_rightWristPos}");
+            //Debug.Log($"Right Wrist Position: {rightWristPos}");
         }
         
         if (_handholdCenters == null || _handholdCenters.Count == 0) return;

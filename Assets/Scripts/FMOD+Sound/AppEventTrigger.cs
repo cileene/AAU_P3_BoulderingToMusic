@@ -1,31 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using Unity.VisualScripting;
 using UnityEngine;
 using VisionModels.Utilities;
-using Vector2 = UnityEngine.Vector2;
 
 public class AppEventTrigger : MonoBehaviour
 {
     //This script handles the logic for calling the event in app AppEvents eventually playing sound in FMOD
 
-    private List<Vector2> _handholdCenters = new();
-    private PoseData _poseData;
-    private Vector2 _rightWristPos;
-    private Vector2 _leftWristPos;
-    private KeypointDelta RightWristDelta = new();
-    private KeypointDelta LeftWristDelta = new();
+    private List<Vector2> handholdCenters = new();
+    private PoseData poseData;
+    private Vector2 rightWristPos;
+    private Vector2 leftWristPos;
+    private KeypointTracker RightWristTracker = new();
+    private KeypointTracker LeftWristTracker = new();
 
-    private static int _poseDataKeypointLength = Enum.GetValues(typeof(KeypointIndex)).Length; //Will get the length of KeypointIndex
-    private Queue<Vector2>[] _poseDataKeypoints = new Queue<Vector2>[_poseDataKeypointLength];
-    private int maxPoseDataKeypointsLength = 5;
+    private static int keypointCount = Enum.GetValues(typeof(KeypointIndex)).Length; //Will get the length of the enum KeypointIndex
+    private Queue<Vector2>[] keypointPositionHistory = new Queue<Vector2>[keypointCount];
+    private int keypointHistorySize = 5;
+
+    private float climberFallingThreshold = -500f;
+    private bool climberIsFalling = false;
     private void InitializePoseDataKeypoints()
     {
-        for (int i = 0;  i < _poseDataKeypointLength; i++) //Fills all the Queues with up vectors
+        for (int i = 0; i < keypointCount; i++) //Fills all the Queues with one vectors
         {
-            _poseDataKeypoints[i] = new Queue<Vector2>(Enumerable.Repeat(Vector2.one, maxPoseDataKeypointsLength));
+            keypointPositionHistory[i] = new Queue<Vector2>();
         }
     }
     private void Start()
@@ -58,227 +58,188 @@ public class AppEventTrigger : MonoBehaviour
     }
     private void OnNewPoseDetected(PoseData poseData)
     {
-        _poseData = poseData;
+        this.poseData = poseData;
     }
 
-    private void Update()
+    private void Update() 
     {
-        if (_poseData != null)
+        CheckClimberFalling();
+
+        if (poseData != null)
         {
-            _rightWristPos = _poseData.GetKeypoint(KeypointIndex.RightWrist);
-            _leftWristPos = _poseData.GetKeypoint(KeypointIndex.LeftWrist);
+            rightWristPos = poseData.GetKeypoint(KeypointIndex.RightWrist);
+            leftWristPos = poseData.GetKeypoint(KeypointIndex.LeftWrist);
         }
-        //print($"Right wrist still?: {RightWristDelta.KeypointStill}");
-        if (_handholdCenters != null && _handholdCenters.Count != 0)
+
+        if (handholdCenters != null && handholdCenters.Count != 0)
         {
-            RightWristDelta.CheckHandholdProximity(_handholdCenters, _rightWristPos);
-            LeftWristDelta.CheckHandholdProximity(_handholdCenters, _leftWristPos);
-            //print($"Right wrist delta: {RightWristDelta.currentDelta}");
-            //print($"Left wrist delta: {LeftWristDelta.currentDelta}");
-            if (RightWristDelta.LikelyKeypointOnHold)
+            RightWristTracker.EvaluateHoldContact(handholdCenters, rightWristPos);
+            LeftWristTracker.EvaluateHoldContact(handholdCenters, leftWristPos);
+            if (RightWristTracker.IsOnHold)
             {
                 print("Climber touched hold with right hand!");
             }
-            if (LeftWristDelta.LikelyKeypointOnHold)
+            if (LeftWristTracker.IsOnHold)
             {
                 print("Climber touched hold with left hand!");
             }
-            if(LeftWristDelta.LikelyKeypointOnHighestHold && RightWristDelta.LikelyKeypointOnHighestHold)
+            if (LeftWristTracker.IsOnHighestHold && RightWristTracker.IsOnHighestHold)
             {
                 print("Climber finished the climb!");
             }
         }
-        for (int i = 0;  i < _poseDataKeypointLength; i++)
-        {
-
-        }
     }
-    /*
-    private void CheckIfKeypointIsStill(Vector2 currentKeypoint, float movementThreshold, float stillTime)
-    {
-        if (previousKeypoint == null)
-        {
-            previousKeypoint = currentKeypoint;
-            return;
-        }
 
-        if (delta < movementThreshold)
-        {
-            stillTimer += deltaTime;
-            if (stillTimer >= stillTimeThreshold)
-                isStill = true;
-        }
-        else
-        {
-            stillTimer = 0f;
-            isStill = false;
-        }
-
-        previousKeypoint = currentKeypoint;
-    }
-    */
-    private void SortHandholdCentersByY()
-    {
-        _handholdCenters.Sort((a, b) => b.y.CompareTo(a.y));
-    }
     private void OnNewHandholdDetected(DetectedHandhold handhold)
     {
         BoundingBox bob = handhold.Box;
         Vector2 center = new Vector2(bob.CenterX, bob.CenterY);
-        _handholdCenters.Add(center);
-        SortHandholdCentersByY();
+        handholdCenters.Add(center);
+        handholdCenters.Sort((a, b) => b.y.CompareTo(a.y)); //Sorts handhold by their y-value in order to be able to find the highest hold
     }
 
-    private bool ClimberJumpedDown()
+    private bool CheckClimberFalling()
     {
-        for (int i = 0; i < _poseDataKeypointLength; i++)
+        for (int i = 0; i < keypointCount; i++) //Enqueus the current keypoint position for all visible keypoints
         {
             KeypointIndex currentIndex = (KeypointIndex)i;
 
-            if (_poseData.GetKeypoint(currentIndex) == Vector2.zero) //If the keypoint isn't detected by the model it returns a zero vector
+            if (poseData.GetKeypoint(currentIndex) == Vector2.zero) //If the keypoint isn't detected by the model it returns a zero vector, meaning this loop should be skipped
             {
                 continue;
             }
 
-            _poseDataKeypoints[i].Enqueue(_poseData.GetKeypoint(currentIndex));
-
-            if (_poseDataKeypoints[i].Count > maxPoseDataKeypointsLength)
+            keypointPositionHistory[i].Enqueue(poseData.GetKeypoint(currentIndex));
+            if (keypointPositionHistory[i].Count > keypointHistorySize)
             {
-                _poseDataKeypoints[i].Dequeue();
+                keypointPositionHistory[i].Dequeue();
             }
         }
 
-        for (int i = 0; i < _poseDataKeypointLength; i++)
+        float sumOfDeltas = 0;
+        for (int i = 0; i < keypointCount; i++) //Calculates the current movement
         {
-            for (int j = 0; j < _poseDataKeypoints[i].Count; j++)
+            if (keypointPositionHistory[0].Count() < keypointHistorySize) continue; //Ensures that position is only calculated when the queues are the size dictated by keypointHistorySize
+
+            Vector2[] currentHistory = keypointPositionHistory[i].ToArray();
+            for (int j = 0; j < currentHistory.Length - 1; j++)
             {
+                float currentY = currentHistory[j].y;
+                float nextY = currentHistory[j + 1].y;
+                sumOfDeltas += (nextY - currentY);
             }
         }
 
-        return true;
+        if (sumOfDeltas < climberFallingThreshold)
+        {
+            climberIsFalling = true;
+        }
+        else
+        {
+            climberIsFalling = false;
+        }
+
+        return climberIsFalling;
     }
-    private class KeypointDelta
+    private class KeypointTracker
     /*This helper class is used to detect whether a keypoint is still and next to a handhold
      * (likely indicating that the climber touched a hold).
-     * Call CheckIfKeypointIsStill() inside Update() inside AppEventTrigger
-     * and use the bool LikelyKeypointOnHold to trigger logic in FMOD.
+     * Call EvaluateStillness() inside Update() inside AppEventTrigger
+     * and use the bool IsOnHold to trigger logic in FMOD.
     */
     {
-        //Variables related to AverageDelta()
-        private Queue<float> deltas = new();
-        public float currentDelta;
-        private int deltasMaxLength = 10;
-        private Vector2 previousPoint = Vector2.zero;
+        //Movement tracking
+        private Queue<float> movementDeltas = new();
+        public float averageMovement;
+        private int movementSampleSize = 10;
+        private Vector2 previousPosition = Vector2.zero;
 
-        //Variables related to CheckIfKeypointIsStill()
-        public bool KeypointStill
-        {
-            get { return _keypointStill; }
-        }
-        private bool _keypointStill = false;
-
-        private float movementThreshold = 200f;
+        //Stillness detection
+        private bool keypointIsStill = false;
+        private float stillnessMovementThreshold = 200f;
         private float stillnessTimeThreshold = 0.3f;
-        private float timer = 0; //Increments when keypoint is still. Used to check against stillnessTimeThreshold
-        private float timerDecay = 0.3f;
+        private float stillnessTimer = 0; //Increments when keypoint is still. Used to check against stillnessTimeThreshold
+        private float stillnessTimerDecayRate = 0.3f;
 
-        //Variables related to CheckHandholdProximity()
-        private float proximityThreshold = 50.0f;
-        public bool LikelyKeypointOnHold
-        {
-            get { return _likelyKeypointOnHold; }
-        }
-        private bool _likelyKeypointOnHold = false;
-
-        public bool LikelyKeypointOnHighestHold
-        {
-            get { return _likelyKeypointOnHighestHold; }
-        }
-        private bool _likelyKeypointOnHighestHold = false;
-
-        public KeypointDelta()
+        //Hold proximity check
+        private float holdProximityThreshold = 50.0f;
+        private bool isOnHold = false;
+        public bool IsOnHold { get { return isOnHold; } }
+        private bool isOnHighestHold = false;
+        public bool IsOnHighestHold { get { return isOnHighestHold; } }
+        public KeypointTracker()
         {
 
         }
-        public KeypointDelta(float thresholdProximity)
+        public KeypointTracker(float thresholdProximity)
         {
-            proximityThreshold = thresholdProximity;
+            holdProximityThreshold = thresholdProximity;
         }
 
-        /// <summary>
-        /// Will calculate the average movement over a number of points. The number of points is set by deltasMaxLength
-        /// </summary>
-        /// <param name="keypoint"></param>
-        public void AverageDelta(Vector2 keypoint)
+        //Movement calculation
+        public void UpdateMovementAverage(Vector2 keypoint)
         {
-            if (previousPoint == Vector2.zero)
+            if (previousPosition == Vector2.zero)
             {
-                previousPoint = keypoint;
+                previousPosition = keypoint;
                 return;
             }
-            float delta = Vector2.Distance(keypoint, previousPoint) / Time.deltaTime; //Scales delta so it isn't frame rate dependant 
-            deltas.Enqueue(delta);
-            if (deltas.Count > deltasMaxLength)
+            float delta = Vector2.Distance(keypoint, previousPosition) / Time.deltaTime; //Scales delta so it isn't frame rate dependant 
+            movementDeltas.Enqueue(delta);
+            if (movementDeltas.Count > movementSampleSize)
             {
-                deltas.Dequeue();
+                movementDeltas.Dequeue();
             }
-            currentDelta = deltas.Average();
-            previousPoint = keypoint;
+            averageMovement = movementDeltas.Average();
+            previousPosition = keypoint;
         }
-        /// <summary>
-        /// Will set _keypointStill to true if the keypoint input is still for a certain amount of time
-        /// </summary>
-        /// <param name="keypoint"></param>
-        public void CheckIfKeypointIsStill(Vector2 keypoint)
+        //Stillness detection
+        public void EvaluateStillness(Vector2 keypoint)
         {
-            AverageDelta(keypoint);
-            if (currentDelta < movementThreshold)
+            UpdateMovementAverage(keypoint);
+            if (averageMovement < stillnessMovementThreshold)
             {
-                timer += Time.deltaTime;
-                if (timer > stillnessTimeThreshold)
+                stillnessTimer += Time.deltaTime;
+                if (stillnessTimer > stillnessTimeThreshold)
                 {
-                    _keypointStill = true;
+                    keypointIsStill = true;
                 }
                 else
                 {
-                    _keypointStill = false;
+                    keypointIsStill = false;
                 }
             }
             else
             {
-                timer = Mathf.Max(0, timer - Time.deltaTime * timerDecay); //Smooths the decay of the timer so a keypoint jittering will not affect stillness detection too much
-                _keypointStill = false;
+                stillnessTimer = Mathf.Max(0, stillnessTimer - Time.deltaTime * stillnessTimerDecayRate); //Smooths the decay of the stillnessTimer so a keypoint jittering will not affect stillness detection too much
+                keypointIsStill = false;
             }
         }
-        /// <summary>
-        /// Will check if a keypoint is still and close to a handhold
-        /// </summary>
-        /// <param name="handholdCenters"></param>
-        /// <param name="keypoint"></param>
-        public void CheckHandholdProximity(List<Vector2> handholdCenters, Vector2 keypoint)
+        //Hold proximity check
+        public void EvaluateHoldContact(List<Vector2> handholdCenters, Vector2 keypoint)
         {
-            CheckIfKeypointIsStill(keypoint);
-            if (!_keypointStill)
+            EvaluateStillness(keypoint);
+            if (!keypointIsStill)
             {
-                _likelyKeypointOnHold = false;
-                _likelyKeypointOnHighestHold = false;
+                isOnHold = false;
+                isOnHighestHold = false;
                 return;
             }
-            _likelyKeypointOnHold = false;
-            _likelyKeypointOnHighestHold = false;
+            isOnHold = false;
+            isOnHighestHold = false;
 
             for (int i = 0; i < handholdCenters.Count; i++)
             {
                 var center = handholdCenters[i];
                 float distance = Vector2.Distance(keypoint, center);
 
-                if (distance < proximityThreshold)
+                if (distance < holdProximityThreshold)
                 {
-                    _likelyKeypointOnHold = true;
+                    isOnHold = true;
 
                     if (i == 0)
                     {
-                        _likelyKeypointOnHighestHold = true;
+                        isOnHighestHold = true;
                     }
                     break;
                 }
