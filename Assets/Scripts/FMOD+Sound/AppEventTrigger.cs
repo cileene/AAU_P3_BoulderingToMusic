@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -21,6 +22,14 @@ public class AppEventTrigger : MonoBehaviour
 
     private float climberFallingThreshold = -500f;
     private bool climberIsFalling = false;
+    private bool canTriggerFallingEvent = true;
+    IEnumerator ClimberFallingEventCooldown()
+    {
+        canTriggerFallingEvent = false;
+        yield return new WaitForSeconds(3);
+        canTriggerFallingEvent = true;
+    }
+
     private void InitializePoseDataKeypoints()
     {
         for (int i = 0; i < keypointCount; i++) //Fills all the Queues with one vectors
@@ -28,15 +37,10 @@ public class AppEventTrigger : MonoBehaviour
             keypointPositionHistory[i] = new Queue<Vector2>();
         }
     }
-    private void Start()
-    {
-        InitializePoseDataKeypoints();
-    }
-
     public static AppEventTrigger Instance { get; private set; }
-    private void Awake() //Singleton logic
+    private void Awake() 
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null && Instance != this) //Singleton logic
         {
             Destroy(this);
         }
@@ -44,6 +48,8 @@ public class AppEventTrigger : MonoBehaviour
         {
             Instance = this;
         }
+
+        InitializePoseDataKeypoints();
     }
 
     private void OnEnable()
@@ -75,15 +81,15 @@ public class AppEventTrigger : MonoBehaviour
         {
             RightWristTracker.EvaluateHoldContact(handholdCenters, rightWristPos);
             LeftWristTracker.EvaluateHoldContact(handholdCenters, leftWristPos);
-            if (RightWristTracker.IsOnHold)
+            if (RightWristTracker.IsOnHold && RightWristTracker.canRaiseEvent)
             {
                 print("Climber touched hold with right hand!");
             }
-            if (LeftWristTracker.IsOnHold)
+            if (LeftWristTracker.IsOnHold && LeftWristTracker.canRaiseEvent)
             {
                 print("Climber touched hold with left hand!");
             }
-            if (LeftWristTracker.IsOnHighestHold && RightWristTracker.IsOnHighestHold)
+            if (LeftWristTracker.IsOnHighestHold && RightWristTracker.IsOnHighestHold && RightWristTracker.canRaiseEvent && LeftWristTracker.canRaiseEvent)
             {
                 print("Climber finished the climb!");
             }
@@ -98,7 +104,7 @@ public class AppEventTrigger : MonoBehaviour
         handholdCenters.Sort((a, b) => b.y.CompareTo(a.y)); //Sorts handhold by their y-value in order to be able to find the highest hold
     }
 
-    private bool CheckClimberFalling()
+    private void CheckClimberFalling()
     {
         for (int i = 0; i < keypointCount; i++) //Enqueus the current keypoint position for all visible keypoints
         {
@@ -130,16 +136,13 @@ public class AppEventTrigger : MonoBehaviour
             }
         }
 
-        if (sumOfDeltas < climberFallingThreshold)
+        climberIsFalling = sumOfDeltas < climberFallingThreshold;
+        if(climberIsFalling && canTriggerFallingEvent)
         {
-            climberIsFalling = true;
-        }
-        else
-        {
-            climberIsFalling = false;
+            StartCoroutine(ClimberFallingEventCooldown());
+            print("Climber is falling!");
         }
 
-        return climberIsFalling;
     }
     private class KeypointTracker
     /*This helper class is used to detect whether a keypoint is still and next to a handhold
@@ -167,6 +170,8 @@ public class AppEventTrigger : MonoBehaviour
         public bool IsOnHold { get { return isOnHold; } }
         private bool isOnHighestHold = false;
         public bool IsOnHighestHold { get { return isOnHighestHold; } }
+        public bool canRaiseEvent = true;
+
         public KeypointTracker()
         {
 
@@ -233,15 +238,20 @@ public class AppEventTrigger : MonoBehaviour
                 var center = handholdCenters[i];
                 float distance = Vector2.Distance(keypoint, center);
 
-                if (distance < holdProximityThreshold)
-                {
-                    isOnHold = true;
+                bool wasOnHold = isOnHold;
+                isOnHold = distance < holdProximityThreshold;
+                isOnHighestHold = (i == 0) && isOnHold;
 
-                    if (i == 0)
-                    {
-                        isOnHighestHold = true;
-                    }
-                    break;
+                if (wasOnHold) break; //Will prevent the event from being triggered multiple times
+                if (IsOnHighestHold)
+                {
+                    //Raise completed event
+                    print("Hand on highest hold");
+                }
+                else if(isOnHold)
+                {
+                    //Raise event
+                    print("Hand on hold!");
                 }
             }
         }
