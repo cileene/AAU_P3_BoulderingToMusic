@@ -160,12 +160,12 @@ namespace Sound
         //Stillness detection
         private bool keypointIsStill = false;
         private float stillnessMovementThreshold = 200f;
-        private float stillnessTimeThreshold = 0.3f;
+        private float stillnessTimeThreshold = 0.2f;
         private float stillnessTimer = 0; //Increments when keypoint is still. Used to check against stillnessTimeThreshold
         private float stillnessTimerDecayRate = 0.3f;
  
         //Hold proximity check
-        private float holdProximityThreshold = 50.0f;
+        private float holdProximityThreshold = 70.0f;
         private bool isOnHold = false;
         public bool IsOnHold { get { return isOnHold; } }
         private bool isOnHighestHold = false;
@@ -251,6 +251,8 @@ namespace Sound
                     else
                     {
                         isOnHighestHold = true;
+                        Debug.Log("On highest hold!");
+                        AppEvents.RaisePotentialHighestHandholdContact();
                     }
                     canRaiseEvent = false;
                     lastTouchedHold = i;

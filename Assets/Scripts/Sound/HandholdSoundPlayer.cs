@@ -24,7 +24,7 @@ namespace Sound
             Debug.Log("[HandholdSoundPlayer] OnDisable – unsubscribing from events");
             AppEvents.SoundConfig -= OnSoundConfig;
             AppEvents.PotentialHandholdContact -= PlayHandholdSound;
-            AppEvents.PotentialHighestHandholdContact -= PlayHandholdSound;
+            AppEvents.PotentialHighestHandholdContact -= PlayWinSound;
             AppEvents.PotentialFallDetected -= PlayDeathSound;
 
 
