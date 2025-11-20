@@ -406,8 +406,13 @@ MonoBehaviour:
   MasterBanks:
   - Master
   Banks:
-  - Ambience
-  - Event detected
+  - Dialogue_CN
+  - Dialogue_EN
+  - Dialogue_JP
+  - Music
+  - SFX
+  - Vehicles
+  - VO
   BanksToLoad: []
   LiveUpdatePort: 9264
   EnableMemoryTracking: 0
