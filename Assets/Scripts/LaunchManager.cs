@@ -49,6 +49,12 @@ public class LaunchManager : MonoBehaviour
     [SerializeField] private bool detectPose;
     [Tooltip("Drag your YOLO11n-pose .onnx model here")]
     public ModelAsset modelAsset;
+
+    [Header("FMOD Sound")] 
+    [SerializeField] private GameObject handholdsSound;
+    [SerializeField] private GameObject bgmSound;
+    [SerializeField] private GameObject winSound;
+    [SerializeField] private GameObject deathSound;
     
     private void Awake()
     {
@@ -62,6 +68,7 @@ public class LaunchManager : MonoBehaviour
         
         HandleDetectionSettings();
         HandleInput();
+        AppEvents.RaiseSoundConfig(handholdsSound, bgmSound, winSound, deathSound);
     }
 
     private void HandleInput()
