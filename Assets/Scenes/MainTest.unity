@@ -285,6 +285,69 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.AspectRatioFitter
   m_AspectMode: 1
   m_AspectRatio: 1
+--- !u!1 &710172278
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 710172280}
+  - component: {fileID: 710172279}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &710172279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710172278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioEventEmitter
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -533391203
+      Data2: 1308719468
+      Data3: -1105965896
+      Data4: 1426599000
+    Path: event:/BGM
+  Event: 
+  EventPlayTrigger: 1
+  EventStopTrigger: 0
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 20
+--- !u!4 &710172280
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710172278}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3977.0496, y: 2297.4583, z: -355.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &949276908
 GameObject:
   m_ObjectHideFlags: 0
@@ -435,7 +498,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99495ddd03a24414a6524598156ccc08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaunchManager
-  inputSource: 1
+  inputSource: 0
   webcamResolution: 4
   webcamDeviceName: 
   videoName: Camilleclimbs1.mp4
@@ -450,7 +513,7 @@ MonoBehaviour:
   detectPersonModel: {fileID: 5022602860645237092, guid: 6dd5bbefc9b494ac08820963a1ca5630, type: 3}
   detectPersonClasses: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
   detectHandholds: 1
-  continuousHandholdDetection: 0
+  continuousHandholdDetection: 1
   handholdDetectButton: {fileID: 949276910}
   problemColor: 1
   handholdPersistenceFrames: 30
@@ -722,8 +785,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2112474134}
   - component: {fileID: 2112474133}
-  - component: {fileID: 2112474132}
   - component: {fileID: 2112474131}
+  - component: {fileID: 2112474135}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -775,14 +838,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!81 &2112474132
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2112474130}
-  m_Enabled: 1
 --- !u!20 &2112474133
 Camera:
   m_ObjectHideFlags: 0
@@ -849,6 +904,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2112474135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2112474130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c6556701af9e04380698b89f691b6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
+  nonRigidbodyVelocity: 0
+  attenuationObject: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -857,3 +926,4 @@ SceneRoots:
   - {fileID: 1218540713}
   - {fileID: 1519205739}
   - {fileID: 513451629}
+  - {fileID: 710172280}
