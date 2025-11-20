@@ -380,9 +380,8 @@ MonoBehaviour:
   switchSettingsMigration: 1
   HasSourceProject: 1
   HasPlatforms: 1
-  sourceProjectPath: Assets/Plugins/FMOD/FMOD bouldering to music project/FMOD bouldering
-    to music project.fspro
-  sourceBankPath: Assets/Plugins/FMOD/FMOD bouldering to music project/Build
+  sourceProjectPath: FmodTest/FmodTest.fspro
+  sourceBankPath: FmodTest/Build
   sourceBankPathUnformatted: 
   BankRefreshCooldown: 5
   ShowBankRefreshWindow: 1
