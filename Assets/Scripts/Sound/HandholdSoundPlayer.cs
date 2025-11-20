@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Sound
@@ -11,43 +12,60 @@ namespace Sound
 
         private void OnEnable()
         {
+            Debug.Log("[HandholdSoundPlayer] OnEnable – subscribing to events");
             AppEvents.SoundConfig += OnSoundConfig;
             AppEvents.PotentialHandholdContact += PlayHandholdSound;
+            AppEvents.PotentialHighestHandholdContact += PlayWinSound;
         }
 
         private void OnDisable()
         {
+            Debug.Log("[HandholdSoundPlayer] OnDisable – unsubscribing from events");
             AppEvents.SoundConfig -= OnSoundConfig;
             AppEvents.PotentialHandholdContact -= PlayHandholdSound;
+            AppEvents.PotentialHighestHandholdContact -= PlayHandholdSound;
+
         }
 
         private void OnSoundConfig(GameObject handholdsSound, GameObject bgmSound, GameObject winSound, GameObject deathSound)
         {
-            this.handholdSound = handholdSound;
+            this.handholdSound = handholdsSound;
             this.bgmSound = bgmSound;
             this.winSound = winSound;
             this.deathSound = deathSound;
         }
-
-        private void Start()
+        
+        private void TriggerEmitter(GameObject soundObject)
         {
-            if (bgmSound == null) return;
-            bgmSound.SetActive(true);
+            if (soundObject == null) return;
+
+            var emitter = soundObject.GetComponent<FMODUnity.StudioEventEmitter>();
+            if (emitter == null) return;
+
+            // Reset
+            emitter.enabled = false;
+
+            // Trigger FMOD "Object Enable"
+            emitter.enabled = true;
+
+            // Disable again next frame for clean oneshot behavior
+            StartCoroutine(DisableEmitterNextFrame(emitter));
+        }
+
+        private IEnumerator DisableEmitterNextFrame(FMODUnity.StudioEventEmitter emitter)
+        {
+            yield return null; // wait one frame
+            emitter.enabled = false;
         }
 
         private void PlayHandholdSound()
         {
-            if (handholdSound == null) return;
-
-            handholdSound.SetActive(true);
-            handholdSound.SetActive(false);
+            TriggerEmitter(this.handholdSound);
         }
 
         private void PlayWinSound()
         {
-            if (winSound == null) return;
-            winSound.SetActive(true);
-            
+            TriggerEmitter(this.winSound);
         }
     }
 }
