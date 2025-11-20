@@ -40,6 +40,8 @@ public static class AppEvents
     public static event Action<PoseData> NewPoseDetected;
     public static event Action PotentialHandholdContact;
     public static event Action PotentialHighestHandholdContact;
+    
+    public static event Action PotentialFallDetected;
     public static event Action<GameObject, GameObject, GameObject, GameObject> SoundConfig;
 
 
@@ -146,6 +148,11 @@ public static class AppEvents
     public static void RaisePotentialHighestHandholdContact()
     {
         PotentialHighestHandholdContact?.Invoke();
+    }
+    
+    public static void RaisePotentialFallDetected()
+    {
+        PotentialFallDetected?.Invoke();
     }
     
     public static void RaiseSoundConfig(

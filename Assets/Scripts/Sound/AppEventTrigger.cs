@@ -138,8 +138,8 @@ namespace Sound
         climberIsFalling = sumOfDeltas < climberFallingThreshold;
         if(climberIsFalling && canTriggerFallingEvent)
         {
+            AppEvents.RaisePotentialFallDetected();
             print("Climber is falling!");
-            
             StartCoroutine(ClimberFallingEventCooldown());
         }
  

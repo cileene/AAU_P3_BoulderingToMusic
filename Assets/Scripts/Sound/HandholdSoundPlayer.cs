@@ -16,6 +16,7 @@ namespace Sound
             AppEvents.SoundConfig += OnSoundConfig;
             AppEvents.PotentialHandholdContact += PlayHandholdSound;
             AppEvents.PotentialHighestHandholdContact += PlayWinSound;
+            AppEvents.PotentialFallDetected += PlayDeathSound;
         }
 
         private void OnDisable()
@@ -24,17 +25,20 @@ namespace Sound
             AppEvents.SoundConfig -= OnSoundConfig;
             AppEvents.PotentialHandholdContact -= PlayHandholdSound;
             AppEvents.PotentialHighestHandholdContact -= PlayHandholdSound;
+            AppEvents.PotentialFallDetected -= PlayDeathSound;
+
 
         }
 
-        private void OnSoundConfig(GameObject handholdsSound, GameObject bgmSound, GameObject winSound, GameObject deathSound)
+        private void OnSoundConfig(GameObject handholdsSound, GameObject bgmSound, GameObject winSound,
+            GameObject deathSound)
         {
             this.handholdSound = handholdsSound;
             this.bgmSound = bgmSound;
             this.winSound = winSound;
             this.deathSound = deathSound;
         }
-        
+
         private void TriggerEmitter(GameObject soundObject)
         {
             if (soundObject == null) return;
@@ -66,6 +70,11 @@ namespace Sound
         private void PlayWinSound()
         {
             TriggerEmitter(this.winSound);
+        }
+
+        private void PlayDeathSound()
+        {
+            TriggerEmitter(this.deathSound);
         }
     }
 }
