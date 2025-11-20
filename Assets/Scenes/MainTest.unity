@@ -743,7 +743,7 @@ MonoBehaviour:
   handholdPersistenceFrames: 30
   detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}
   classesAsset: {fileID: 4900000, guid: 35a8acf7937f2468286d5a7cf2a36e8c, type: 3}
-  detectPose: 0
+  detectPose: 1
   modelAsset: {fileID: 5022602860645237092, guid: 24a021123fc584a5b91cefc078e2b2ae, type: 3}
   handholdsSound: {fileID: 710172278}
   bgmSound: {fileID: 932888472}

@@ -80,10 +80,12 @@ namespace Sound
                 if (RightWristTracker.IsOnHold)
                 {
                     print("Climber touched hold with right hand!");
+                    AppEvents.RaisePotentialHandholdContact();
                 }
                 if (LeftWristTracker.IsOnHold)
                 {
                     print("Climber touched hold with left hand!");
+                    AppEvents.RaisePotentialHandholdContact();
                 }
                 if (LeftWristTracker.IsOnHighestHold && RightWristTracker.IsOnHighestHold)
                 {
