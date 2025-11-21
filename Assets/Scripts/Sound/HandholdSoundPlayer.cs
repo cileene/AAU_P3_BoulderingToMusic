@@ -47,13 +47,7 @@ namespace Sound
             if (emitter == null) return;
 
             // Reset
-            emitter.enabled = false;
-
-            // Trigger FMOD "Object Enable"
-            emitter.enabled = true;
-
-            // Disable again next frame for clean oneshot behavior
-            StartCoroutine(DisableEmitterNextFrame(emitter));
+            emitter.Play();
         }
 
         private IEnumerator DisableEmitterNextFrame(FMODUnity.StudioEventEmitter emitter)

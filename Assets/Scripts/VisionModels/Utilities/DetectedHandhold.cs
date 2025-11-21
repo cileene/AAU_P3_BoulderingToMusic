@@ -6,5 +6,6 @@ namespace VisionModels.Utilities
         public string Label;
         public int FramesSinceLastSeen;
         public int Id;
+        public bool HasBeenDetected;
     }
 }

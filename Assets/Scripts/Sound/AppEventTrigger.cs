@@ -72,6 +72,7 @@ namespace Sound
     private void OnHandHoldContact()
     {
         AppEvents.RaisePotentialHandholdContact();
+        Debug.Log("Hand hold contact detected");
     }
     private void OnNewPoseDetected(PoseData poseData)
     {
@@ -239,6 +240,7 @@ namespace Sound
             {
                 var center = handholdCenters[i];
                 float distance = Vector2.Distance(keypoint, center);
+                if (i==0) {Debug.Log("Distance to hold " + i + ": " + distance);}
  
                 if (distance < holdProximityThreshold)
                 {

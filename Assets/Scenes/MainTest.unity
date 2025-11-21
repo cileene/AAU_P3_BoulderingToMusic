@@ -324,7 +324,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 697712706}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
   m_Name: 
@@ -338,7 +338,7 @@ MonoBehaviour:
       Data4: 1639341506
     Path: event:/Dead
   Event: 
-  EventPlayTrigger: 11
+  EventPlayTrigger: 0
   EventStopTrigger: 0
   AllowFadeout: 1
   TriggerOnce: 0
@@ -387,7 +387,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 710172278}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
   m_Name: 
@@ -401,7 +401,7 @@ MonoBehaviour:
       Data4: -1861854397
     Path: event:/HandHold
   Event: 
-  EventPlayTrigger: 11
+  EventPlayTrigger: 0
   EventStopTrigger: 0
   AllowFadeout: 1
   TriggerOnce: 0
@@ -450,7 +450,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 932888472}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
   m_Name: 
@@ -634,7 +634,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1021602790}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
   m_Name: 
@@ -648,7 +648,7 @@ MonoBehaviour:
       Data4: 1473932141
     Path: event:/Win
   Event: 
-  EventPlayTrigger: 11
+  EventPlayTrigger: 0
   EventStopTrigger: 0
   AllowFadeout: 1
   TriggerOnce: 0
@@ -722,10 +722,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99495ddd03a24414a6524598156ccc08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaunchManager
-  inputSource: 0
+  inputSource: 1
   webcamResolution: 4
   webcamDeviceName: 
-  videoName: Camilleclimbs1.mp4
+  videoName: Valde.mov
   stillFilePath: Still2.jpg
   runLogic: 1
   showDebug: 1
@@ -737,14 +737,14 @@ MonoBehaviour:
   detectPersonModel: {fileID: 5022602860645237092, guid: 6dd5bbefc9b494ac08820963a1ca5630, type: 3}
   detectPersonClasses: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
   detectHandholds: 1
-  continuousHandholdDetection: 1
+  continuousHandholdDetection: 0
   handholdDetectButton: {fileID: 949276910}
-  problemColor: 1
+  problemColor: 4
   handholdPersistenceFrames: 30
   detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}
   classesAsset: {fileID: 4900000, guid: 35a8acf7937f2468286d5a7cf2a36e8c, type: 3}
   detectPose: 1
-  modelAsset: {fileID: 5022602860645237092, guid: 24a021123fc584a5b91cefc078e2b2ae, type: 3}
+  modelAsset: {fileID: 5022602860645237092, guid: cc3d2c9b65d5f44828ac007c69cc4202, type: 3}
   handholdsSound: {fileID: 710172278}
   bgmSound: {fileID: 932888472}
   winSound: {fileID: 1021602790}
@@ -1015,6 +1015,7 @@ GameObject:
   - component: {fileID: 2112474133}
   - component: {fileID: 2112474131}
   - component: {fileID: 2112474135}
+  - component: {fileID: 2112474136}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -1146,6 +1147,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
   nonRigidbodyVelocity: 0
   attenuationObject: {fileID: 0}
+--- !u!114 &2112474136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2112474130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 157588b1c598d4761baa22e4c816eb22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Sound.HandholdSoundPlayer
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

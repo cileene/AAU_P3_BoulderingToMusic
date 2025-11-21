@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace VisionModels.Utilities
 {
     public class BoundingBox // changed to class from struct to allow passing by reference
