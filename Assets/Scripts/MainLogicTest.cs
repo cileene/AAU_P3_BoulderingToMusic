@@ -50,7 +50,7 @@ public class MainLogicTest : MonoBehaviour
     private void CheckHandholdProximity()
     {
         
-        float proximityThreshold = 40.0f; // Define a threshold distance
+        float proximityThreshold = 50.0f; // Define a threshold distance
         foreach (var handhold in _detectedHandholds)
         {
             Vector2 center = new Vector2(handhold.Box.CenterX, handhold.Box.CenterY);
