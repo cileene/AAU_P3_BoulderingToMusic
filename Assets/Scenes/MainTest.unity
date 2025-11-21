@@ -234,7 +234,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 0}
+  m_SizeDelta: {x: 640, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &578865018
 MonoBehaviour:
@@ -722,10 +722,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99495ddd03a24414a6524598156ccc08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaunchManager
-  inputSource: 1
+  inputSource: 0
   webcamResolution: 4
   webcamDeviceName: 
-  videoName: Valde.mov
+  videoName: Camilleclimbs1.mp4
   stillFilePath: Still2.jpg
   runLogic: 1
   showDebug: 1
