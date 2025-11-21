@@ -16,10 +16,9 @@ namespace Sound
         private Vector2 _leftWristPos;
         private KeypointTracker _rightWristTracker = new();
         private KeypointTracker _leftWristTracker = new();
-
-        private static int
-            keypointCount =
-                Enum.GetValues(typeof(KeypointIndex)).Length; //Will get the length of the enum KeypointIndex
+        
+        //Will get the length of the enum KeypointIndex
+        private static int keypointCount = Enum.GetValues(typeof(KeypointIndex)).Length; 
 
         private Queue<Vector2>[] _keypointPositionHistory = new Queue<Vector2>[keypointCount];
         private int _keypointHistorySize = 5;
@@ -111,8 +110,9 @@ namespace Sound
             {
                 KeypointIndex currentIndex = (KeypointIndex)i;
 
+                //If the keypoint isn't detected by the model it returns a zero vector, meaning this loop should be skipped
                 if (_poseData.GetKeypoint(currentIndex) ==
-                    Vector2.zero) //If the keypoint isn't detected by the model it returns a zero vector, meaning this loop should be skipped
+                    Vector2.zero) 
                 {
                     continue;
                 }
@@ -127,8 +127,9 @@ namespace Sound
             float sumOfDeltas = 0;
             for (int i = 0; i < keypointCount; i++) //Calculates the current movement
             {
+                //Ensures that position is only calculated when the queues are the size dictated by keypointHistorySize
                 if (_keypointPositionHistory[0].Count() < _keypointHistorySize)
-                    continue; //Ensures that position is only calculated when the queues are the size dictated by keypointHistorySize
+                    continue; 
 
                 Vector2[] currentHistory = _keypointPositionHistory[i].ToArray();
                 for (int j = 0; j < currentHistory.Length - 1; j++)
@@ -174,8 +175,8 @@ namespace Sound
             private float stillnessMovementThreshold = 200f;
             private float stillnessTimeThreshold = 0.2f;
 
-            private float
-                stillnessTimer = 0; //Increments when keypoint is still. Used to check against stillnessTimeThreshold
+            //Increments when keypoint is still. Used to check against stillnessTimeThreshold
+            private float stillnessTimer = 0; 
 
             private float stillnessTimerDecayRate = 0.3f;
 
@@ -199,8 +200,6 @@ namespace Sound
             public int lastTouchedHold = -1;
 
             public event Action OnHoldContactDetected;
-
-            
             
             public KeypointTracker()
             {
