@@ -63,6 +63,7 @@ public class LaunchManager : MonoBehaviour
     
     private void Start()
     {
+        gameObject.AddComponent<HandholdSoundPlayer>();
         AppEvents.RaiseSoundConfig(handholdsSound, bgmSound, winSound, deathSound);
         if (showDebug) gameObject.AddComponent<ModelDebugger>();
         if (runLogic) gameObject.AddComponent<AppEventTrigger>();

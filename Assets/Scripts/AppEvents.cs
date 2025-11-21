@@ -40,7 +40,6 @@ public static class AppEvents
     public static event Action<PoseData> NewPoseDetected;
     public static event Action PotentialHandholdContact;
     public static event Action PotentialHighestHandholdContact;
-    
     public static event Action PotentialFallDetected;
     public static event Action<GameObject, GameObject, GameObject, GameObject> SoundConfig;
 
@@ -141,18 +140,23 @@ public static class AppEvents
         NewPoseDetected?.Invoke(pose);
         //Debug.Log("Event: NewPoseDetected with " + pose.Keypoints.Count + " keypoints");
     }
+    
     public static void RaisePotentialHandholdContact()
     {
         PotentialHandholdContact?.Invoke();
+        Debug.Log("Event: PotentialHandholdContact invoked");
     }
+    
     public static void RaisePotentialHighestHandholdContact()
     {
         PotentialHighestHandholdContact?.Invoke();
+        Debug.Log("Event: PotentialHighestHandholdContact invoked");
     }
     
     public static void RaisePotentialFallDetected()
     {
         PotentialFallDetected?.Invoke();
+        Debug.Log("Event: PotentialFallDetected invoked");
     }
     
     public static void RaiseSoundConfig(

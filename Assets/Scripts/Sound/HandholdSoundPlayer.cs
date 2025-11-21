@@ -1,14 +1,13 @@
-using System.Collections;
 using UnityEngine;
 
 namespace Sound
 {
     public class HandholdSoundPlayer : MonoBehaviour
     {
-        private GameObject handholdSound;
-        private GameObject bgmSound;
-        private GameObject winSound;
-        private GameObject deathSound;
+        private GameObject _handholdSound;
+        private GameObject _bgmSound;
+        private GameObject _winSound;
+        private GameObject _deathSound;
 
         private void OnEnable()
         {
@@ -26,55 +25,45 @@ namespace Sound
             AppEvents.PotentialHandholdContact -= PlayHandholdSound;
             AppEvents.PotentialHighestHandholdContact -= PlayWinSound;
             AppEvents.PotentialFallDetected -= PlayDeathSound;
-
-
         }
 
         private void OnSoundConfig(GameObject handholdsSound, GameObject bgmSound, GameObject winSound,
             GameObject deathSound)
         {
-            this.handholdSound = handholdsSound;
-            this.bgmSound = bgmSound;
-            this.winSound = winSound;
-            this.deathSound = deathSound;
+            _handholdSound = handholdsSound;
+            _bgmSound = bgmSound;
+            _winSound = winSound;
+            _deathSound = deathSound;
+            
+            _bgmSound.GetComponent<FMODUnity.StudioEventEmitter>()?.Play();
         }
 
         private void TriggerEmitter(GameObject soundObject)
         {
-            if (soundObject == null) return;
+            if (!soundObject) return;
 
             var emitter = soundObject.GetComponent<FMODUnity.StudioEventEmitter>();
-            if (emitter == null) return;
-
-            // Reset
-            emitter.enabled = false;
-
-            // Trigger FMOD "Object Enable"
-            emitter.enabled = true;
-
-            // Disable again next frame for clean oneshot behavior
-            StartCoroutine(DisableEmitterNextFrame(emitter));
-        }
-
-        private IEnumerator DisableEmitterNextFrame(FMODUnity.StudioEventEmitter emitter)
-        {
-            yield return null; // wait one frame
-            emitter.enabled = false;
+            if (!emitter) return;
+            
+            emitter.Play();
         }
 
         private void PlayHandholdSound()
         {
-            TriggerEmitter(this.handholdSound);
+            TriggerEmitter(_handholdSound);
+            Debug.Log("Played handhold contact sound");
         }
 
         private void PlayWinSound()
         {
-            TriggerEmitter(this.winSound);
+            TriggerEmitter(_winSound);
+            Debug.Log("Played win sound");
         }
 
         private void PlayDeathSound()
         {
-            TriggerEmitter(this.deathSound);
+            TriggerEmitter(_deathSound);
+            Debug.Log("Played death sound");
         }
     }
 }
