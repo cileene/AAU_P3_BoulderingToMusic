@@ -4,7 +4,7 @@ using VisionModels.Utilities;
 
 namespace Sound
 {
-    public class FMODEvents : MonoBehaviour
+    public class _FMODEvents : MonoBehaviour
     {
         [field: SerializeField] public EventReference HandholdContact {  get; private set; }
     
@@ -13,7 +13,7 @@ namespace Sound
 
         [SerializeField] private GameObject HandholdsEmitter;
 
-        public static FMODEvents Instance { get; private set; }
+        public static _FMODEvents Instance { get; private set; }
 
         private GameObject _handHolds;
         

@@ -107,12 +107,10 @@ namespace Sound
             if (isRightHand)
             {
                 _rightHandSeen = true;
-                Debug.Log("Right hand seen");
             }
             else
             {
                 _leftHandSeen = true;
-                Debug.Log("Left hand seen");
             }
 
             if (!_keypointIsStill)
@@ -128,7 +126,7 @@ namespace Sound
                 float distance = Vector2.Distance(keypoint, center);
                 if (i == 0)
                 {
-                    Debug.Log("Distance to hold " + i + ": " + distance);
+                    //Debug.Log("Distance to hold " + i + ": " + distance);
                 }
 
                 if (distance < _holdProximityThreshold)
@@ -142,9 +140,6 @@ namespace Sound
                     }
                     else
                     {
-                        Debug.Log("Checking for highest hold...");
-
-                        //IsOnHighestHold = true;
                         Debug.Log("On highest hold!");
                         AppEvents.RaisePotentialHighestHandholdContact();
                         _leftHandSeen = false;

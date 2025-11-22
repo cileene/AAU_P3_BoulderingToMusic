@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace Sound
 {
-    public class AudioManager : MonoBehaviour
+    public class _AudioManager : MonoBehaviour
     {
-        public static AudioManager Instance { get; private set; }
+        public static _AudioManager Instance { get; private set; }
 
         private EventInstance musicEventInstance;
 
@@ -21,7 +21,7 @@ namespace Sound
 
         private void Start()
         {
-            InitializeMusic(FMODEvents.Instance.Ambience);
+            InitializeMusic(_FMODEvents.Instance.Ambience);
         }
 
         private void InitializeMusic(EventReference musicEventReference)

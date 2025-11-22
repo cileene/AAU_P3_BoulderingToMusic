@@ -251,7 +251,7 @@ namespace VisionModels.ModelRunners
                 var box = new BoundingBox
                 {
                     CenterX = output[n, 0] * scaleX - displayWidth / 2,
-                    CenterY = -(output[n, 1] * scaleY - displayHeight / 2),
+                    CenterY = -(output[n, 1] * scaleY - displayHeight / 2), // important -
                     Width = output[n, 2] * scaleX,
                     Height = output[n, 3] * scaleY,
                     Label = label,
