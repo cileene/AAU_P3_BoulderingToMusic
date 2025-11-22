@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Configs;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -95,13 +96,14 @@ namespace VisionModels.ModelRunners
             _useWebcam = false;
         }
         
-        private void OnConfigurePersonDetector(ModelAsset model, TextAsset classes, RawImage display, Font fnt, Texture2D borderTex)
+        private void OnConfigurePersonDetector(PersonDetectorConfig config)
         {
-            _modelAsset = model;
-            _classesAsset = classes;
-            _displayImage = display;
-            _font = fnt;
-            _borderTexture = borderTex;
+            _modelAsset = config.Model;
+            _classesAsset = config.Classes;
+            _displayImage = config.RawImage;
+            _font = config.Font;
+            _borderTexture = config.BorderTexture;
+            
             StartModel();
         }
 

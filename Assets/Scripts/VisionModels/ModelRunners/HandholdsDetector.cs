@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Configs;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -117,30 +117,19 @@ namespace VisionModels.ModelRunners
             _useWebcam = false;
         }
 
-        private void OnConfigureHandholdsDetector(
-            ModelAsset model,
-            TextAsset classes,
-            ProblemColor problemColor,
-            RawImage rawImage,
-            Font font,
-            Texture2D borderTex,
-            Int32 keepHandholdsFrames,
-            Button handholdDetectButton,
-            bool continuousHandholdDetection
-            )
+        private void OnConfigureHandholdsDetector(HandholdsDetectorConfig config)
         {
-            _modelAsset = model;
-            _classesAsset = classes;
-            _selectedColor = problemColor;
-            _displayImage = rawImage;
-            _borderTexture = borderTex;
-            _font = font;
-            _maxFramesBeforeRemoval = keepHandholdsFrames;
-            _detectionToggleButton = handholdDetectButton;
-            _continuousDetection = continuousHandholdDetection;
+            _modelAsset = config.Model;
+            _classesAsset = config.Classes;
+            _selectedColor = config.ProblemColor;
+            _displayImage = config.RawImage;
+            _borderTexture = config.BorderTexture;
+            _font = config.Font;
+            _maxFramesBeforeRemoval = config.KeepHandholdsFrames;
+            _detectionToggleButton = config.HandholdDetectButton;
+            _continuousDetection = config.ContinuousHandholdDetection;
 
             StartModel();
-            
             SetupButtonEventTriggers();
         }
 

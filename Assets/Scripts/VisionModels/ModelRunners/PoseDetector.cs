@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
+using Configs;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -95,14 +95,11 @@ namespace VisionModels.ModelRunners
             _useWebcam = false;
         }
 
-        private void OnConfigurePoseDetector(
-            ModelAsset model,
-            RawImage rawImage,
-            Texture2D borderTex)
+        private void OnConfigurePoseDetector(PoseDetectorConfig config)
         {
-            _modelAsset = model;
-            _displayImage = rawImage;
-            _borderTexture = borderTex;
+            _modelAsset = config.Model;
+            _displayImage = config.RawImage;
+            _borderTexture = config.BorderTexture;
 
             StartModel();
         }

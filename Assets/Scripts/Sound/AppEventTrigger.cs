@@ -7,10 +7,9 @@ using VisionModels.Utilities;
 
 namespace Sound
 {
+    //This script handles the logic for calling the event in app AppEvents eventually playing sound in FMOD
     public class AppEventTrigger : MonoBehaviour
     {
-        //This script handles the logic for calling the event in app AppEvents eventually playing sound in FMOD
-
         private List<Vector2> _handholdCenters = new();
         private PoseData _poseData;
         private Vector2 _rightWristPos;
@@ -146,7 +145,6 @@ namespace Sound
                     _keypointPositionHistory[i].Dequeue();
                 }
             }
-
             
             sumOfDeltas = 0;
             for (int i = 0; i < _keypointCount; i++) //Calculates the current movement

@@ -34,18 +34,12 @@ namespace Sound
         {
             AppEvents.NewPoseDetected += OnNewPoseDetected;
             AppEvents.NewHandholdDetected += OnPotentialHandholdContact;
-            AppEvents.SoundConfig += OnSoundConfig;
         }
         
         private void OnDisable()
         {
             AppEvents.NewPoseDetected -= OnNewPoseDetected;
             AppEvents.NewHandholdDetected -= OnPotentialHandholdContact;
-        }
-
-        private void OnSoundConfig(GameObject handHolds, GameObject bgm, GameObject win, GameObject death)
-        {
-            
         }
 
         private void OnNewPoseDetected(PoseData pose)

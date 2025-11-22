@@ -22,7 +22,6 @@ namespace Sound
         private void OnAppEventTriggerReady(AppEventTrigger appEventTrigger)
         {
             trigger = appEventTrigger;
-            
         }
         
         private void Update()
@@ -34,6 +33,5 @@ namespace Sound
                 RuntimeManager.StudioSystem.setParameterByName("height", height);
             }
         }
-        
     }
 }
