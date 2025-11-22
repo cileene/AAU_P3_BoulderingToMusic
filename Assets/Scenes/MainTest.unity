@@ -440,8 +440,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1048705358}
+  m_Children: []
   m_Father: {fileID: 1122630364}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &932888474
@@ -670,7 +669,7 @@ GameObject:
   - component: {fileID: 1048705358}
   - component: {fileID: 1048705359}
   m_Layer: 0
-  m_Name: Height
+  m_Name: HeightParameter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -684,12 +683,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1048705357}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 932888473}
+  m_Father: {fileID: 1122630364}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1048705359
 MonoBehaviour:
@@ -740,6 +739,7 @@ Transform:
   - {fileID: 697712707}
   - {fileID: 1021602791}
   - {fileID: 932888473}
+  - {fileID: 1048705358}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1218540711
