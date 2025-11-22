@@ -28,6 +28,8 @@ namespace Sound
         private float _climberFallingThreshold = -500f;
         private bool _climberIsFalling = false;
         private bool _canTriggerFallingEvent = true;
+        
+        private float _sumOfDeltas;
 
         public static AppEventTrigger Instance { get; private set; }
 
@@ -126,7 +128,8 @@ namespace Sound
                 }
             }
 
-            float sumOfDeltas = 0;
+            
+            _sumOfDeltas = 0;
             for (int i = 0; i < _keypointCount; i++) //Calculates the current movement
             {
                 if (_keypointPositionHistory[0].Count() < _keypointHistorySize)
@@ -137,11 +140,11 @@ namespace Sound
                 {
                     float currentY = currentHistory[j].y;
                     float nextY = currentHistory[j + 1].y;
-                    sumOfDeltas += (nextY - currentY);
+                    _sumOfDeltas += (nextY - currentY);
                 }
             }
 
-            _climberIsFalling = sumOfDeltas < _climberFallingThreshold;
+            _climberIsFalling = _sumOfDeltas < _climberFallingThreshold;
             if (_climberIsFalling && _canTriggerFallingEvent)
             {
                 AppEvents.RaisePotentialFallDetected();

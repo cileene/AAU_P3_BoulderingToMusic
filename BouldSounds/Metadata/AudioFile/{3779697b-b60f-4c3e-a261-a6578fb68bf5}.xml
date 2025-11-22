@@ -2,7 +2,10 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{3779697b-b60f-4c3e-a261-a6578fb68bf5}">
 		<property name="assetPath">
-			<value>HHold6.wav</value>
+			<value>Hholds/HHold6.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
 		</property>
 		<property name="frequencyInKHz">
 			<value>48</value>

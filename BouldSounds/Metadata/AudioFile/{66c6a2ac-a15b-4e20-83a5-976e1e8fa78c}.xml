@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{66c6a2ac-a15b-4e20-83a5-976e1e8fa78c}">
 		<property name="assetPath">
-			<value>HHold5.wav</value>
+			<value>Hholds/HHold5.wav</value>
 		</property>
 		<property name="isStreaming">
 			<value>true</value>

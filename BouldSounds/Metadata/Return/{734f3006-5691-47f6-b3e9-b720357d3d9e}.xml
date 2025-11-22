@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="MixerReturn" id="{734f3006-5691-47f6-b3e9-b720357d3d9e}">
+		<property name="name">
+			<value>Delay</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{d318bfa9-1e3b-48cd-8968-18ce6cd8eea9}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{63f782b4-21cf-4297-87d6-caaff5975818}</destination>
+		</relationship>
+		<relationship name="output">
+			<destination>{d38885f5-eb1b-4940-9df0-ecf1e67d42c0}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{d318bfa9-1e3b-48cd-8968-18ce6cd8eea9}">
+		<relationship name="effects">
+			<destination>{6b53bbe5-0f2c-4ecd-99bf-e3c68a2f3807}</destination>
+			<destination>{a12291b5-11a5-42b1-aacc-a29e4bf794de}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{63f782b4-21cf-4297-87d6-caaff5975818}" />
+	<object class="DelayEffect" id="{6b53bbe5-0f2c-4ecd-99bf-e3c68a2f3807}">
+		<property name="delay">
+			<value>480</value>
+		</property>
+		<property name="feedback">
+			<value>60.5</value>
+		</property>
+		<property name="dryLevel">
+			<value>-80</value>
+		</property>
+		<property name="delayChangeMode">
+			<value>1</value>
+		</property>
+		<relationship name="modulators">
+			<destination>{9d459804-2e7f-42b8-9e6b-59c5241a089d}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusFader" id="{a12291b5-11a5-42b1-aacc-a29e4bf794de}" />
+	<object class="LFOModulator" id="{9d459804-2e7f-42b8-9e6b-59c5241a089d}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>delay</value>
+		</property>
+		<property name="rate">
+			<value>0.599999964</value>
+		</property>
+		<property name="depth">
+			<value>0.5</value>
+		</property>
+	</object>
+</objects>
