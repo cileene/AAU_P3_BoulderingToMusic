@@ -9,6 +9,7 @@ namespace Sound
         private GameObject bgmSound;
         private GameObject winSound;
         private GameObject deathSound;
+        
 
         private void OnEnable()
         {

@@ -5,157 +5,167 @@ using UnityEngine;
 
 namespace Sound
 {
+    /// <summary>
+    /// This helper class is used to detect whether a keypoint is still and next to a handhold
+    /// (likely indicating that the climber touched a hold).
+    /// Call EvaluateStillness() inside Update() in AppEventTrigger
+    /// and use the bool IsOnHold to trigger logic in FMOD.
+    /// </summary>
     public class KeypointTracker : MonoBehaviour
-            /*This helper class is used to detect whether a keypoint is still and next to a handhold
-             * (likely indicating that the climber touched a hold).
-             * Call EvaluateStillness() inside Update() in AppEventTrigger
-             * and use the bool IsOnHold to trigger logic in FMOD.
-             */
+    {
+        //Movement tracking
+        private Queue<float> _movementDeltas = new();
+        public float _averageMovement;
+        private int _movementSampleSize = 10;
+        private Vector2 _previousPosition = Vector2.zero;
+
+        //Stillness detection
+        private bool _keypointIsStill = false;
+        private float _stillnessMovementThreshold = 200f;
+        private float _stillnessTimeThreshold = 0.2f;
+
+        //Increments when keypoint is still. Used to check against stillnessTimeThreshold
+        private float _stillnessTimer = 0;
+
+        private float _stillnessTimerDecayRate = 0.3f;
+
+        //Hold proximity check
+        private float _holdProximityThreshold = 70.0f;
+        public bool isOnHold = false;
+
+        public bool IsOnHighestHold { get; private set; } = false;
+
+        public bool canRaiseEvent = true;
+        public int lastTouchedHold = -1;
+
+        private bool _leftHandSeen = false;
+        private bool _rightHandSeen = false;
+
+        public event Action OnHoldContactDetected;
+
+
+        public KeypointTracker()
         {
-            //Movement tracking
-            private Queue<float> movementDeltas = new();
-            public float averageMovement;
-            private int movementSampleSize = 10;
-            private Vector2 previousPosition = Vector2.zero;
+        }
 
-            //Stillness detection
-            private bool keypointIsStill = false;
-            private float stillnessMovementThreshold = 200f;
-            private float stillnessTimeThreshold = 0.2f;
+        public KeypointTracker(float thresholdProximity)
+        {
+            _holdProximityThreshold = thresholdProximity;
+        }
 
-            private float
-                stillnessTimer = 0; //Increments when keypoint is still. Used to check against stillnessTimeThreshold
 
-            private float stillnessTimerDecayRate = 0.3f;
-
-            //Hold proximity check
-            private float holdProximityThreshold = 70.0f;
-            private bool isOnHold = false;
-
-            public bool IsOnHold
+        //Movement calculation
+        public void UpdateMovementAverage(Vector2 keypoint)
+        {
+            if (_previousPosition == Vector2.zero)
             {
-                get { return isOnHold; }
+                _previousPosition = keypoint;
+                return;
             }
 
-            private bool isOnHighestHold = false;
-
-            public bool IsOnHighestHold
+            //Scales delta so it isn't frame rate dependant 
+            float delta = Vector2.Distance(keypoint, _previousPosition) / Time.deltaTime;
+            _movementDeltas.Enqueue(delta);
+            if (_movementDeltas.Count > _movementSampleSize)
             {
-                get { return isOnHighestHold; }
+                _movementDeltas.Dequeue();
             }
 
-            public bool canRaiseEvent = true;
-            public int lastTouchedHold = -1;
+            _averageMovement = _movementDeltas.Average();
+            _previousPosition = keypoint;
+        }
 
-            public event Action OnHoldContactDetected;
-
-            public KeypointTracker()
+        //Stillness detection
+        public void EvaluateStillness(Vector2 keypoint)
+        {
+            UpdateMovementAverage(keypoint);
+            if (_averageMovement < _stillnessMovementThreshold)
             {
-            }
-
-            public KeypointTracker(float thresholdProximity)
-            {
-                holdProximityThreshold = thresholdProximity;
-            }
-
-            //Movement calculation
-            public void UpdateMovementAverage(Vector2 keypoint)
-            {
-                if (previousPosition == Vector2.zero)
+                _stillnessTimer += Time.deltaTime;
+                if (_stillnessTimer > _stillnessTimeThreshold)
                 {
-                    previousPosition = keypoint;
-                    return;
-                }
-
-                float delta = Vector2.Distance(keypoint, previousPosition) /
-                              Time.deltaTime; //Scales delta so it isn't frame rate dependant 
-                movementDeltas.Enqueue(delta);
-                if (movementDeltas.Count > movementSampleSize)
-                {
-                    movementDeltas.Dequeue();
-                }
-
-                averageMovement = movementDeltas.Average();
-                previousPosition = keypoint;
-            }
-
-            //Stillness detection
-            public void EvaluateStillness(Vector2 keypoint)
-            {
-                UpdateMovementAverage(keypoint);
-                if (averageMovement < stillnessMovementThreshold)
-                {
-                    stillnessTimer += Time.deltaTime;
-                    if (stillnessTimer > stillnessTimeThreshold)
-                    {
-                        keypointIsStill = true;
-                    }
-                    else
-                    {
-                        keypointIsStill = false;
-                    }
+                    _keypointIsStill = true;
                 }
                 else
                 {
-                    stillnessTimer =
-                        Mathf.Max(0,
-                            stillnessTimer -
-                            Time.deltaTime *
-                            stillnessTimerDecayRate); //Smooths the decay of the stillnessTimer so a keypoint jittering will not affect stillness detection too much
-                    keypointIsStill = false;
+                    _keypointIsStill = false;
                 }
             }
-
-            //Hold proximity check
-            public void EvaluateHoldContact(List<Vector2> handholdCenters, Vector2 keypoint)
+            else
             {
-                EvaluateStillness(keypoint);
+                //Smooths the decay of the stillnessTimer so a keypoint jittering will not affect stillness detection too much
+                _stillnessTimer = Mathf.Max(0, _stillnessTimer - Time.deltaTime * _stillnessTimerDecayRate);
+                _keypointIsStill = false;
+            }
+        }
 
-                if (!keypointIsStill)
+        //Hold proximity check
+        public void EvaluateHoldContact(List<Vector2> handholdCenters, Vector2 keypoint, bool isRightHand)
+        {
+            EvaluateStillness(keypoint);
+
+            if (isRightHand)
+            {
+                _rightHandSeen = true;
+                Debug.Log("Right hand seen");
+            }
+            else
+            {
+                _leftHandSeen = true;
+                Debug.Log("Left hand seen");
+            }
+
+            if (!_keypointIsStill)
+            {
+                isOnHold = false;
+                IsOnHighestHold = false;
+                return;
+            }
+
+            for (int i = 0; i < handholdCenters.Count; i++)
+            {
+                var center = handholdCenters[i];
+                float distance = Vector2.Distance(keypoint, center);
+                if (i == 0)
                 {
-                    isOnHold = false;
-                    isOnHighestHold = false;
-                    return;
+                    Debug.Log("Distance to hold " + i + ": " + distance);
                 }
 
-                for (int i = 0; i < handholdCenters.Count; i++)
+                if (distance < _holdProximityThreshold)
                 {
-                    var center = handholdCenters[i];
-                    float distance = Vector2.Distance(keypoint, center);
-                    if (i == 0)
+                    if (canRaiseEvent == false || lastTouchedHold == i) break;
+
+                    if (i != 0)
                     {
-                        Debug.Log("Distance to hold " + i + ": " + distance);
-                    }
-
-                    if (distance < holdProximityThreshold)
-                    {
-                        if (canRaiseEvent == false || lastTouchedHold == i) break;
-
-                        if (i != 0)
-                        {
-                            isOnHold = true;
-                        }
-                        else
-                        {
-                            isOnHighestHold = true;
-                            Debug.Log("On highest hold!");
-                            AppEvents.RaisePotentialHighestHandholdContact();
-                        }
-
-                        canRaiseEvent = false;
-                        lastTouchedHold = i;
-
+                        isOnHold = true;
                         OnHoldContactDetected?.Invoke();
-                        break;
                     }
-                    else if (i == handholdCenters.Count - 1)
+                    else
                     {
-                        isOnHold = false;
-                        isOnHighestHold = false;
-                        canRaiseEvent = true;
-                        lastTouchedHold = -1;
+                        Debug.Log("Checking for highest hold...");
+
+                        //IsOnHighestHold = true;
+                        Debug.Log("On highest hold!");
+                        AppEvents.RaisePotentialHighestHandholdContact();
+                        _leftHandSeen = false;
+                        _rightHandSeen = false;
+                        //TODO: Consider whether to raise event only if both hands are seen
                     }
+
+                    canRaiseEvent = false;
+                    lastTouchedHold = i;
+
+                    break;
+                }
+
+                if (i == handholdCenters.Count - 1)
+                {
+                    isOnHold = false;
+                    IsOnHighestHold = false;
+                    canRaiseEvent = true;
+                    lastTouchedHold = -1;
                 }
             }
         }
+    }
 }

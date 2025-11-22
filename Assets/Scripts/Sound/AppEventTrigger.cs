@@ -74,8 +74,8 @@ namespace Sound
 
             if (_handholdCenters != null && _handholdCenters.Count != 0)
             {
-                _rightWristTracker.EvaluateHoldContact(_handholdCenters, _rightWristPos);
-                _leftWristTracker.EvaluateHoldContact(_handholdCenters, _leftWristPos);
+                _rightWristTracker.EvaluateHoldContact(_handholdCenters, _rightWristPos, true);
+                _leftWristTracker.EvaluateHoldContact(_handholdCenters, _leftWristPos, false);
             }
         }
 
@@ -113,8 +113,8 @@ namespace Sound
             {
                 KeypointIndex currentIndex = (KeypointIndex)i;
 
-                if (_poseData.GetKeypoint(currentIndex) ==
-                    Vector2.zero) //If the keypoint isn't detected by the model it returns a zero vector, meaning this loop should be skipped
+                //If the keypoint isn't detected by the model it returns a zero vector, meaning this loop should be skipped
+                if (_poseData.GetKeypoint(currentIndex) == Vector2.zero) 
                 {
                     continue;
                 }
@@ -156,8 +156,5 @@ namespace Sound
             yield return new WaitForSeconds(3);
             _canTriggerFallingEvent = true;
         }
-
-
-        
     }
 }
