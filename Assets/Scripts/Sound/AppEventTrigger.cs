@@ -17,11 +17,8 @@ namespace Sound
         private Vector2 _leftWristPos;
         private KeypointTracker _rightWristTracker = new();
         private KeypointTracker _leftWristTracker = new();
-
-        private static int
-            _keypointCount =
-                Enum.GetValues(typeof(KeypointIndex)).Length; //Will get the length of the enum KeypointIndex
-
+        //Will get the length of the enum KeypointIndex
+        private static int _keypointCount = Enum.GetValues(typeof(KeypointIndex)).Length; 
         private Queue<Vector2>[] _keypointPositionHistory = new Queue<Vector2>[_keypointCount];
         private int _keypointHistorySize = 5;
 
@@ -29,7 +26,8 @@ namespace Sound
         private bool _climberIsFalling = false;
         private bool _canTriggerFallingEvent = true;
         
-        private float _sumOfDeltas;
+        public float sumOfDeltas;
+        public float hipHeight;
 
         public static AppEventTrigger Instance { get; private set; }
 
@@ -63,9 +61,15 @@ namespace Sound
 
             InitializePoseDataKeypoints();
         }
+        
+        private void Start()
+        {
+            AppEvents.RaiseAppEventTriggerReady(this);
+        }
 
         private void Update()
         {
+            CalculateHipHeight();
             CheckClimberFalling();
 
             if (_poseData != null)
@@ -108,6 +112,21 @@ namespace Sound
                 _keypointPositionHistory[i] = new Queue<Vector2>();
             }
         }
+        
+        private void CalculateHipHeight()
+        {
+            if (_poseData == null) return;
+
+            hipHeight = 0;
+            for (int i = 11; i <= 12; i++)
+            {
+                Vector2 keypoint = _poseData.GetKeypoint((KeypointIndex)i);
+                if (keypoint != Vector2.zero)
+                {
+                    hipHeight += keypoint.y;
+                }
+            }
+        }
 
         private void CheckClimberFalling()
         {
@@ -129,7 +148,7 @@ namespace Sound
             }
 
             
-            _sumOfDeltas = 0;
+            sumOfDeltas = 0;
             for (int i = 0; i < _keypointCount; i++) //Calculates the current movement
             {
                 if (_keypointPositionHistory[0].Count() < _keypointHistorySize)
@@ -140,11 +159,11 @@ namespace Sound
                 {
                     float currentY = currentHistory[j].y;
                     float nextY = currentHistory[j + 1].y;
-                    _sumOfDeltas += (nextY - currentY);
+                    sumOfDeltas += (nextY - currentY);
                 }
             }
 
-            _climberIsFalling = _sumOfDeltas < _climberFallingThreshold;
+            _climberIsFalling = sumOfDeltas < _climberFallingThreshold;
             if (_climberIsFalling && _canTriggerFallingEvent)
             {
                 AppEvents.RaisePotentialFallDetected();

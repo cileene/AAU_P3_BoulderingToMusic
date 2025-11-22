@@ -1,4 +1,5 @@
 using System;
+using Sound;
 using UnityEngine;
 using Unity.InferenceEngine;
 using UnityEngine.UI;
@@ -43,6 +44,7 @@ public static class AppEvents
     
     public static event Action PotentialFallDetected;
     public static event Action<GameObject, GameObject, GameObject, GameObject> SoundConfig;
+    public static event Action<AppEventTrigger> AppEventTriggerReady; 
 
 
     // EVENT METHODS
@@ -164,4 +166,11 @@ public static class AppEvents
         SoundConfig?.Invoke(handholdsSound, bgmSound, winSound, deathSound);
         Debug.Log("Event: SoundConfig invoked");
     }
+    
+    public static void RaiseAppEventTriggerReady(AppEventTrigger appEventTrigger)
+    {
+        AppEventTriggerReady?.Invoke(appEventTrigger);
+        Debug.Log("Event: AppEventTriggerReady invoked");
+    }
+    
 }

@@ -798,6 +798,7 @@ MonoBehaviour:
   bgmSound: {fileID: 932888472}
   winSound: {fileID: 1021602790}
   deathSound: {fileID: 697712706}
+  enableHeightTracking: 1
 --- !u!4 &1218540713
 Transform:
   m_ObjectHideFlags: 0
@@ -1064,7 +1065,6 @@ GameObject:
   - component: {fileID: 2112474133}
   - component: {fileID: 2112474131}
   - component: {fileID: 2112474135}
-  - component: {fileID: 2112474136}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -1196,18 +1196,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioListener
   nonRigidbodyVelocity: 0
   attenuationObject: {fileID: 0}
---- !u!114 &2112474136
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2112474130}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 157588b1c598d4761baa22e4c816eb22, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Sound.HandholdSoundPlayer
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

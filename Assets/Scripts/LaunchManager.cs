@@ -2,6 +2,7 @@ using Sound;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.InferenceEngine;
+using UnityEditor.SceneManagement;
 using VisionModels.Input;
 using VisionModels.ModelRunners;
 using VisionModels.Utilities;
@@ -55,6 +56,7 @@ public class LaunchManager : MonoBehaviour
     [SerializeField] private GameObject bgmSound;
     [SerializeField] private GameObject winSound;
     [SerializeField] private GameObject deathSound;
+    [SerializeField] private bool enableHeightTracking;
     
     private void Awake()
     {
@@ -63,9 +65,11 @@ public class LaunchManager : MonoBehaviour
     
     private void Start()
     {
+        if (enableHeightTracking) gameObject.AddComponent<HeightTracker>();
+        gameObject.AddComponent<HandholdSoundPlayer>();
+        if (runLogic) gameObject.AddComponent<AppEventTrigger>();
         AppEvents.RaiseSoundConfig(handholdsSound, bgmSound, winSound, deathSound);
         if (showDebug) gameObject.AddComponent<ModelDebugger>();
-        if (runLogic) gameObject.AddComponent<AppEventTrigger>();
         
         HandleDetectionSettings();
         HandleInput();

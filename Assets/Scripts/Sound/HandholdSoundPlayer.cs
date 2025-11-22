@@ -5,10 +5,10 @@ namespace Sound
 {
     public class HandholdSoundPlayer : MonoBehaviour
     {
-        private GameObject handholdSound;
-        private GameObject bgmSound;
-        private GameObject winSound;
-        private GameObject deathSound;
+        private GameObject _handholdSound;
+        private GameObject _bgmSound;
+        private GameObject _winSound;
+        private GameObject _deathSound;
         
 
         private void OnEnable()
@@ -34,10 +34,10 @@ namespace Sound
         private void OnSoundConfig(GameObject handholdsSound, GameObject bgmSound, GameObject winSound,
             GameObject deathSound)
         {
-            this.handholdSound = handholdsSound;
-            this.bgmSound = bgmSound;
-            this.winSound = winSound;
-            this.deathSound = deathSound;
+            _handholdSound = handholdsSound;
+            _bgmSound = bgmSound;
+            _winSound = winSound;
+            _deathSound = deathSound;
         }
 
         private void TriggerEmitter(GameObject soundObject)
@@ -59,17 +59,17 @@ namespace Sound
 
         private void PlayHandholdSound()
         {
-            TriggerEmitter(this.handholdSound);
+            TriggerEmitter(_handholdSound);
         }
 
         private void PlayWinSound()
         {
-            TriggerEmitter(this.winSound);
+            TriggerEmitter(_winSound);
         }
 
         private void PlayDeathSound()
         {
-            TriggerEmitter(this.deathSound);
+            TriggerEmitter(_deathSound);
         }
     }
 }
