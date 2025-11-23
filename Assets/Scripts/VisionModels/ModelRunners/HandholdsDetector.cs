@@ -93,7 +93,7 @@ namespace VisionModels.ModelRunners
         {
             if (!_isModelReady) return;
 
-            if (!_continuousDetection && !_isButtonPressed)
+            if (!_continuousDetection)
                 return;
     
             ExecuteML();
@@ -136,26 +136,14 @@ namespace VisionModels.ModelRunners
         private void SetupButtonEventTriggers()
         {
             if (_continuousDetection) return;
-            
-            var eventTrigger = _detectionToggleButton.GetComponent<EventTrigger>()
-                               ?? _detectionToggleButton.gameObject.AddComponent<EventTrigger>();
 
-            var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
-            pointerDown.callback.AddListener((data) =>
+            _detectionToggleButton.onClick.AddListener(() =>
             {
-                _isButtonPressed = true;
-                if (_worker == null) LoadModel(); // Recreate worker if disposed
-            });
-            eventTrigger.triggers.Add(pointerDown);
-
-            var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
-            pointerUp.callback.AddListener((data) =>
-            {
-                _isButtonPressed = false;
-                _worker?.Dispose(); // Free GPU memory
+                if (_worker == null) LoadModel();
+                ExecuteML();
+                _worker?.Dispose();
                 _worker = null;
             });
-            eventTrigger.triggers.Add(pointerUp);
         }
         
         private void StartModel()
