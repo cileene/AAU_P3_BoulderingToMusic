@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using VisionModels.Input;
 using VisionModels.Utilities;
-using UnityEngine.EventSystems;
 
 
 namespace VisionModels.ModelRunners
@@ -30,7 +29,6 @@ namespace VisionModels.ModelRunners
 
         private List<DetectedHandhold> _persistentHandholds = new();
         private int _nextHandholdId = 0;
-        private int _maxFramesBeforeRemoval = 30; // Remove if not seen for ~0.5 seconds at 60fps
         private bool _debugMode;
 
         private ModelAsset _modelAsset;
@@ -69,7 +67,6 @@ namespace VisionModels.ModelRunners
         private bool _useWebcam = true;
         private ProblemColor _selectedColor;
         
-        private bool _continuousDetection;
         private Button _detectionToggleButton;
         private bool _isButtonPressed;
 
@@ -87,16 +84,6 @@ namespace VisionModels.ModelRunners
             AppEvents.VideoReady -= OnVideoReady;
             AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigureHandholdsDetector -= OnConfigureHandholdsDetector;
-        }
-        
-        private void Update()
-        {
-            if (!_isModelReady) return;
-
-            if (!_continuousDetection)
-                return;
-    
-            ExecuteML();
         }
 
         private void OnWebcamReady(WebCamTexture cam)
@@ -125,9 +112,7 @@ namespace VisionModels.ModelRunners
             _displayImage = config.RawImage;
             _borderTexture = config.BorderTexture;
             _font = config.Font;
-            _maxFramesBeforeRemoval = config.KeepHandholdsFrames;
             _detectionToggleButton = config.HandholdDetectButton;
-            _continuousDetection = config.ContinuousHandholdDetection;
 
             StartModel();
             SetupButtonEventTriggers();
@@ -135,8 +120,6 @@ namespace VisionModels.ModelRunners
 
         private void SetupButtonEventTriggers()
         {
-            if (_continuousDetection) return;
-
             _detectionToggleButton.onClick.AddListener(() =>
             {
                 if (_worker == null) LoadModel();
@@ -248,9 +231,6 @@ namespace VisionModels.ModelRunners
                 UpdateOrAddHandhold(box, label);
             }
 
-            // Remove handholds not seen for too long
-            _persistentHandholds.RemoveAll(h => h.FramesSinceLastSeen > _maxFramesBeforeRemoval);
-
             // Draw persistent handholds
             ClearAnnotations();
             for (int i = 0; i < _persistentHandholds.Count; i++)
@@ -304,16 +284,20 @@ namespace VisionModels.ModelRunners
 
         private bool HandleInput()
         {
-            InputMode mode = _useWebcam ? InputMode.Webcam :
-                (_video ? InputMode.Video : InputMode.Still);
+            InputMode mode = _useWebcam ? InputMode.Webcam : (_video ? InputMode.Video : InputMode.Still);
 
             return InputProcessor.ProcessInput(mode, _cam, _video, _still, _targetRT, _displayImage, _mirrorHorizontally);
         }
 
         private void DrawBox(BoundingBox box, int id, float fontSize)
         {
-            var panel = AnnotationManager.GetOrCreateBox(_boxPool, id, _displayLocation, _borderSprite, _font,
+            var panel = AnnotationManager.GetOrCreateBox(
+                _boxPool, id, 
+                _displayLocation, 
+                _borderSprite, 
+                _font,
                 Color.red);
+            
             panel.transform.localPosition = new Vector3(box.CenterX, box.CenterY);
 
             var rt = panel.GetComponent<RectTransform>();
