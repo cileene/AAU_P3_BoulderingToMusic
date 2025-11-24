@@ -26,7 +26,6 @@ namespace Sound
 
         //Increments when keypoint is still. Used to check against stillnessTimeThreshold
         private float _stillnessTimer = 0;
-
         private float _stillnessTimerDecayRate = 1f;
 
         //Hold proximity check
@@ -37,9 +36,6 @@ namespace Sound
 
         public bool canRaiseEvent = true;
         public int lastTouchedHold = -1;
-
-        private bool _leftHandSeen = false;
-        private bool _rightHandSeen = false;
 
         public event Action OnHoldContactDetected;
 
@@ -104,15 +100,6 @@ namespace Sound
         {
             EvaluateStillness(keypoint);
 
-            if (isRightHand)
-            {
-                _rightHandSeen = true;
-            }
-            else
-            {
-                _leftHandSeen = true;
-            }
-
             if (!_keypointIsStill)
             {
                 isOnHold = false;
@@ -124,10 +111,6 @@ namespace Sound
             {
                 var center = handholdCenters[i];
                 float distance = Vector2.Distance(keypoint, center);
-                if (i == 0)
-                {
-                    //Debug.Log("Distance to hold " + i + ": " + distance);
-                }
 
                 if (distance < _holdProximityThreshold)
                 {
@@ -140,11 +123,8 @@ namespace Sound
                     }
                     else
                     {
-                        Debug.Log("On highest hold!");
-                        AppEvents.RaisePotentialHighestHandholdContact();
-                        _leftHandSeen = false;
-                        _rightHandSeen = false;
-                        //TODO: Consider whether to raise event only if both hands are seen
+                        Debug.Log($"{this.name}: On highest hold!");
+                        IsOnHighestHold = true;
                     }
 
                     canRaiseEvent = false;

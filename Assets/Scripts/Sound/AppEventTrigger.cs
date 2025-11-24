@@ -21,6 +21,12 @@ namespace Sound
         private Queue<Vector2>[] _keypointPositionHistory = new Queue<Vector2>[_keypointCount];
         private int _keypointHistorySize = 5;
 
+        private float _climbFinishTimerThreshold = 0.5f;
+        private float _climbFinishTimer = 0f;
+        private float _climbFinishTimerDecayRate = 1f;
+        private bool _climbFinished = false;
+        private float _climbFinishedCooldown = 5f;
+
         private float _climberFallingThreshold = -500f;
         private bool _climberIsFalling = false;
         private bool _canTriggerFallingEvent = true;
@@ -69,6 +75,7 @@ namespace Sound
         private void Update()
         {
             CalculateHipHeight();
+            CheckFinishClimb();
             CheckClimberFalling();
 
             if (_poseData != null)
@@ -117,7 +124,7 @@ namespace Sound
             if (_poseData == null) return;
 
             hipHeight = 0;
-            for (int i = 11; i <= 12; i++)
+            for (int i = 11; i <= 12; i++) //TODO: Use keypoint index rather than magic numbers
             {
                 Vector2 keypoint = _poseData.GetKeypoint((KeypointIndex)i);
                 if (keypoint != Vector2.zero)
@@ -127,8 +134,43 @@ namespace Sound
             }
         }
 
+        private void CheckFinishClimb() //The rules in bouldering dictate that the climber must have both hand on the finished (top) hold and have "control" in that position
+        {
+            if (_climbFinished) return;
+
+            if (_leftWristTracker.IsOnHighestHold && _rightWristTracker.IsOnHighestHold) 
+            {
+                _climbFinishTimer += Time.deltaTime;
+                if (_climbFinishTimer >= _climbFinishTimerThreshold)
+                {
+                    AppEvents.RaisePotentialHighestHandholdContact();
+                    _climbFinished = true;
+                    StartCoroutine(FinishedClimbEventCooldown());
+                }
+            }
+            else
+            {
+                _climbFinishTimer = Mathf.Max(0, _climbFinishTimer - Time.deltaTime * _climbFinishTimerDecayRate);
+            }
+        }
+
+        IEnumerator FinishedClimbEventCooldown()
+        {
+            yield return new WaitForSeconds(3);
+            _climbFinished = false;
+        }
+
         private void CheckClimberFalling()
         {
+            if (_climbFinished)
+            {
+                foreach(Queue<Vector2> queue in _keypointPositionHistory)
+                {
+                    queue.Clear();
+                }
+                return;
+            }
+
             for (int i = 0; i < _keypointCount; i++) //Enqueus the current keypoint position for all visible keypoints
             {
                 KeypointIndex currentIndex = (KeypointIndex)i;
@@ -149,7 +191,7 @@ namespace Sound
             sumOfDeltas = 0;
             for (int i = 0; i < _keypointCount; i++) //Calculates the current movement
             {
-                if (_keypointPositionHistory[0].Count() < _keypointHistorySize)
+                if (_keypointPositionHistory[i].Count() < _keypointHistorySize)
                     continue; //Ensures that position is only calculated when the queues are the size dictated by keypointHistorySize
 
                 Vector2[] currentHistory = _keypointPositionHistory[i].ToArray();
@@ -164,7 +206,7 @@ namespace Sound
             _climberIsFalling = sumOfDeltas < _climberFallingThreshold;
             if (_climberIsFalling && _canTriggerFallingEvent)
             {
-                //AppEvents.RaisePotentialFallDetected();
+                AppEvents.RaisePotentialFallDetected();
                 print("Climber is falling!");
                 StartCoroutine(ClimberFallingEventCooldown());
             }
