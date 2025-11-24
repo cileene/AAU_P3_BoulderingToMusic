@@ -33,6 +33,9 @@ namespace Sound
         
         public float sumOfDeltas;
         public float hipHeight;
+        
+        public bool rightHighestHoldContact = false;
+        public bool leftHighestHoldContact = false;
 
         public static AppEventTrigger Instance { get; private set; }
 
@@ -43,6 +46,9 @@ namespace Sound
             AppEvents.NewPoseDetected += OnNewPoseDetected;
             _rightWristTracker.OnHoldContactDetected += OnHandHoldContact;
             _leftWristTracker.OnHoldContactDetected += OnHandHoldContact;
+            
+            _rightWristTracker.OnHighestHoldContactDetected += OnHigestHoldContactRight;
+            _leftWristTracker.OnHighestHoldContactDetected += OnHigestHoldContactLeft;
         }
 
         private void OnDisable()
@@ -51,6 +57,17 @@ namespace Sound
             AppEvents.NewPoseDetected -= OnNewPoseDetected;
             _rightWristTracker.OnHoldContactDetected -= OnHandHoldContact;
             _leftWristTracker.OnHoldContactDetected -= OnHandHoldContact;
+            
+            _rightWristTracker.OnHighestHoldContactDetected -= OnHigestHoldContactRight;
+            _leftWristTracker.OnHighestHoldContactDetected -= OnHigestHoldContactLeft;
+        }
+        private void OnHigestHoldContactRight()
+        {
+            rightHighestHoldContact = true;
+        }
+        private void OnHigestHoldContactLeft()
+        {
+            leftHighestHoldContact = true;
         }
 
         private void Awake()
@@ -138,7 +155,7 @@ namespace Sound
         {
             if (_climbFinished) return;
 
-            if (_leftWristTracker.IsOnHighestHold && _rightWristTracker.IsOnHighestHold) 
+            if (leftHighestHoldContact && rightHighestHoldContact) 
             {
                 _climbFinishTimer += Time.deltaTime;
                 if (_climbFinishTimer >= _climbFinishTimerThreshold)
@@ -146,6 +163,9 @@ namespace Sound
                     AppEvents.RaisePotentialHighestHandholdContact();
                     _climbFinished = true;
                     StartCoroutine(FinishedClimbEventCooldown());
+                    Debug.Log("Climb finished!");
+                    leftHighestHoldContact = false;
+                    rightHighestHoldContact = false;
                 }
             }
             else

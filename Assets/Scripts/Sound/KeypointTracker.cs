@@ -38,6 +38,7 @@ namespace Sound
         public int lastTouchedHold = -1;
 
         public event Action OnHoldContactDetected;
+        public event Action OnHighestHoldContactDetected;
 
 
         public KeypointTracker()
@@ -123,8 +124,8 @@ namespace Sound
                     }
                     else
                     {
-                        Debug.Log($"{this.name}: On highest hold!");
                         IsOnHighestHold = true;
+                        OnHighestHoldContactDetected?.Invoke();
                     }
 
                     canRaiseEvent = false;
