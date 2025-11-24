@@ -21,16 +21,16 @@ namespace Sound
 
         //Stillness detection
         private bool _keypointIsStill = false;
-        private float _stillnessMovementThreshold = 200f;
+        private float _stillnessMovementThreshold = 300f;
         private float _stillnessTimeThreshold = 0.1f;
 
         //Increments when keypoint is still. Used to check against stillnessTimeThreshold
         private float _stillnessTimer = 0;
 
-        private float _stillnessTimerDecayRate = 0.3f;
+        private float _stillnessTimerDecayRate = 1f;
 
         //Hold proximity check
-        private float _holdProximityThreshold = 140.0f;
+        private float _holdProximityThreshold = 70.0f;
         public bool isOnHold = false;
 
         public bool IsOnHighestHold { get; private set; } = false;
