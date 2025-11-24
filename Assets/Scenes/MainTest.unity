@@ -771,7 +771,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99495ddd03a24414a6524598156ccc08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaunchManager
-  inputSource: 1
+  inputSource: 0
   webcamResolution: 4
   webcamDeviceName: 
   videoName: Camilleclimbs1.mp4
@@ -788,7 +788,7 @@ MonoBehaviour:
   detectHandholds: 1
   continuousHandholdDetection: 0
   handholdDetectButton: {fileID: 949276910}
-  problemColor: 1
+  problemColor: 7
   handholdPersistenceFrames: 30
   detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}
   classesAsset: {fileID: 4900000, guid: 35a8acf7937f2468286d5a7cf2a36e8c, type: 3}
