@@ -21,26 +21,33 @@ using VisionModels.Utilities;
 public static class AppEvents
 {
     // EVENTS
+    // - For detecting/losing the climber
     public static event Action<BoundingBox> PersonDetected;
     public static event Action PersonLost;
+    // - For requesting the necessary input sources
     public static event Action<UseWebcam.WebcamResolution, string> RequestUseWebcam;
     public static event Action<string> RequestUseVideo;
     public static event Action<string> RequestUseStill;
+    // - Called when the sources are ready
     public static event Action<WebCamTexture> WebcamReady;
     public static event Action<Texture> VideoReady;
     public static event Action<Texture2D> StillReady;
+    // - Configuring the detectors
     public static event Action<ModelAsset, TextAsset, RawImage, Font, Texture2D> ConfigurePersonDetector;
     public static event Action<ModelAsset, RawImage, Texture2D> ConfigurePoseDetector;
 
     public static event
         Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32, Button, bool>
         ConfigureHandholdsDetector;
+    
+    // - Called when the either handholds or a new climber/pose is detected. 
 
     public static event Action<DetectedHandhold> NewHandholdDetected;
     public static event Action<PoseData> NewPoseDetected;
 
 
     // EVENT METHODS
+    // - Called for each action
     public static void RaisePersonDetected(BoundingBox box)
     {
         PersonDetected?.Invoke(box);

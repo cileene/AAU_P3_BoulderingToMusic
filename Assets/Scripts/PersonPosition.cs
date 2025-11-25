@@ -2,6 +2,9 @@ using TMPro;
 using UnityEngine;
 using VisionModels.Utilities;
 
+/// <summary>
+/// In charge of detecting the position of the relevant climber, and controls the fmod emitter/music controller.
+/// </summary>
 public class PersonPosition : MonoBehaviour
 {
     [SerializeField] private TMP_Text hiText;
@@ -29,6 +32,7 @@ public class PersonPosition : MonoBehaviour
         }
     }
 
+    //Given that the system seems to "blink" the person being detected, I worry this is gonna give us issues with the music cutting in and out, to a notable degree
     private void HandlePersonDetected(BoundingBox box)
     {
         _lastBox = box;

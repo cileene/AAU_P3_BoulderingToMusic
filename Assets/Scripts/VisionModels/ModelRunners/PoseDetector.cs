@@ -74,7 +74,7 @@ namespace VisionModels.ModelRunners
             AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigurePoseDetector -= OnConfigurePoseDetector;
         }
-
+        
         private void OnWebcamReady(WebCamTexture cam)
         {
             _cam = cam;
@@ -93,6 +93,8 @@ namespace VisionModels.ModelRunners
             _useWebcam = false;
         }
 
+        // How does this work with webcamtextures? Texture2D and webcamtexture both inherit from Texture, but they shouldn't be usable interchangably like this, to my understanding
+        // 
         private void OnConfigurePoseDetector(
             ModelAsset model,
             RawImage rawImage,
@@ -146,10 +148,14 @@ namespace VisionModels.ModelRunners
 
             if (HandleInput()) return;
 
+            //Creates a tensor with values: number of images, color channels, height, width. These all have empty values, with set sizes
             using var inputTensor = new Tensor<float>(new TensorShape(1, 3, imageHeight, imageWidth));
+            //ToTensor allows the tensor to contain the information of the input image, filling the tensor with values from the texture. 
             TextureConverter.ToTensor(_targetRT, inputTensor, default);
+            //Schedule allows the model to be read by the worker.
             _worker.Schedule(inputTensor);
 
+            //peeks the workers output and sets the value it has to being the output tensor<float>
             using var output = (_worker.PeekOutput() as Tensor<float>).ReadbackAndClone();
 
             int numDetections = output.shape[2];
@@ -189,6 +195,7 @@ namespace VisionModels.ModelRunners
                 _currentPose.UpdateKeypoints(keypoints, conf);
                 DrawPose(_currentPose.Keypoints);
                 break; // Only process first detection
+                //Why not use keypoints[0] then? Or format it to be able to detect a custom amount of climbers 
             }
         }
 

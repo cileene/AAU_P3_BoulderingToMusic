@@ -5,6 +5,9 @@ using VisionModels.Input;
 using VisionModels.ModelRunners;
 using VisionModels.Utilities;
 
+/// <summary>
+/// The script responsible for initializing and instantiating the proper input sources and associated components. 
+/// </summary>
 public class LaunchManager : MonoBehaviour
 {
     private enum InputSource { Webcam, Video, Still }

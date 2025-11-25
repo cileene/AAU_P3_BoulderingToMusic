@@ -2,6 +2,10 @@ using UnityEngine;
 
 namespace VisionModels.Input
 {
+    /// <summary>
+    /// Class to assist in the setting up of the relevant webcam. This is the setting intended for live input, with live climbers. It ensures that there is a camera present and determines the sizes of the input,
+    /// before calling the next action "RaiseWebcamReady". This event is subscribed to by HandholdsDetector.cs, PersonDetector.cs and PoseDetector.cs, the three modelrunners
+    /// </summary>
     public class UseWebcam : MonoBehaviour
     {
         public enum WebcamResolution //TODO: Handle iPhone specific resolutions
