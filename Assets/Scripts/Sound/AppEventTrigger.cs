@@ -14,8 +14,8 @@ namespace Sound
         private PoseData _poseData;
         private Vector2 _rightWristPos;
         private Vector2 _leftWristPos;
-        private KeypointTracker _rightWristTracker = new();
-        private KeypointTracker _leftWristTracker = new();
+        private KeypointTracker _rightWristTracker;
+        private KeypointTracker _leftWristTracker;
         //Will get the length of the enum KeypointIndex
         private static int _keypointCount = Enum.GetValues(typeof(KeypointIndex)).Length; 
         private Queue<Vector2>[] _keypointPositionHistory = new Queue<Vector2>[_keypointCount];
@@ -25,7 +25,7 @@ namespace Sound
         private float _climbFinishTimer = 0f;
         private float _climbFinishTimerDecayRate = 1f;
         private bool _climbFinished = false;
-        private float _climbFinishedCooldown = 5f;
+        //private float _climbFinishedCooldown = 5f;
 
         private float _climberFallingThreshold = -500f;
         private bool _climberIsFalling = false;
@@ -80,6 +80,9 @@ namespace Sound
             {
                 Instance = this;
             }
+            
+            _rightWristTracker = gameObject.AddComponent<KeypointTracker>();
+            _leftWristTracker = gameObject.AddComponent<KeypointTracker>();
 
             InitializePoseDataKeypoints();
         }
