@@ -18,7 +18,7 @@ namespace VisionModels.Input
                 existingPlayer.prepareCompleted -= OnVideoPrepared;
                 Destroy(existingPlayer);
             }
-            var video = gameObject.AddComponent<VideoPlayer>();  // Add to same GameObject as UseVideo
+            var video = gameObject.AddComponent<VideoPlayer>();
             video.renderMode = VideoRenderMode.APIOnly;
             video.source = VideoSource.Url;
             video.url = Path.Join(Application.streamingAssetsPath, fileName);

@@ -1,3 +1,5 @@
+using Configs;
+using Sound;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.InferenceEngine;
@@ -5,9 +7,7 @@ using VisionModels.Input;
 using VisionModels.ModelRunners;
 using VisionModels.Utilities;
 
-/// <summary>
-/// The script responsible for initializing and instantiating the proper input sources and associated components. 
-/// </summary>
+
 public class LaunchManager : MonoBehaviour
 {
     private enum InputSource { Webcam, Video, Still }
@@ -50,6 +50,13 @@ public class LaunchManager : MonoBehaviour
     [SerializeField] private bool detectPose;
     [Tooltip("Drag your YOLO11n-pose .onnx model here")]
     public ModelAsset modelAsset;
+
+    [Header("FMOD Sound")] 
+    [SerializeField] private GameObject handholdsSound;
+    [SerializeField] private GameObject bgmSound;
+    [SerializeField] private GameObject winSound;
+    [SerializeField] private GameObject deathSound;
+    [SerializeField] private bool enableHeightTracking;
     
     private void Awake()
     {
@@ -58,11 +65,26 @@ public class LaunchManager : MonoBehaviour
     
     private void Start()
     {
+        if (enableHeightTracking) gameObject.AddComponent<HeightTracker>();
+        gameObject.AddComponent<SoundPlayer>();
+        if (runLogic) gameObject.AddComponent<AppEventTrigger>();
+        HandleSoundConfig();
         if (showDebug) gameObject.AddComponent<ModelDebugger>();
-        if (runLogic) gameObject.AddComponent<MainLogicTest>();
-        
         HandleDetectionSettings();
         HandleInput();
+    }
+    
+    private void HandleSoundConfig()
+    {
+        var config = new SoundConfig
+        {
+            HandholdsSound = handholdsSound,
+            BgmSound = bgmSound,
+            WinSound = winSound,
+            FallSound = deathSound
+        };
+        
+        AppEvents.RaiseSoundConfig(config);
     }
 
     private void HandleInput()
@@ -91,12 +113,16 @@ public class LaunchManager : MonoBehaviour
             new GameObject("PersonDetector", 
                 typeof(PersonDetector)).transform.SetParent(transform);
             
-            AppEvents.RaiseConfigurePersonDetector(
-                detectPersonModel,
-                detectPersonClasses,
-                imageDisplay,
-                font,
-                borderTexture);
+            var config = new PersonDetectorConfig
+            {
+                Model = detectPersonModel,
+                Classes = detectPersonClasses,
+                RawImage = imageDisplay,
+                Font = font,
+                BorderTexture = borderTexture
+            };
+            
+            AppEvents.RaiseConfigurePersonDetector(config);
         }
 
         if (detectPose)
@@ -104,27 +130,35 @@ public class LaunchManager : MonoBehaviour
             new GameObject("PoseDetector", 
                 typeof(PoseDetector)).transform.SetParent(transform);
             
-            AppEvents.RaiseConfigurePoseDetector(
-                modelAsset,
-                imageDisplay,
-                borderTexture);
+            var config = new PoseDetectorConfig
+            {
+                Model = modelAsset,
+                RawImage = imageDisplay,
+                BorderTexture = borderTexture
+            };
+            
+            AppEvents.RaiseConfigurePoseDetector(config);
         }
 
         if (detectHandholds)
         {
             new GameObject("HandholdsDetector", 
                 typeof(HandholdsDetector)).transform.SetParent(transform);
+            
+            var config = new HandholdsDetectorConfig
+            {
+                Model = detectHandholdsModel,
+                Classes = classesAsset,
+                ProblemColor = problemColor,
+                RawImage = imageDisplay,
+                Font = font,
+                BorderTexture = borderTexture,
+                KeepHandholdsFrames = handholdPersistenceFrames,
+                HandholdDetectButton = handholdDetectButton,
+                ContinuousHandholdDetection = continuousHandholdDetection
+            };
 
-            AppEvents.RaiseConfigureHandholdsDetector(
-                detectHandholdsModel,
-                classesAsset,
-                problemColor,
-                imageDisplay,
-                font,
-                borderTexture,
-                handholdPersistenceFrames,
-                handholdDetectButton,
-                continuousHandholdDetection);
+            AppEvents.RaiseConfigureHandholdsDetector(config);
         }
     }
 }

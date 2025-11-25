@@ -4,9 +4,10 @@ using VisionModels.Utilities;
 
 public class MainLogicTest : MonoBehaviour
 {
-    private List<Vector2> _handholdCenters = new();
+    private List<DetectedHandhold> _detectedHandholds = new();
     private PoseData _poseData;
     private Vector2 _rightWristPos;
+    private Vector2 _leftWristPos;
     
     private void OnEnable()
     {
@@ -24,7 +25,8 @@ public class MainLogicTest : MonoBehaviour
     {
         BoundingBox bob = handhold.Box;
         Vector2 center = new Vector2(bob.CenterX, bob.CenterY);
-        _handholdCenters.Add(center);
+        
+        _detectedHandholds.Add(handhold);
         Debug.Log($"Handhold Detected: {handhold.Label} at {center}");
     }
     
@@ -38,22 +40,38 @@ public class MainLogicTest : MonoBehaviour
         if (_poseData != null)
         {
             _rightWristPos  = _poseData.GetKeypoint(KeypointIndex.RightWrist);
-            //Debug.Log($"Right Wrist Position: {_rightWristPos}");
+            _leftWristPos   = _poseData.GetKeypoint(KeypointIndex.LeftWrist);
         }
         
-        if (_handholdCenters == null || _handholdCenters.Count == 0) return;
+        if (_detectedHandholds == null || _detectedHandholds.Count == 0) return;
         CheckHandholdProximity();
     }
     
     private void CheckHandholdProximity()
     {
-        float proximityThreshold = 25.0f; // Define a threshold distance
-        foreach (var center in _handholdCenters)
+        
+        float proximityThreshold = 50.0f; // Define a threshold distance
+        foreach (var handhold in _detectedHandholds)
         {
-            float distance = Vector2.Distance(_rightWristPos, center);
-            if (distance < proximityThreshold)
+            Vector2 center = new Vector2(handhold.Box.CenterX, handhold.Box.CenterY);
+            float distanceRight = Vector2.Distance(_rightWristPos, center);
+            if (distanceRight < proximityThreshold)
             {
-                Debug.Log($"Right wrist is close to handhold at {center} with distance {distance}");
+                if (handhold.RightHasBeenDetected) return;
+                Debug.Log($"Right wrist is close to handhold at {handhold} with distance {distanceRight}");
+                
+                AppEvents.RaisePotentialHandholdContact();
+                handhold.RightHasBeenDetected = true;
+
+            }
+            float distanceLeft = Vector2.Distance(_leftWristPos, center);
+            if (distanceLeft < proximityThreshold)
+            {
+                if (handhold.LeftHasBeenDetected) return;    
+                Debug.Log($"Left wrist is close to handhold at {handhold} with distance {distanceLeft}");
+                
+                AppEvents.RaisePotentialHandholdContact();
+                handhold.LeftHasBeenDetected = true;
             }
         }
     }

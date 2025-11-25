@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace VisionModels.Input
@@ -46,7 +47,8 @@ namespace VisionModels.Input
                 WebcamResolution.HD1080p => (1920, 1080),
                 WebcamResolution.HD720p => (1280, 720),
                 WebcamResolution.VGA => (640, 480),
-                WebcamResolution.Macbook => (1552, 1552)
+                WebcamResolution.Macbook => (1552, 1552),
+                _ => throw new ArgumentOutOfRangeException(nameof(resolution), resolution, null)
             };
 
             if (string.IsNullOrEmpty(deviceName))

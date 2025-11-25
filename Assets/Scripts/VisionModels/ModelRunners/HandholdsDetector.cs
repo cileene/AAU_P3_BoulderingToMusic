@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Configs;
 using Unity.InferenceEngine;
 using UnityEngine;
 using UnityEngine.UI;
 using VisionModels.Input;
 using VisionModels.Utilities;
-using UnityEngine.EventSystems;
 
 
 namespace VisionModels.ModelRunners
@@ -30,7 +29,6 @@ namespace VisionModels.ModelRunners
 
         private List<DetectedHandhold> _persistentHandholds = new();
         private int _nextHandholdId = 0;
-        private int _maxFramesBeforeRemoval = 30; // Remove if not seen for ~0.5 seconds at 60fps
         private bool _debugMode;
 
         private ModelAsset _modelAsset;
@@ -69,7 +67,6 @@ namespace VisionModels.ModelRunners
         private bool _useWebcam = true;
         private ProblemColor _selectedColor;
         
-        private bool _continuousDetection;
         private Button _detectionToggleButton;
         private bool _isButtonPressed;
 
@@ -87,16 +84,6 @@ namespace VisionModels.ModelRunners
             AppEvents.VideoReady -= OnVideoReady;
             AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigureHandholdsDetector -= OnConfigureHandholdsDetector;
-        }
-        
-        private void Update()
-        {
-            if (!_isModelReady) return;
-
-            if (!_continuousDetection && !_isButtonPressed)
-                return;
-    
-            ExecuteML();
         }
 
         private void OnWebcamReady(WebCamTexture cam)
@@ -117,56 +104,29 @@ namespace VisionModels.ModelRunners
             _useWebcam = false;
         }
 
-        private void OnConfigureHandholdsDetector(
-            ModelAsset model,
-            TextAsset classes,
-            ProblemColor problemColor,
-            RawImage rawImage,
-            Font font,
-            Texture2D borderTex,
-            Int32 keepHandholdsFrames,
-            Button handholdDetectButton,
-            bool continuousHandholdDetection
-            )
+        private void OnConfigureHandholdsDetector(HandholdsDetectorConfig config)
         {
-            _modelAsset = model;
-            _classesAsset = classes;
-            _selectedColor = problemColor;
-            _displayImage = rawImage;
-            _borderTexture = borderTex;
-            _font = font;
-            _maxFramesBeforeRemoval = keepHandholdsFrames;
-            _detectionToggleButton = handholdDetectButton;
-            _continuousDetection = continuousHandholdDetection;
+            _modelAsset = config.Model;
+            _classesAsset = config.Classes;
+            _selectedColor = config.ProblemColor;
+            _displayImage = config.RawImage;
+            _borderTexture = config.BorderTexture;
+            _font = config.Font;
+            _detectionToggleButton = config.HandholdDetectButton;
 
             StartModel();
-            
             SetupButtonEventTriggers();
         }
 
         private void SetupButtonEventTriggers()
         {
-            if (_continuousDetection) return;
-            
-            var eventTrigger = _detectionToggleButton.GetComponent<EventTrigger>()
-                               ?? _detectionToggleButton.gameObject.AddComponent<EventTrigger>();
-
-            var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
-            pointerDown.callback.AddListener((data) =>
+            _detectionToggleButton.onClick.AddListener(() =>
             {
-                _isButtonPressed = true;
-                if (_worker == null) LoadModel(); // Recreate worker if disposed
-            });
-            eventTrigger.triggers.Add(pointerDown);
-
-            var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
-            pointerUp.callback.AddListener((data) =>
-            {
-                _isButtonPressed = false;
-                _worker?.Dispose(); // Free GPU memory
+                if (_worker == null) LoadModel();
+                ExecuteML();
+                _worker?.Dispose();
                 _worker = null;
             });
-            eventTrigger.triggers.Add(pointerUp);
         }
         
         private void StartModel()
@@ -262,7 +222,7 @@ namespace VisionModels.ModelRunners
                 var box = new BoundingBox
                 {
                     CenterX = output[n, 0] * scaleX - displayWidth / 2,
-                    CenterY = output[n, 1] * scaleY - displayHeight / 2,
+                    CenterY = -(output[n, 1] * scaleY - displayHeight / 2), // important -
                     Width = output[n, 2] * scaleX,
                     Height = output[n, 3] * scaleY,
                     Label = label,
@@ -270,9 +230,6 @@ namespace VisionModels.ModelRunners
 
                 UpdateOrAddHandhold(box, label);
             }
-
-            // Remove handholds not seen for too long
-            _persistentHandholds.RemoveAll(h => h.FramesSinceLastSeen > _maxFramesBeforeRemoval);
 
             // Draw persistent handholds
             ClearAnnotations();
@@ -327,17 +284,21 @@ namespace VisionModels.ModelRunners
 
         private bool HandleInput()
         {
-            InputMode mode = _useWebcam ? InputMode.Webcam :
-                (_video ? InputMode.Video : InputMode.Still);
+            InputMode mode = _useWebcam ? InputMode.Webcam : (_video ? InputMode.Video : InputMode.Still);
 
             return InputProcessor.ProcessInput(mode, _cam, _video, _still, _targetRT, _displayImage, _mirrorHorizontally);
         }
 
         private void DrawBox(BoundingBox box, int id, float fontSize)
         {
-            var panel = AnnotationManager.GetOrCreateBox(_boxPool, id, _displayLocation, _borderSprite, _font,
+            var panel = AnnotationManager.GetOrCreateBox(
+                _boxPool, id, 
+                _displayLocation, 
+                _borderSprite, 
+                _font,
                 Color.red);
-            panel.transform.localPosition = new Vector3(box.CenterX, -box.CenterY);
+            
+            panel.transform.localPosition = new Vector3(box.CenterX, box.CenterY);
 
             var rt = panel.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(box.Width, box.Height);

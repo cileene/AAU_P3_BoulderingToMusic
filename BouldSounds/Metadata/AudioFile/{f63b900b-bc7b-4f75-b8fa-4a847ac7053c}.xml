@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{f63b900b-bc7b-4f75-b8fa-4a847ac7053c}">
+		<property name="assetPath">
+			<value>DryGit/GitDry3.wav</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>18.5625</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{9f46607b-41ca-4756-ae2b-49e9693c5d7e}</destination>
+		</relationship>
+	</object>
+</objects>

@@ -1,10 +1,9 @@
 using System;
+using Configs;
+using Sound;
 using UnityEngine;
-using Unity.InferenceEngine;
-using UnityEngine.UI;
 using UnityEngine.Video;
 using VisionModels.Input;
-using VisionModels.ModelRunners;
 using VisionModels.Utilities;
 
 /// <summary>
@@ -21,33 +20,27 @@ using VisionModels.Utilities;
 public static class AppEvents
 {
     // EVENTS
-    // - For detecting/losing the climber
     public static event Action<BoundingBox> PersonDetected;
     public static event Action PersonLost;
-    // - For requesting the necessary input sources
     public static event Action<UseWebcam.WebcamResolution, string> RequestUseWebcam;
     public static event Action<string> RequestUseVideo;
     public static event Action<string> RequestUseStill;
-    // - Called when the sources are ready
     public static event Action<WebCamTexture> WebcamReady;
     public static event Action<Texture> VideoReady;
     public static event Action<Texture2D> StillReady;
-    // - Configuring the detectors
-    public static event Action<ModelAsset, TextAsset, RawImage, Font, Texture2D> ConfigurePersonDetector;
-    public static event Action<ModelAsset, RawImage, Texture2D> ConfigurePoseDetector;
-
-    public static event
-        Action<ModelAsset, TextAsset, HandholdsDetector.ProblemColor, RawImage, Font, Texture2D, Int32, Button, bool>
-        ConfigureHandholdsDetector;
-    
-    // - Called when the either handholds or a new climber/pose is detected. 
-
+    public static event Action<PersonDetectorConfig> ConfigurePersonDetector;
+    public static event Action<PoseDetectorConfig> ConfigurePoseDetector;
+    public static event Action<HandholdsDetectorConfig> ConfigureHandholdsDetector;
     public static event Action<DetectedHandhold> NewHandholdDetected;
     public static event Action<PoseData> NewPoseDetected;
+    public static event Action PotentialHandholdContact;
+    public static event Action PotentialHighestHandholdContact;
+    public static event Action PotentialFallDetected;
+    public static event Action<SoundConfig> SoundConfig;
+    public static event Action<AppEventTrigger> AppEventTriggerReady; 
 
 
     // EVENT METHODS
-    // - Called for each action
     public static void RaisePersonDetected(BoundingBox box)
     {
         PersonDetected?.Invoke(box);
@@ -96,52 +89,61 @@ public static class AppEvents
         Debug.Log($"Event: StillReady with texture size {texture.width}x{texture.height}");
     }
 
-    public static void RaiseConfigurePersonDetector(
-        ModelAsset model,
-        TextAsset classes,
-        RawImage rawImage,
-        Font font,
-        Texture2D borderTexture)
+    public static void RaiseConfigurePersonDetector(PersonDetectorConfig config)
     {
-        ConfigurePersonDetector?.Invoke(model, classes, rawImage, font, borderTexture);
-        Debug.Log($"Event: ConfigurePersonDetector with model {model.name}");
+        ConfigurePersonDetector?.Invoke(config);
+        Debug.Log($"Event: ConfigurePersonDetector with model {config.Model.name}");
     }
 
-    public static void RaiseConfigurePoseDetector(
-        ModelAsset model,
-        RawImage rawImage,
-        Texture2D borderTexture)
+    public static void RaiseConfigurePoseDetector(PoseDetectorConfig config)
     {
-        ConfigurePoseDetector?.Invoke(model, rawImage, borderTexture);
-        Debug.Log($"Event: ConfigurePoseDetector with model {model.name}");
+        ConfigurePoseDetector?.Invoke(config);
+        Debug.Log($"Event: ConfigurePoseDetector with model {config.Model.name}");
     }
 
-    public static void RaiseConfigureHandholdsDetector(
-        ModelAsset model,
-        TextAsset classes,
-        HandholdsDetector.ProblemColor problemColor,
-        RawImage rawImage,
-        Font font,
-        Texture2D borderTexture,
-        Int32 keepHandholdsFrames,
-        Button handholdDetectButton,
-        bool continuousHandholdDetection)
+    public static void RaiseConfigureHandholdsDetector(HandholdsDetectorConfig config)
     {
-        ConfigureHandholdsDetector?.Invoke(model, classes, problemColor, rawImage, font, borderTexture,
-            keepHandholdsFrames, handholdDetectButton, continuousHandholdDetection);
-        Debug.Log($"Event: ConfigureHandholdsDetector with model {model.name}");
+        ConfigureHandholdsDetector?.Invoke(config);
+        Debug.Log($"Event: ConfigureHandholdsDetector with model {config.Model.name}");
     }
 
     public static void RaiseNewHandholdDetected(DetectedHandhold handhold)
     {
         NewHandholdDetected?.Invoke(handhold);
-        Debug.Log(
-            $"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
+        //Debug.Log($"Event: NewHandholdDetected ID:{handhold.Id} Label:{handhold.Label} at ({handhold.Box.CenterX:F1}, {handhold.Box.CenterY:F1})");
     }
 
     public static void RaiseNewPoseDetected(PoseData pose)
     {
         NewPoseDetected?.Invoke(pose);
-        Debug.Log("Event: NewPoseDetected with " + pose.Keypoints.Count + " keypoints");
+        //Debug.Log("Event: NewPoseDetected with " + pose.Keypoints.Count + " keypoints");
     }
+    
+    public static void RaisePotentialHandholdContact()
+    {
+        PotentialHandholdContact?.Invoke();
+    }
+    
+    public static void RaisePotentialHighestHandholdContact()
+    {
+        PotentialHighestHandholdContact?.Invoke();
+    }
+    
+    public static void RaisePotentialFallDetected()
+    {
+        PotentialFallDetected?.Invoke();
+    }
+    
+    public static void RaiseSoundConfig(SoundConfig config)
+    {
+        SoundConfig?.Invoke(config);
+        Debug.Log("Event: SoundConfig invoked");
+    }
+    
+    public static void RaiseAppEventTriggerReady(AppEventTrigger appEventTrigger)
+    {
+        AppEventTriggerReady?.Invoke(appEventTrigger);
+        Debug.Log("Event: AppEventTriggerReady invoked");
+    }
+    
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="MixerMaster" id="{d38885f5-eb1b-4940-9df0-ecf1e67d42c0}">
+		<property name="name">
+			<value>Master Bus</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{d4361bbe-6769-40d6-b919-d0e722e022a7}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{bc2f8594-9aa3-4eab-a6be-f2782c5662c0}</destination>
+		</relationship>
+		<relationship name="mixer">
+			<destination>{a652000a-d046-40ec-9ed4-8574ac5336fc}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{d4361bbe-6769-40d6-b919-d0e722e022a7}">
+		<relationship name="effects">
+			<destination>{54695cef-7357-406d-b0f3-cc9da414b62a}</destination>
+			<destination>{23ae271e-dfc9-4d57-b7c2-cb1317d1fc9a}</destination>
+			<destination>{708210f5-81e1-4b32-bee4-326e371081c0}</destination>
+			<destination>{fecce991-ee1f-4b87-8770-36a2cb0a2a8f}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{bc2f8594-9aa3-4eab-a6be-f2782c5662c0}">
+		<property name="overridingOutputFormat">
+			<value>2</value>
+		</property>
+	</object>
+	<object class="MixerBusFader" id="{54695cef-7357-406d-b0f3-cc9da414b62a}" />
+	<object class="MultibandDynamicsEffect" id="{23ae271e-dfc9-4d57-b7c2-cb1317d1fc9a}">
+		<property name="linkChannels">
+			<value>false</value>
+		</property>
+		<property name="thresholdA">
+			<value>-60</value>
+		</property>
+		<property name="thresholdB">
+			<value>-60</value>
+		</property>
+		<property name="thresholdC">
+			<value>-60</value>
+		</property>
+		<property name="ratioB">
+			<value>7.56313324</value>
+		</property>
+		<property name="ratioC">
+			<value>14.4186459</value>
+		</property>
+	</object>
+	<object class="CompressorEffect" id="{708210f5-81e1-4b32-bee4-326e371081c0}">
+		<property name="threshold">
+			<value>-16</value>
+		</property>
+		<property name="linkChannels">
+			<value>false</value>
+		</property>
+	</object>
+	<object class="LimiterEffect" id="{fecce991-ee1f-4b87-8770-36a2cb0a2a8f}">
+		<property name="boost">
+			<value>9</value>
+		</property>
+		<property name="ceiling">
+			<value>-0.100000001</value>
+		</property>
+		<property name="release">
+			<value>34</value>
+		</property>
+	</object>
+</objects>

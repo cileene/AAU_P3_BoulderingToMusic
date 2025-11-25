@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="MixerReturn" id="{1391b2c5-1134-4698-b586-82e840556799}">
+		<property name="overridingInputFormat">
+			<value>2</value>
+		</property>
+		<property name="name">
+			<value>Reverb</value>
+		</property>
+		<relationship name="effectChain">
+			<destination>{bf5760e7-b4c8-47c0-8248-87faaba77bcb}</destination>
+		</relationship>
+		<relationship name="panner">
+			<destination>{150caef1-a64a-4524-975f-b27a116aa461}</destination>
+		</relationship>
+		<relationship name="output">
+			<destination>{d38885f5-eb1b-4940-9df0-ecf1e67d42c0}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusEffectChain" id="{bf5760e7-b4c8-47c0-8248-87faaba77bcb}">
+		<relationship name="effects">
+			<destination>{ccc88136-743f-4db3-91fb-cffa9a64d4e1}</destination>
+			<destination>{a8502ee4-36cc-4f6a-a4c3-12c0d896fda7}</destination>
+		</relationship>
+	</object>
+	<object class="MixerBusPanner" id="{150caef1-a64a-4524-975f-b27a116aa461}" />
+	<object class="SFXReverbEffect" id="{ccc88136-743f-4db3-91fb-cffa9a64d4e1}">
+		<property name="decayTime">
+			<value>10000</value>
+		</property>
+		<property name="diffusion">
+			<value>99.5</value>
+		</property>
+		<property name="lowShelfFrequency">
+			<value>190</value>
+		</property>
+		<property name="lowShelfGain">
+			<value>-10.5</value>
+		</property>
+		<property name="highCut">
+			<value>19200</value>
+		</property>
+		<property name="wetLevel">
+			<value>0</value>
+		</property>
+		<property name="dryLevel">
+			<value>-80</value>
+		</property>
+	</object>
+	<object class="MixerBusFader" id="{a8502ee4-36cc-4f6a-a4c3-12c0d896fda7}" />
+</objects>
