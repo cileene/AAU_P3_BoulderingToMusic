@@ -106,8 +106,8 @@ namespace Sound
 
             if (_handholdCenters != null && _handholdCenters.Count != 0)
             {
-                _rightWristTracker.EvaluateHoldContact(_handholdCenters, _rightWristPos, true);
-                _leftWristTracker.EvaluateHoldContact(_handholdCenters, _leftWristPos, false);
+                _rightWristTracker.EvaluateHoldContact(_handholdCenters, _rightWristPos);
+                _leftWristTracker.EvaluateHoldContact(_handholdCenters, _leftWristPos);
             }
         }
 

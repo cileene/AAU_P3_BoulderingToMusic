@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using VisionModels.ModelRunners;
 
 namespace Sound
 {
@@ -29,9 +30,9 @@ namespace Sound
         private float _stillnessTimerDecayRate = 1f;
 
         //Hold proximity check
-        private float _holdProximityThreshold = 70.0f;
-        public bool isOnHold = false;
 
+        private float _holdProximityThreshold = 0.03f;
+        public bool isOnHold = false;
         public bool IsOnHighestHold { get; private set; } = false;
 
         public bool canRaiseEvent = true;
@@ -97,7 +98,7 @@ namespace Sound
         }
 
         //Hold proximity check
-        public void EvaluateHoldContact(List<Vector2> handholdCenters, Vector2 keypoint, bool isRightHand)
+        public void EvaluateHoldContact(List<Vector2> handholdCenters, Vector2 keypoint)
         {
             EvaluateStillness(keypoint);
 
@@ -110,8 +111,15 @@ namespace Sound
 
             for (int i = 0; i < handholdCenters.Count; i++)
             {
+                handholdCenters[i] = handholdCenters[i] / PoseDetector.ImageHeight;
+            }
+
+            Vector2 normalizedKeypoint = keypoint / PoseDetector.ImageHeight;
+
+            for (int i = 0; i < handholdCenters.Count; i++)
+            {
                 var center = handholdCenters[i];
-                float distance = Vector2.Distance(keypoint, center);
+                float distance = Vector2.Distance(normalizedKeypoint, center);
 
                 if (distance < _holdProximityThreshold)
                 {
