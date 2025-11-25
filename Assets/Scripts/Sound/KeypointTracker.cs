@@ -22,8 +22,8 @@ namespace Sound
 
         //Stillness detection
         private bool _keypointIsStill = false;
-        private float _stillnessMovementThreshold = 300f;
-        private float _stillnessTimeThreshold = 0.3f;
+        private float _stillnessMovementThreshold = 50f;
+        private float _stillnessTimeThreshold = 0.7f;
 
         //Increments when keypoint is still. Used to check against stillnessTimeThreshold
         private float _stillnessTimer = 0;
@@ -31,7 +31,7 @@ namespace Sound
 
         //Hold proximity check
 
-        private float _holdProximityThreshold = 0.03f;
+        private float _holdProximityThreshold = 0.015f;
         public bool isOnHold = false;
         public bool IsOnHighestHold { get; private set; } = false;
 
@@ -108,19 +108,26 @@ namespace Sound
                 IsOnHighestHold = false;
                 return;
             }
-
+            
+            //Debug.Log(handholdCenters[0]);
+            Vector2[] normalizedHandholdCenters = new Vector2[handholdCenters.Count];
             for (int i = 0; i < handholdCenters.Count; i++)
             {
-                handholdCenters[i] = handholdCenters[i] / PoseDetector.ImageHeight;
+                normalizedHandholdCenters[i] = handholdCenters[i] / (float)PoseDetector.ImageHeight;
             }
 
             Vector2 normalizedKeypoint = keypoint / PoseDetector.ImageHeight;
-
-            for (int i = 0; i < handholdCenters.Count; i++)
+            //Debug.Log(normalizedKeypoint.y);
+            
+            for (int i = 0; i < normalizedHandholdCenters.Length; i++)
             {
-                var center = handholdCenters[i];
+                var center = normalizedHandholdCenters[i];
                 float distance = Vector2.Distance(normalizedKeypoint, center);
-
+                if (i==0)
+                {
+                //Debug.Log(normalizedHandholdCenters[i]);
+                }
+                
                 if (distance < _holdProximityThreshold)
                 {
                     if (canRaiseEvent == false) break;
@@ -142,7 +149,7 @@ namespace Sound
                     break;
                 }
 
-                if (i == handholdCenters.Count - 1)
+                if (i == normalizedHandholdCenters.Length - 1)
                 {
                     isOnHold = false;
                     IsOnHighestHold = false;
