@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Configs;
 using Unity.InferenceEngine;
 using UnityEngine;
@@ -47,8 +48,8 @@ namespace VisionModels.ModelRunners
         private Sprite _borderSprite;
 
         //Image size for the model
-        private const int ImageWidth = 640;
-        private const int ImageHeight = 640;
+        private const int ImageWidth = 960;
+        private const int ImageHeight = 960;
 
         private Texture _video;
         private Texture2D _still;
@@ -191,6 +192,7 @@ namespace VisionModels.ModelRunners
         private void ExecuteML()
         {
             if (HandleInput()) return;
+            var stopwatch = Stopwatch.StartNew(); // debug timing
 
             using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, ImageHeight, ImageWidth));
             TextureConverter.ToTensor(_targetRT, inputTensor, default);
@@ -229,6 +231,8 @@ namespace VisionModels.ModelRunners
                 };
 
                 UpdateOrAddHandhold(box, label);
+                stopwatch.Stop(); // debug timing
+                UnityEngine.Debug.Log($"ExecuteML took {stopwatch.Elapsed.TotalMilliseconds:F2} ms"); // debug timing
             }
 
             // Draw persistent handholds
