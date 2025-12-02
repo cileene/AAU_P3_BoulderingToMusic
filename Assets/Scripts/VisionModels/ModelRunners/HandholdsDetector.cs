@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Configs;
 using Unity.InferenceEngine;
 using UnityEngine;
@@ -191,6 +192,7 @@ namespace VisionModels.ModelRunners
         private void ExecuteML()
         {
             if (HandleInput()) return;
+            var stopwatch = Stopwatch.StartNew(); // debug timing
 
             using Tensor<float> inputTensor = new Tensor<float>(new TensorShape(1, 3, ImageHeight, ImageWidth));
             TextureConverter.ToTensor(_targetRT, inputTensor, default);
@@ -237,6 +239,9 @@ namespace VisionModels.ModelRunners
             {
                 DrawBox(_persistentHandholds[i].Box, i, displayHeight * 0.05f);
             }
+            
+            stopwatch.Stop(); // debug timing
+            UnityEngine.Debug.Log($"ExecuteML took {stopwatch.Elapsed.TotalMilliseconds:F2} ms"); // debug timing
         }
 
         private void UpdateOrAddHandhold(BoundingBox box, string label)
