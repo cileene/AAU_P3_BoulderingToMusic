@@ -67,9 +67,6 @@ namespace VisionModels.ModelRunners
         private WebCamTexture _cam;
         private bool _useWebcam = true;
         private ProblemColor _selectedColor;
-        
-        private Button _detectionToggleButton;
-        private bool _isButtonPressed;
 
         private void OnEnable()
         {
@@ -77,6 +74,7 @@ namespace VisionModels.ModelRunners
             AppEvents.VideoReady += OnVideoReady;
             AppEvents.StillReady += OnStillReady;
             AppEvents.ConfigureHandholdsDetector += OnConfigureHandholdsDetector;
+            AppEvents.ButtonPressed += OnButtonPressed;
         }
 
         private void OnDisable()
@@ -85,6 +83,7 @@ namespace VisionModels.ModelRunners
             AppEvents.VideoReady -= OnVideoReady;
             AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigureHandholdsDetector -= OnConfigureHandholdsDetector;
+            AppEvents.ButtonPressed -= OnButtonPressed;
         }
 
         private void OnWebcamReady(WebCamTexture cam)
@@ -113,21 +112,16 @@ namespace VisionModels.ModelRunners
             _displayImage = config.RawImage;
             _borderTexture = config.BorderTexture;
             _font = config.Font;
-            _detectionToggleButton = config.HandholdDetectButton;
 
             StartModel();
-            SetupButtonEventTriggers();
         }
-
-        private void SetupButtonEventTriggers()
+        
+        private void OnButtonPressed()
         {
-            _detectionToggleButton.onClick.AddListener(() =>
-            {
-                if (_worker == null) LoadModel();
-                ExecuteML();
-                _worker?.Dispose();
-                _worker = null;
-            });
+            if (_worker == null) LoadModel();
+            ExecuteML();
+            _worker?.Dispose();
+            _worker = null;
         }
         
         private void StartModel()

@@ -38,6 +38,7 @@ public static class AppEvents
     public static event Action PotentialFallDetected;
     public static event Action<SoundConfig> SoundConfig;
     public static event Action<AppEventTrigger> AppEventTriggerReady; 
+    public static event Action ButtonPressed;
 
 
     // EVENT METHODS
@@ -144,6 +145,12 @@ public static class AppEvents
     {
         AppEventTriggerReady?.Invoke(appEventTrigger);
         Debug.Log("Event: AppEventTriggerReady invoked");
+    }
+    
+    public static void RaiseButtonPressed()
+    {
+        ButtonPressed?.Invoke();
+        Debug.Log("Event: ButtonPressed invoked");
     }
     
 }
