@@ -607,7 +607,7 @@
 			<value>0.9844632768361582</value>
 		</property>
 		<property name="value">
-			<value>-15</value>
+			<value>-8</value>
 		</property>
 	</object>
 	<object class="AutomationCurve" id="{c231250b-788e-446f-97c8-878302e74547}">
@@ -654,7 +654,7 @@
 			<value>0.98269774011299438</value>
 		</property>
 		<property name="value">
-			<value>5000</value>
+			<value>22000</value>
 		</property>
 	</object>
 	<object class="AutomationPoint" id="{30d32788-cfa7-444f-9600-1908646364a2}">

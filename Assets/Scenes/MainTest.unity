@@ -285,6 +285,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.AspectRatioFitter
   m_AspectMode: 1
   m_AspectRatio: 1
+--- !u!1 &689307129
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 689307131}
+  - component: {fileID: 689307130}
+  m_Layer: 0
+  m_Name: TestDayScript
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &689307130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 689307129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0679c20ec037e8428abc94fac95eeb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TestDayScript
+  isWizardOfOzTest: 1
+--- !u!4 &689307131
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 689307129}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.00024}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &697712706
 GameObject:
   m_ObjectHideFlags: 0
@@ -486,6 +531,7 @@ GameObject:
   - component: {fileID: 949276912}
   - component: {fileID: 949276911}
   - component: {fileID: 949276910}
+  - component: {fileID: 949276913}
   m_Layer: 5
   m_Name: UpdateHandholds_Button
   m_TagString: Untagged
@@ -595,6 +641,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 949276908}
   m_CullTransparentMesh: 1
+--- !u!114 &949276913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949276908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cde0e7c34857444db84e750d329a60c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonHandler
 --- !u!1 &1021602790
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,10 +829,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99495ddd03a24414a6524598156ccc08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaunchManager
-  inputSource: 0
+  inputSource: 1
   webcamResolution: 4
   webcamDeviceName: 
-  videoName: Valde.Mov
+  videoName: Camilleclimbs1.mp4
   stillFilePath: Still2.jpg
   runLogic: 1
   showDebug: 1
@@ -783,11 +841,10 @@ MonoBehaviour:
   font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
   imageDisplay: {fileID: 578865018}
   detectPerson: 0
-  detectPersonModel: {fileID: 5022602860645237092, guid: 6dd5bbefc9b494ac08820963a1ca5630, type: 3}
+  detectPersonModel: {fileID: 5022602860645237092, guid: 24a021123fc584a5b91cefc078e2b2ae, type: 3}
   detectPersonClasses: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
   detectHandholds: 1
   continuousHandholdDetection: 0
-  handholdDetectButton: {fileID: 949276910}
   problemColor: 1
   handholdPersistenceFrames: 30
   detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}
@@ -1205,3 +1262,4 @@ SceneRoots:
   - {fileID: 1519205739}
   - {fileID: 513451629}
   - {fileID: 1122630364}
+  - {fileID: 689307131}

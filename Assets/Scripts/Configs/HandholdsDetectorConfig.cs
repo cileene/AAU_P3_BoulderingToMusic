@@ -14,7 +14,6 @@ namespace Configs
         public Font Font;
         public Texture2D BorderTexture;
         public int KeepHandholdsFrames;
-        public Button HandholdDetectButton;
         public bool ContinuousHandholdDetection;
     }
 }

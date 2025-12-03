@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using Configs;
 using Unity.InferenceEngine;
@@ -68,9 +67,6 @@ namespace VisionModels.ModelRunners
         private WebCamTexture _cam;
         private bool _useWebcam = true;
         private ProblemColor _selectedColor;
-        
-        private Button _detectionToggleButton;
-        private bool _isButtonPressed;
 
         private void OnEnable()
         {
@@ -78,6 +74,7 @@ namespace VisionModels.ModelRunners
             AppEvents.VideoReady += OnVideoReady;
             AppEvents.StillReady += OnStillReady;
             AppEvents.ConfigureHandholdsDetector += OnConfigureHandholdsDetector;
+            AppEvents.ButtonPressed += OnButtonPressed;
         }
 
         private void OnDisable()
@@ -86,6 +83,7 @@ namespace VisionModels.ModelRunners
             AppEvents.VideoReady -= OnVideoReady;
             AppEvents.StillReady -= OnStillReady;
             AppEvents.ConfigureHandholdsDetector -= OnConfigureHandholdsDetector;
+            AppEvents.ButtonPressed -= OnButtonPressed;
         }
 
         private void OnWebcamReady(WebCamTexture cam)
@@ -105,7 +103,7 @@ namespace VisionModels.ModelRunners
             _still = still;
             _useWebcam = false;
         }
-        
+
         private void OnConfigureHandholdsDetector(HandholdsDetectorConfig config)
         {
             _modelAsset = config.Model;
@@ -114,21 +112,16 @@ namespace VisionModels.ModelRunners
             _displayImage = config.RawImage;
             _borderTexture = config.BorderTexture;
             _font = config.Font;
-            _detectionToggleButton = config.HandholdDetectButton;
 
             StartModel();
-            SetupButtonEventTriggers();
         }
-
-        private void SetupButtonEventTriggers()
+        
+        private void OnButtonPressed()
         {
-            _detectionToggleButton.onClick.AddListener(() =>
-            {
-                if (_worker == null) LoadModel();
-                ExecuteML();
-                _worker?.Dispose();
-                _worker = null;
-            });
+            if (_worker == null) LoadModel();
+            ExecuteML();
+            _worker?.Dispose();
+            _worker = null;
         }
         
         private void StartModel()
@@ -232,8 +225,6 @@ namespace VisionModels.ModelRunners
                 };
 
                 UpdateOrAddHandhold(box, label);
-                stopwatch.Stop(); // debug timing
-                UnityEngine.Debug.Log($"ExecuteML took {stopwatch.Elapsed.TotalMilliseconds:F2} ms"); // debug timing
             }
 
             // Draw persistent handholds
@@ -242,6 +233,9 @@ namespace VisionModels.ModelRunners
             {
                 DrawBox(_persistentHandholds[i].Box, i, displayHeight * 0.05f);
             }
+            
+            stopwatch.Stop(); // debug timing
+            UnityEngine.Debug.Log($"ExecuteML took {stopwatch.Elapsed.TotalMilliseconds:F2} ms"); // debug timing
         }
 
         private void UpdateOrAddHandhold(BoundingBox box, string label)

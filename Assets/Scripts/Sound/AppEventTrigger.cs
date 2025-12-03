@@ -21,11 +21,14 @@ namespace Sound
         private Queue<Vector2>[] _keypointPositionHistory = new Queue<Vector2>[_keypointCount];
         private int _keypointHistorySize = 5;
 
+        private int _handHoldSoundTriggered = 0;
+
         private float _climbFinishTimerThreshold = 0.5f;
         private float _climbFinishTimer = 0f;
         private float _climbFinishTimerDecayRate = 1f;
         private bool _climbFinished = false;
         //private float _climbFinishedCooldown = 5f;
+        private int _climbFinishedCount = 0;
 
         private float _climberFallingThreshold = -500f;
         private bool _climberIsFalling = false;
@@ -127,8 +130,10 @@ namespace Sound
 
         private void OnHandHoldContact()
         {
+            if (TestDayScript.IsWizardOfOzTest) return;
             AppEvents.RaisePotentialHandholdContact();
-            Debug.Log("Hand hold contact detected");
+            _handHoldSoundTriggered++;
+            Debug.Log($"Hand hold contact detected at time: {Time.time}. Number of times triggered: {_handHoldSoundTriggered}");
         }
 
         private void InitializePoseDataKeypoints()
@@ -156,6 +161,7 @@ namespace Sound
 
         private void CheckFinishClimb() //The rules in bouldering dictate that the climber must have both hand on the finished (top) hold and have "control" in that position
         {
+            if (TestDayScript.IsWizardOfOzTest) return;
             if (_climbFinished) return;
 
             if (leftHighestHoldContact && rightHighestHoldContact) 
@@ -166,7 +172,8 @@ namespace Sound
                     AppEvents.RaisePotentialHighestHandholdContact();
                     _climbFinished = true;
                     StartCoroutine(FinishedClimbEventCooldown());
-                    Debug.Log("Climb finished!");
+                    _climbFinishedCount++;
+                    Debug.Log($"Climb finished at time: {Time.time}. Number of times triggered: {_climbFinishedCount}");
                     leftHighestHoldContact = false;
                     rightHighestHoldContact = false;
                 }
@@ -229,6 +236,7 @@ namespace Sound
             _climberIsFalling = sumOfDeltas < _climberFallingThreshold;
             if (_climberIsFalling && _canTriggerFallingEvent)
             {
+                if (TestDayScript.IsWizardOfOzTest) return;
                 AppEvents.RaisePotentialFallDetected();
                 print("Climber is falling!");
                 StartCoroutine(ClimberFallingEventCooldown());
