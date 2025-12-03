@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Configs;
 using Unity.InferenceEngine;
@@ -48,8 +49,8 @@ namespace VisionModels.ModelRunners
         private Sprite _borderSprite;
 
         //Image size for the model
-        private const int ImageWidth = 960;
-        private const int ImageHeight = 960;
+        private const int ImageWidth = 640;
+        private const int ImageHeight = 640;
 
         private Texture _video;
         private Texture2D _still;
@@ -103,6 +104,11 @@ namespace VisionModels.ModelRunners
         {
             _still = still;
             _useWebcam = false;
+        }
+
+        private void Start()
+        {
+            ExecuteML();
         }
 
         private void OnConfigureHandholdsDetector(HandholdsDetectorConfig config)
