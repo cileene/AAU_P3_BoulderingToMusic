@@ -14,12 +14,21 @@ namespace Sound
         private PoseData _poseData;
         private Vector2 _rightWristPos;
         private Vector2 _leftWristPos;
-        private KeypointTracker _rightWristTracker = new();
-        private KeypointTracker _leftWristTracker = new();
+        private KeypointTracker _rightWristTracker;
+        private KeypointTracker _leftWristTracker;
         //Will get the length of the enum KeypointIndex
         private static int _keypointCount = Enum.GetValues(typeof(KeypointIndex)).Length; 
         private Queue<Vector2>[] _keypointPositionHistory = new Queue<Vector2>[_keypointCount];
         private int _keypointHistorySize = 5;
+
+        private int _handHoldSoundTriggered = 0;
+
+        private float _climbFinishTimerThreshold = 0.5f;
+        private float _climbFinishTimer = 0f;
+        private float _climbFinishTimerDecayRate = 1f;
+        private bool _climbFinished = false;
+        //private float _climbFinishedCooldown = 5f;
+        private int _climbFinishedCount = 0;
 
         private float _climberFallingThreshold = -500f;
         private bool _climberIsFalling = false;
@@ -27,6 +36,9 @@ namespace Sound
         
         public float sumOfDeltas;
         public float hipHeight;
+        
+        public bool rightHighestHoldContact = false;
+        public bool leftHighestHoldContact = false;
 
         public static AppEventTrigger Instance { get; private set; }
 
@@ -37,6 +49,9 @@ namespace Sound
             AppEvents.NewPoseDetected += OnNewPoseDetected;
             _rightWristTracker.OnHoldContactDetected += OnHandHoldContact;
             _leftWristTracker.OnHoldContactDetected += OnHandHoldContact;
+            
+            _rightWristTracker.OnHighestHoldContactDetected += OnHigestHoldContactRight;
+            _leftWristTracker.OnHighestHoldContactDetected += OnHigestHoldContactLeft;
         }
 
         private void OnDisable()
@@ -45,6 +60,17 @@ namespace Sound
             AppEvents.NewPoseDetected -= OnNewPoseDetected;
             _rightWristTracker.OnHoldContactDetected -= OnHandHoldContact;
             _leftWristTracker.OnHoldContactDetected -= OnHandHoldContact;
+            
+            _rightWristTracker.OnHighestHoldContactDetected -= OnHigestHoldContactRight;
+            _leftWristTracker.OnHighestHoldContactDetected -= OnHigestHoldContactLeft;
+        }
+        private void OnHigestHoldContactRight()
+        {
+            rightHighestHoldContact = true;
+        }
+        private void OnHigestHoldContactLeft()
+        {
+            leftHighestHoldContact = true;
         }
 
         private void Awake()
@@ -57,6 +83,9 @@ namespace Sound
             {
                 Instance = this;
             }
+            
+            _rightWristTracker = gameObject.AddComponent<KeypointTracker>();
+            _leftWristTracker = gameObject.AddComponent<KeypointTracker>();
 
             InitializePoseDataKeypoints();
         }
@@ -69,6 +98,7 @@ namespace Sound
         private void Update()
         {
             CalculateHipHeight();
+            CheckFinishClimb();
             CheckClimberFalling();
 
             if (_poseData != null)
@@ -79,8 +109,8 @@ namespace Sound
 
             if (_handholdCenters != null && _handholdCenters.Count != 0)
             {
-                _rightWristTracker.EvaluateHoldContact(_handholdCenters, _rightWristPos, true);
-                _leftWristTracker.EvaluateHoldContact(_handholdCenters, _leftWristPos, false);
+                _rightWristTracker.EvaluateHoldContact(_handholdCenters, _rightWristPos);
+                _leftWristTracker.EvaluateHoldContact(_handholdCenters, _leftWristPos);
             }
         }
 
@@ -100,8 +130,10 @@ namespace Sound
 
         private void OnHandHoldContact()
         {
+            if (TestDayScript.IsWizardOfOzTest) return;
             AppEvents.RaisePotentialHandholdContact();
-            Debug.Log("Hand hold contact detected");
+            _handHoldSoundTriggered++;
+            Debug.Log($"Hand hold contact detected at time: {Time.time}. Number of times triggered: {_handHoldSoundTriggered}");
         }
 
         private void InitializePoseDataKeypoints()
@@ -117,7 +149,7 @@ namespace Sound
             if (_poseData == null) return;
 
             hipHeight = 0;
-            for (int i = 11; i <= 12; i++)
+            for (int i = 11; i <= 12; i++) //TODO: Use keypoint index rather than magic numbers
             {
                 Vector2 keypoint = _poseData.GetKeypoint((KeypointIndex)i);
                 if (keypoint != Vector2.zero)
@@ -127,8 +159,48 @@ namespace Sound
             }
         }
 
+        private void CheckFinishClimb() //The rules in bouldering dictate that the climber must have both hand on the finished (top) hold and have "control" in that position
+        {
+            if (TestDayScript.IsWizardOfOzTest) return;
+            if (_climbFinished) return;
+
+            if (leftHighestHoldContact && rightHighestHoldContact) 
+            {
+                _climbFinishTimer += Time.deltaTime;
+                if (_climbFinishTimer >= _climbFinishTimerThreshold)
+                {
+                    AppEvents.RaisePotentialHighestHandholdContact();
+                    _climbFinished = true;
+                    StartCoroutine(FinishedClimbEventCooldown());
+                    _climbFinishedCount++;
+                    Debug.Log($"Climb finished at time: {Time.time}. Number of times triggered: {_climbFinishedCount}");
+                    leftHighestHoldContact = false;
+                    rightHighestHoldContact = false;
+                }
+            }
+            else
+            {
+                _climbFinishTimer = Mathf.Max(0, _climbFinishTimer - Time.deltaTime * _climbFinishTimerDecayRate);
+            }
+        }
+
+        IEnumerator FinishedClimbEventCooldown()
+        {
+            yield return new WaitForSeconds(3);
+            _climbFinished = false;
+        }
+
         private void CheckClimberFalling()
         {
+            if (_climbFinished)
+            {
+                foreach(Queue<Vector2> queue in _keypointPositionHistory)
+                {
+                    queue.Clear();
+                }
+                return;
+            }
+
             for (int i = 0; i < _keypointCount; i++) //Enqueus the current keypoint position for all visible keypoints
             {
                 KeypointIndex currentIndex = (KeypointIndex)i;
@@ -149,7 +221,7 @@ namespace Sound
             sumOfDeltas = 0;
             for (int i = 0; i < _keypointCount; i++) //Calculates the current movement
             {
-                if (_keypointPositionHistory[0].Count() < _keypointHistorySize)
+                if (_keypointPositionHistory[i].Count() < _keypointHistorySize)
                     continue; //Ensures that position is only calculated when the queues are the size dictated by keypointHistorySize
 
                 Vector2[] currentHistory = _keypointPositionHistory[i].ToArray();
@@ -164,7 +236,8 @@ namespace Sound
             _climberIsFalling = sumOfDeltas < _climberFallingThreshold;
             if (_climberIsFalling && _canTriggerFallingEvent)
             {
-                //AppEvents.RaisePotentialFallDetected();
+                if (TestDayScript.IsWizardOfOzTest) return;
+                AppEvents.RaisePotentialFallDetected();
                 print("Climber is falling!");
                 StartCoroutine(ClimberFallingEventCooldown());
             }
