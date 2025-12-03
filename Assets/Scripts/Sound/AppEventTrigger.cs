@@ -97,7 +97,7 @@ namespace Sound
 
         private void Update()
         {
-            CalculateHipHeight();
+            //CalculateHipHeight();
             CheckFinishClimb();
             CheckClimberFalling();
 
@@ -130,8 +130,7 @@ namespace Sound
 
         private void OnHandHoldContact()
         {
-            if (TestDayScript.IsWizardOfOzTest) return;
-            AppEvents.RaisePotentialHandholdContact();
+            //AppEvents.RaisePotentialHandholdContact();
             _handHoldSoundTriggered++;
             Debug.Log($"Hand hold contact detected at time: {Time.time}. Number of times triggered: {_handHoldSoundTriggered}");
         }
@@ -143,7 +142,6 @@ namespace Sound
                 _keypointPositionHistory[i] = new Queue<Vector2>();
             }
         }
-        
         private void CalculateHipHeight()
         {
             if (_poseData == null) return;
@@ -158,10 +156,8 @@ namespace Sound
                 }
             }
         }
-
         private void CheckFinishClimb() //The rules in bouldering dictate that the climber must have both hand on the finished (top) hold and have "control" in that position
         {
-            if (TestDayScript.IsWizardOfOzTest) return;
             if (_climbFinished) return;
 
             if (leftHighestHoldContact && rightHighestHoldContact) 
@@ -169,7 +165,7 @@ namespace Sound
                 _climbFinishTimer += Time.deltaTime;
                 if (_climbFinishTimer >= _climbFinishTimerThreshold)
                 {
-                    AppEvents.RaisePotentialHighestHandholdContact();
+                    //AppEvents.RaisePotentialHighestHandholdContact();
                     _climbFinished = true;
                     StartCoroutine(FinishedClimbEventCooldown());
                     _climbFinishedCount++;
@@ -236,8 +232,7 @@ namespace Sound
             _climberIsFalling = sumOfDeltas < _climberFallingThreshold;
             if (_climberIsFalling && _canTriggerFallingEvent)
             {
-                if (TestDayScript.IsWizardOfOzTest) return;
-                AppEvents.RaisePotentialFallDetected();
+                //AppEvents.RaisePotentialFallDetected();
                 print("Climber is falling!");
                 StartCoroutine(ClimberFallingEventCooldown());
             }
