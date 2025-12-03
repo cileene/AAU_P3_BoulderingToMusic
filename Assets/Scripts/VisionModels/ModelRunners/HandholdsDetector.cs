@@ -105,12 +105,7 @@ namespace VisionModels.ModelRunners
             _still = still;
             _useWebcam = false;
         }
-
-        private void Start()
-        {
-            ExecuteML();
-        }
-
+        
         private void OnConfigureHandholdsDetector(HandholdsDetectorConfig config)
         {
             _modelAsset = config.Model;
