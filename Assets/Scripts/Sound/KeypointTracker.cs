@@ -113,7 +113,7 @@ namespace Sound
             Vector2[] normalizedHandholdCenters = new Vector2[handholdCenters.Count];
             for (int i = 0; i < handholdCenters.Count; i++)
             {
-                normalizedHandholdCenters[i] = handholdCenters[i] / (float)640;
+                normalizedHandholdCenters[i] = handholdCenters[i] / (float)1280;
             }
 
             Vector2 normalizedKeypoint = keypoint / PoseDetector.ImageHeight;

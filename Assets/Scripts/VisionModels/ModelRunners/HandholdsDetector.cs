@@ -48,8 +48,8 @@ namespace VisionModels.ModelRunners
         private Sprite _borderSprite;
 
         //Image size for the model
-        private const int ImageWidth = 640;
-        private const int ImageHeight = 640;
+        private const int ImageWidth = 1280;
+        private const int ImageHeight = 1280;
 
         private Texture _video;
         private Texture2D _still;
