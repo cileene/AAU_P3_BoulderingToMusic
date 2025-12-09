@@ -314,7 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0679c20ec037e8428abc94fac95eeb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestDayScript
-  isWizardOfOzTest: 1
+  isWizardOfOzTest: 0
 --- !u!4 &689307131
 Transform:
   m_ObjectHideFlags: 0
@@ -832,7 +832,7 @@ MonoBehaviour:
   inputSource: 1
   webcamResolution: 4
   webcamDeviceName: 
-  videoName: Camilleclimbs1.mp4
+  videoName: Valde.mov
   stillFilePath: Still2.jpg
   runLogic: 1
   showDebug: 1
@@ -845,7 +845,7 @@ MonoBehaviour:
   detectPersonClasses: {fileID: 4900000, guid: ee7841051da314e03a71a27a5b33baac, type: 3}
   detectHandholds: 1
   continuousHandholdDetection: 0
-  problemColor: 1
+  problemColor: 4
   handholdPersistenceFrames: 30
   detectHandholdsModel: {fileID: 5022602860645237092, guid: 981a5a69009f243eb8449b4f63dc0a47, type: 3}
   classesAsset: {fileID: 4900000, guid: 35a8acf7937f2468286d5a7cf2a36e8c, type: 3}
