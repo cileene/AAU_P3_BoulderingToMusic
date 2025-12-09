@@ -12,6 +12,11 @@ namespace VisionModels.Input
 
     public static class InputProcessor
     {
+        /// <summary>
+        /// Processes input from various sources and renders it to a target RenderTexture.
+        /// Note: If targetRT is square (e.g., 640x640) and input is non-square, the image
+        /// will be squashed/stretched to fit.
+        /// </summary>
         public static bool ProcessInput(
             InputMode mode,
             WebCamTexture cam,
@@ -24,6 +29,7 @@ namespace VisionModels.Input
             Texture sourceTex = null;
             int srcW = 0, srcH = 0;
 
+            // Determine source texture based on input mode
             switch (mode)
             {
                 case InputMode.Webcam:
@@ -59,6 +65,7 @@ namespace VisionModels.Input
                 return true; // No valid input
             }
 
+            // Handle webcam rotation and mirroring
             int rot = 0;
             bool vflip = false;
             if (mode == InputMode.Webcam && cam != null)
@@ -69,12 +76,15 @@ namespace VisionModels.Input
 
             displayImage.rectTransform.localEulerAngles = new Vector3(0f, 0f, -rot);
 
+            // Calculate scaling factors based on aspect ratio
             float aspect = srcW * 1f / Mathf.Max(1, srcH);
             float sx = (mirrorHorizontally ? -1f : 1f) / aspect;
             float sy = vflip ? -1f : 1f;
             Vector2 scale = new Vector2(sx, sy);
             Vector2 offset = new Vector2(mirrorHorizontally ? 1f : 0f, vflip ? 1f : 0f);
 
+            // Blit source to target - THIS IS WHERE SQUASHING/STRETCHING OCCURS
+            // Non-square inputs are distorted to fit square targetRT dimensions
             Graphics.Blit(sourceTex, targetRT, scale, offset);
             displayImage.texture = targetRT;
             return false; // Valid input processed
