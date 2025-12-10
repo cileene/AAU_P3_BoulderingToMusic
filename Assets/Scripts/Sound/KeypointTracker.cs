@@ -123,10 +123,6 @@ namespace Sound
             {
                 var center = normalizedHandholdCenters[i];
                 float distance = Vector2.Distance(normalizedKeypoint, center);
-                if (i==0)
-                {
-                //Debug.Log(normalizedHandholdCenters[i]);
-                }
                 
                 if (distance < _holdProximityThreshold)
                 {
@@ -144,7 +140,6 @@ namespace Sound
                     }
 
                     canRaiseEvent = false;
-                    lastTouchedHold = i;
 
                     break;
                 }
@@ -154,7 +149,6 @@ namespace Sound
                     isOnHold = false;
                     IsOnHighestHold = false;
                     canRaiseEvent = true;
-                    lastTouchedHold = -1;
                 }
             }
         }

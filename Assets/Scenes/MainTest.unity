@@ -314,7 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0679c20ec037e8428abc94fac95eeb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestDayScript
-  isWizardOfOzTest: 1
+  isWizardOfOzTest: 0
 --- !u!4 &689307131
 Transform:
   m_ObjectHideFlags: 0

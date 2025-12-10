@@ -97,7 +97,7 @@ namespace Sound
 
         private void Update()
         {
-            //CalculateHipHeight();
+            CalculateHipHeight();
             CheckFinishClimb();
             CheckClimberFalling();
 
@@ -130,14 +130,14 @@ namespace Sound
 
         private void OnHandHoldContact()
         {
-            //AppEvents.RaisePotentialHandholdContact();
+            AppEvents.RaisePotentialHandholdContact();
             _handHoldSoundTriggered++;
             Debug.Log($"Hand hold contact detected at time: {Time.time}. Number of times triggered: {_handHoldSoundTriggered}");
         }
 
         private void InitializePoseDataKeypoints()
         {
-            for (int i = 0; i < _keypointCount; i++) //Fills all the Queues with one vectors
+            for (int i = 0; i < _keypointCount; i++) //Fills all the Queues
             {
                 _keypointPositionHistory[i] = new Queue<Vector2>();
             }
@@ -156,7 +156,7 @@ namespace Sound
                 }
             }
         }
-        private void CheckFinishClimb() //The rules in bouldering dictate that the climber must have both hand on the finished (top) hold and have "control" in that position
+        private void CheckFinishClimb() 
         {
             if (_climbFinished) return;
 
@@ -165,7 +165,7 @@ namespace Sound
                 _climbFinishTimer += Time.deltaTime;
                 if (_climbFinishTimer >= _climbFinishTimerThreshold)
                 {
-                    //AppEvents.RaisePotentialHighestHandholdContact();
+                    AppEvents.RaisePotentialHighestHandholdContact();
                     _climbFinished = true;
                     StartCoroutine(FinishedClimbEventCooldown());
                     _climbFinishedCount++;
@@ -232,7 +232,7 @@ namespace Sound
             _climberIsFalling = sumOfDeltas < _climberFallingThreshold;
             if (_climberIsFalling && _canTriggerFallingEvent)
             {
-                //AppEvents.RaisePotentialFallDetected();
+                AppEvents.RaisePotentialFallDetected();
                 print("Climber is falling!");
                 StartCoroutine(ClimberFallingEventCooldown());
             }
