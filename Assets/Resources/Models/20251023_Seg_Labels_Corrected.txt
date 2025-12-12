@@ -1,7 +1,7 @@
 Gray
-orange
-black
 blue
+black
+orange
 green
 purple
 red
