@@ -221,8 +221,8 @@ namespace Sound
                 for (int j = 0; j < currentHistory.Length - 1; j++)
                 {
                     float currentY = currentHistory[j].y;
-                    float nextY = currentHistory[j + 1].y;
-                    sumOfDeltas += (nextY - currentY);
+                    float previousY = currentHistory[j + 1].y;
+                    sumOfDeltas += (previousY - currentY);
                 }
             }
 
