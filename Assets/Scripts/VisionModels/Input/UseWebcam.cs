@@ -11,8 +11,7 @@ namespace VisionModels.Input
             HD1080p,    // 1920*1080
             HD720p,     // 1280*720
             VGA,        // 640*480
-            Macbook,     // 1552*1552
-            Iphone,
+            Macbook     // 1552*1552
         }
         
         private WebCamTexture _cam;
