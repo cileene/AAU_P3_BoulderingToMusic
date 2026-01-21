@@ -773,7 +773,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LaunchManager
   inputSource: 0
   webcamResolution: 4
-  webcamDeviceName: 
+  webcamDeviceName: Back Ultra Wide Camera
   videoName: Valde.Mov
   stillFilePath: Still2.jpg
   runLogic: 1
