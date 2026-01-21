@@ -11,7 +11,8 @@ namespace VisionModels.Input
             HD1080p,    // 1920*1080
             HD720p,     // 1280*720
             VGA,        // 640*480
-            Macbook     // 1552*1552
+            Macbook,     // 1552*1552
+            Iphone,
         }
         
         private WebCamTexture _cam;
@@ -44,6 +45,7 @@ namespace VisionModels.Input
                 WebcamResolution.HD720p => (1280, 720),
                 WebcamResolution.VGA => (640, 480),
                 WebcamResolution.Macbook => (1552, 1552),
+                
                 _ => throw new ArgumentOutOfRangeException(nameof(resolution), resolution, null)
             };
 
