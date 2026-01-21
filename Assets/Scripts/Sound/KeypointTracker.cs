@@ -31,7 +31,7 @@ namespace Sound
 
         //Hold proximity check
 
-        private float _holdProximityThreshold = 0.015f;
+        private float _holdProximityThreshold = 0.15f;
         public bool isOnHold = false;
         public bool IsOnHighestHold { get; private set; } = false;
 
@@ -100,14 +100,14 @@ namespace Sound
         //Hold proximity check
         public void EvaluateHoldContact(List<Vector2> handholdCenters, Vector2 keypoint)
         {
-            EvaluateStillness(keypoint);
+            //EvaluateStillness(keypoint);
 
-            if (!_keypointIsStill)
-            {
-                isOnHold = false;
-                IsOnHighestHold = false;
-                return;
-            }
+            // if (!_keypointIsStill)
+            // {
+            //     isOnHold = false;
+            //     IsOnHighestHold = false;
+            //     return;
+            // }
             
             //Debug.Log(handholdCenters[0]);
             Vector2[] normalizedHandholdCenters = new Vector2[handholdCenters.Count];
@@ -123,6 +123,7 @@ namespace Sound
             {
                 var center = normalizedHandholdCenters[i];
                 float distance = Vector2.Distance(normalizedKeypoint, center);
+                Debug.Log($"Distance to hold {i}: {distance}");
                 if (i==0)
                 {
                 //Debug.Log(normalizedHandholdCenters[i]);
